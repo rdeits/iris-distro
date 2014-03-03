@@ -13,6 +13,7 @@
 #   pods_find_pkg_config(...)
 #   pods_install_pkg_config_file(...)
 #   pods_install_bash_setup(...)
+#   get_relative_path(from to)
 #
 # C/C++
 #   pods_install_headers(...)
@@ -31,6 +32,18 @@
 # ----
 # File: pods.cmake
 # Distributed with pods version: 12.11.14
+
+
+function(get_relative_path from to var)
+#  find_package(PythonInterp)
+  find_program(mypy NAMES python2.7 python2.6) # PythonInterp finds a symlink on cygwin, which then fails in the execute process below
+#  message(from=${from})
+#  message(to=${to})
+  get_filename_component(from "${from}" ABSOLUTE)  
+  get_filename_component(to "${to}" ABSOLUTE)  
+  execute_process(COMMAND "${mypy}" "-c" "import os; print os.path.relpath('${to}','${from}')" OUTPUT_VARIABLE myvar OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(${var} "${myvar}" PARENT_SCOPE)
+endfunction()
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
 # 
@@ -551,6 +564,16 @@ if(NOT POD_NAME)
 endif(NOT POD_NAME)
 project(${POD_NAME})
 set(POD_NAME "${POD_NAME}" CACHE STRING "${POD_NAME}" )
+
+if ( WIN32 ) # convert to windows paths
+   find_program(cygpath cygpath)
+   if ( cygpath )
+      execute_process(COMMAND ${cygpath} -m "${CMAKE_INSTALL_PREFIX}" OUTPUT_VARIABLE CMAKE_INSTALL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+      message(STATUS "CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
+   endif()
+endif()
+
+
 
 #make sure we're running an out-of-source build
 enforce_out_of_source()
