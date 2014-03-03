@@ -21,7 +21,7 @@ macro(get_mex_option option)
     set(MEX_${option_name} ${svalue} PARENT_SCOPE)
   endif()
 
-  message(STATUS "MEX_${option_name} = ${svalue}")
+#  message(STATUS "MEX_${option_name} = ${svalue}")
 endmacro()
 
 macro(get_mex_arguments afterstring)
@@ -267,4 +267,4 @@ if (NOT compilers_match)
 endif()
 
 # NOTE:  would like to check LD also, but it appears to be difficult with cmake  (there is not explicit linker executable variable, only the make rule), and  even my mex code assumes that LD==LDCXX for simplicity.
- No newline at end of file
+
