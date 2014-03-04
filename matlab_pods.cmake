@@ -144,7 +144,7 @@ function(pods_configure_matlab_paths)
     set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_base_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_base_path()\n"
-                "  path = fileparts(which(mfilename));\n"
+                "  path = fullfile(fileparts(which(mfilename)),'..');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
