@@ -144,28 +144,28 @@ function(pods_configure_matlab_paths)
     set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_base_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_base_path()\n"
-		"path = '${CMAKE_INSTALL_PREFIX}';\n"
+                "  path = fileparts(which(mfilename));\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
     set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_data_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_data_path()\n"
-		"path = '${CMAKE_INSTALL_PREFIX}/data';\n"
+		"path = fullfile(pods_get_base_path(),'data');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
     set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_config_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_config_path()\n"
-		"path = '${CMAKE_INSTALL_PREFIX}/config';\n"
+		"path = fullfile(pods_get_base_path(),'config');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
     set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_models_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_models_path()\n"
-		"path = '${CMAKE_INSTALL_PREFIX}/models';\n"
+		"path = fullfile(pods_get_base_path(),'models');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
 
