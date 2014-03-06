@@ -18,6 +18,7 @@ macro(get_mex_option option)
     message(WARNING "Could not find MEX_${option_name} using mex -v")
   else()
     string(STRIP ${value} svalue)
+    set(MEX_${option_name} ${svalue})
     set(MEX_${option_name} ${svalue} PARENT_SCOPE)
   endif()
 
@@ -81,6 +82,14 @@ function(mex_setup)
     get_mex_option(LINKER LD)
     get_mex_option(LINKFLAGS LDFLAGS)
     get_mex_option(LINKDEBUGFLAGS LDDEBUGFLAGS)
+
+    # this may be msvc specific, but need to create the tmp directory specified in the linker flags
+    string(REGEX REPLACE "^.*implib:\"(.*)templib.x\" .*$" "\\1" tempdir "${MEX_LDFLAGS}")
+    if (tempdir)
+       execute_process(COMMAND mkdir ${tempdir})
+       message("Creating temporary directory: ${tempdir}")
+    endif()
+
   else()
     get_mex_option(CC)
  
