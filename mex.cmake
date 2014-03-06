@@ -13,7 +13,7 @@ macro(get_mex_option option)
   endif()
   
   # todo: do the string parsing using CMAKE commands to make it less platform dependent
-  execute_process(COMMAND ${mex} -v COMMAND grep ${option} COMMAND head -n 1 COMMAND cut -d "=" -f2 OUTPUT_VARIABLE value ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND ${mex} -v COMMAND grep ${option} COMMAND head -n 1 COMMAND cut -d "=" -f2- OUTPUT_VARIABLE value ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
   if ( NOT value )
     message(WARNING "Could not find MEX_${option_name} using mex -v")
   else()
@@ -83,13 +83,13 @@ function(mex_setup)
     get_mex_option(LINKFLAGS LDFLAGS)
     get_mex_option(LINKDEBUGFLAGS LDDEBUGFLAGS)
 
-    # this may be msvc specific, but need to create the tmp directory specified in the linker flags
-    string(REGEX REPLACE "^.*implib:\"(.*)templib.x\" .*$" "\\1" tempdir "${MEX_LDFLAGS}")
-    if (tempdir)
-       execute_process(COMMAND mkdir ${tempdir})
-       message("Creating temporary directory: ${tempdir}")
+    if (MSVC)
+        string(REGEX REPLACE "^.*implib:\"(.*)templib.x\" .*$" "\\1" tempdir "${MEX_LDFLAGS}")
+    	if (tempdir)
+       	  execute_process(COMMAND mkdir ${tempdir})
+          message("Creating temporary directory: ${tempdir}")
+    	endif()
     endif()
-
   else()
     get_mex_option(CC)
  
@@ -166,6 +166,9 @@ function(add_mex)
   if (isshared EQUAL -1)
     if (isexe EQUAL -1)
         add_library(${target} MODULE ${ARGV})
+	  set_target_properties(${target} PROPERTIES 
+    	  COMPILE_FLAGS "-DMATLAB_MEX_FILE" 
+    	  )
     else()
 	list(REMOVE_ITEM ARGV EXECUTABLE)
 	add_executable(${target} ${ARGV})
@@ -180,10 +183,6 @@ function(add_mex)
   set (CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_BK})
   set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG_BK})  
   set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE_BK})  
-
-  set_target_properties(${target} PROPERTIES 
-    COMPILE_FLAGS "-DMATLAB_MEX_FILE" 
-    )
 
   if (isexe GREATER -1)
     # see note below
