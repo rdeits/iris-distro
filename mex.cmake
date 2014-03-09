@@ -85,6 +85,8 @@ function(mex_setup)
 
     if (MSVC)
         string(REGEX REPLACE "^.*implib:\"(.*)templib.x\" .*$" "\\1" tempdir "${MEX_LDFLAGS}")
+	string(REGEX REPLACE "/MAP:\"[.a-zA-Z0-9]*\"" "" MEX_LDFLAGS "${MEX_LDFLAGS}")
+	set(MEX_LDFLAGS "${MEX_LDFLAGS}" PARENT_SCOPE)
     	if (tempdir)
        	  execute_process(COMMAND mkdir ${tempdir})
           message("Creating temporary directory: ${tempdir}")
@@ -157,7 +159,7 @@ function(add_mex)
   # set global props
   set (CMAKE_C_FLAGS_DEBUG ${MEX_CFLAGS} ${MEX_CDEBUGFLAGS} ${MEX_CC_ARGUMENTS})
   set (CMAKE_C_FLAGS_RELEASE ${MEX_CFLAGS} ${MEX_COPTIMFLAGS} ${MEX_CC_ARGUMENTS})
-  find_program (CMAKE_CXX_COMPILER ${MEX_CXX})
+#  find_program (CMAKE_CXX_COMPILER ${MEX_CXX})
   set (CMAKE_CXX_FLAGS_DEBUG ${MEX_CXXFLAGS} ${MEX_CXXDEBUGFLAGS} ${MEX_CXX_ARGUMENTS})
   set (CMAKE_CXX_FLAGS_RELEASE ${MEX_CXXFLAGS} ${MEX_CXXOPTIMFLAGS} ${MEX_CXX_ARGUMENTS})
 
@@ -204,7 +206,7 @@ function(add_mex)
       )
   else()
     # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the input files).  this is a nasty trick that I found online
-    if (NOT TARGET last) 
+    if (NOT WIN32 AND NOT TARGET last) 
       set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
       add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
                          OUTPUT ${dummy_c_file})
@@ -221,7 +223,9 @@ function(add_mex)
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
       )
-    target_link_libraries(${target} last)
+    if (NOT WIN32)
+        target_link_libraries(${target} last)
+    endif()
   endif()
 
   # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added CXX above)
