@@ -11,26 +11,37 @@ macro(get_mex_option option)
   else()
     set(option_name ${option})     
   endif()
-  
-  # todo: do the string parsing using CMAKE commands to make it less platform dependent
-  execute_process(COMMAND ${mex} -v COMMAND grep ${option} COMMAND head -n 1 COMMAND cut -d "=" -f2- OUTPUT_VARIABLE value ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if ( NOT value )
-    message(WARNING "Could not find MEX_${option_name} using mex -v")
-  else()
-    string(STRIP ${value} svalue)
-    set(MEX_${option_name} ${svalue})
-    set(MEX_${option_name} ${svalue} PARENT_SCOPE)
-  endif()
 
-#  message(STATUS "MEX_${option_name} = ${svalue}")
+  string(REGEX MATCH "${option}[^\r\n]*" option_line ${mexv_output}) # first line containing ${option}
+  if ( option_line )
+    string(REGEX REPLACE "[^=]+=(.*)" "\\1" value ${option_line})  # replace entire string with capturing group (after = )
+    string(STRIP ${value} svalue)
+    set(MEX_${option_name} ${svalue} PARENT_SCOPE)
+    # message(STATUS "MEX_${option_name} = ${svalue}")
+  else()
+    message(WARNING "Could not find MEX_${option_name} using mex -v")
+  endif()
 endmacro()
 
 macro(get_mex_arguments afterstring)
   # writes MEX_${afterstring}_ARGUMENTS 
 
-  # todo: do the string parsing using CMAKE commands to make it less platform dependent
-  execute_process(COMMAND ${MATLAB_ROOT}/bin/mex -v COMMAND sed -e "1,/${afterstring}/d" COMMAND grep arguments COMMAND head -n 1 COMMAND cut -d "=" -f2 OUTPUT_VARIABLE value ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(MEX_${afterstring}_ARGUMENTS ${value} PARENT_SCOPE)
+  set(arguments_name MEX_${afterstring}_ARGUMENTS)
+
+  string(REGEX MATCH "${afterstring}.*" starting_with_afterstring ${mexv_output}) # everything starting with afterstring
+  if ( starting_with_afterstring )
+    string(REGEX MATCH "arguments[^\r\n]*" arguments_line ${starting_with_afterstring}) # first line containing arguments
+    if ( arguments_line )
+      string(REGEX REPLACE "[^=]+=(.*)" "\\1" value ${arguments_line}) # replace entire string with capturing group (after =)
+      string(STRIP ${value} svalue)
+      set(${arguments_name} ${svalue} PARENT_SCOPE)
+      # message(STATUS "${arguments_name} = ${svalue}")
+    else()
+      message(WARNING "Could not find arguments line for ${afterstring} using mex -v")
+    endif()
+  else()
+    message(WARNING "Could not find block containing arguments for ${afterstring} using mex -v")
+  endif()
 endmacro()
 
 function(mex_setup)
@@ -68,6 +79,7 @@ function(mex_setup)
   set(mex ${mex} PARENT_SCOPE)
   set(MEX_EXT ${MEX_EXT} PARENT_SCOPE)
 
+  execute_process(COMMAND ${mex} -v OUTPUT_VARIABLE mexv_output ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
   if ( WIN32 )
     get_mex_option(COMPILER CC)
     get_mex_option(COMPILER CXX)
