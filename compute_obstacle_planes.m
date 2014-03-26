@@ -34,19 +34,33 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
       A(i,:) = nhat';
       b(i) = b0;
     else
-      if isempty(obs_lcon{i})
-        [G, h] = vert2lcon(obstacles{i}');
-        obs_lcon{i} = {G,h};
-      end
-      G = obs_lcon{i}{1};
-      h = obs_lcon{i}{2};
-      G2 = G * C;
-      h2 = h - G * d;
-      tic
-      
-      % TODO: LDP approach seems to fail when the obstacle
-      % has no interior
-      ystar = ldp(-G2, -h2);
+      clear model params
+      nw = size(ys,2);
+      nvar = dim + nw;
+      model.Q = sparse(diag([ones(1,dim),zeros(1,nw)]));
+      model.obj = zeros(nvar,1);
+      model.A = sparse([[-eye(dim), ys];
+                        [zeros(1,dim), ones(1,nw)]]);
+      model.rhs = [zeros(dim,1); 1];
+      model.lb = [-inf * ones(dim,1); zeros(nw, 1)];
+      model.ub = [inf * ones(dim,1); ones(nw, 1)];
+      model.sense = '=';
+      params.outputflag = 0;
+      result = gurobi(model, params);
+      ystar = result.x(1:dim);
+%       if isempty(obs_lcon{i})
+%         [G, h] = vert2lcon(obstacles{i}');
+%         obs_lcon{i} = {G,h};
+%       end
+%       G = obs_lcon{i}{1};
+%       h = obs_lcon{i}{2};
+%       G2 = G * C;
+%       h2 = h - G * d;
+%       tic
+%       
+%       % TODO: LDP approach seems to fail when the obstacle
+%       % has no interior
+%       ystar = ldp(-G2, -h2);
       
       if norm(ystar) < 1e-3
         % d is inside the obstacle. So we'll just reverse nhat to try to push the 
