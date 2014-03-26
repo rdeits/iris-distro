@@ -3,7 +3,7 @@ import iris.*;
 
 results = inflation_results();
 results.start = start;
-% results.obstacles = obstacles;
+results.obstacles = obstacles;
 results.n_obs = length(obstacles);
 
 t0 = cputime();

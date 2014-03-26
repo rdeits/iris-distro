@@ -1,4 +1,4 @@
-function poly_segmentation_3d(record)
+function results = poly_segmentation_3d(record)
 if nargin < 1
   record = false;
 end
@@ -6,16 +6,16 @@ import iris.drawing.*;
 
 lb = [0;0;0];
 ub = [10;10;10];
+dim = 3;
 
 n_obs = 20;
-obstacles = {};
-obs_offsets = 1*[0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5;
+obs_offsets = 3*[0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5;
                    -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5;
                    -0.5,-0.5,-0.5,-0.5, 0.5, 0.5, 0.5, 0.5];
-for j = 1:n_obs
-  center = random('uniform', 0, ub(1), 3, 1);
-  obstacles{j} = bsxfun(@plus, center, obs_offsets);
-end
+obs_centers = random('uniform', lb(1), ub(1), dim*n_obs, 1);
+obs_pts = bsxfun(@plus, obs_centers, repmat(obs_offsets ./ sqrt(n_obs), n_obs, 1));
+obstacles = mat2cell(obs_pts, dim*ones(n_obs,1), size(obs_offsets,2))';
+
 
 
 A_bounds = [-1,0,0;
