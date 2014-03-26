@@ -3,15 +3,16 @@ import iris.*;
 
 results = inflation_results();
 results.start = start;
-results.obstacles = obstacles;
+% results.obstacles = obstacles;
+results.n_obs = length(obstacles);
 
-tic
-obs_lcon = cell(length(obstacles),1);
+t0 = cputime();
+% obs_lcon = cell(length(obstacles),1);
 % for j = 1:length(obstacles)
 %   [G, h] = vert2lcon(obstacles{j}');
 %   obs_lcon{j} = {G, h};
 % end
-obstacles = pad_obstacle_points(obstacles);
+% obstacles = pad_obstacle_points(obstacles);
 obstacle_pts = cell2mat(obstacles);
 
 if nargin < 5 || isempty(callback)
@@ -29,7 +30,7 @@ results.e_history{1} = struct('C', C, 'd', d);
 
 while true
   tic
-  [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, d, obs_lcon);
+  [A, b] = compute_obstacle_planes(obstacles, obstacle_pts, C, d);
   results.p_time = results.p_time + toc;
   if iter > 1
     for i = 1:length(b)
@@ -48,12 +49,14 @@ while true
   results.e_history{iter+1} = struct('C', C, 'd', d);
   
   volumes(end+1) = cvx_optval;
-  iter = iter + 1
   callback(A,b,C,d,obstacles);
   if abs(cvx_optval - best_vol)/best_vol < 2e-2
     break
   end
   best_vol = cvx_optval;
+  iter = iter + 1;
 end
 
-results.total_time = toc;
+results.iters = iter;
+% results.total_time = (now() - t0) * 24 * 60 * 60;
+results.total_time = cputime() - t0;

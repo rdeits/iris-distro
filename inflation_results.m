@@ -8,6 +8,8 @@ classdef inflation_results
     e_time
     p_time
     total_time
+    iters
+    n_obs
   end
   
   methods
@@ -16,9 +18,11 @@ classdef inflation_results
       obj.p_history = {};
       obj.start = [];
       obj.obstacles = {};
+      obj.n_obs = 0;
       obj.e_time = 0;
       obj.p_time = 0;
       obj.total_time = 0;
+      obj.iters = 0;
     end
   end
   
