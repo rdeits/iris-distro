@@ -6,7 +6,12 @@ provided by Mosek, which cannot be distributed here. That code can be
 found at <http://docs.mosek.com/7.0/matlabfusion/Inner_and_outer_L_wner-John_Ellipsoids.html>
 
 The algorithm can be demonstrated by adding the folder containing the
-"+iris" directory to the MATLAB path, then running:
+"+iris" directory, as well as the following third-party folders:
+
+	+iris/+thirdParty/polytopes
+	+iris/+thirdParty/geom_3d/geom3d/geom3d
+
+to the MATLAB path, then running:
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
