@@ -2,7 +2,7 @@ This package contains the IRIS algorithm for iterative convex regional inflation
 
 The primary algorithm is distributed as:
 
-  +iris/inflate_region.m
+	+iris/inflate_region.m
 
 It requires both Gurobi and Mosek to be installed, and it additionally
 relies on the implementation of the Lowner-John Inner ellipsoid function
