@@ -1,5 +1,5 @@
 function h = draw_2d(A,b,C,d,obstacles,lb,ub)
-
+import iris.thirdParty.polytopes.*;
 h = figure(2);
 cla
 hold on

@@ -1,5 +1,6 @@
 import iris.inflate_region;
 import iris.terrain_grid.*;
+import iris.thirdParty.polytopes.*;
 
 load('example_feas_map.mat');
 grid = Q(85:125,25:85);

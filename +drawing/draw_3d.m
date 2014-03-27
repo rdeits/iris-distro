@@ -1,5 +1,6 @@
 function h = draw_3d(A,b,C,d,obstacles,lb,ub)
   import iris.drawing.drawPolyFromVertices;
+  import iris.thirdParty.polytopes.*;
   
   h = figure(2);
   cla
@@ -7,6 +8,7 @@ function h = draw_3d(A,b,C,d,obstacles,lb,ub)
   for j = 1:length(obstacles)
     drawPolyFromVertices(obstacles{j},'k','FaceAlpha',0.5);
   end
+  
   V = lcon2vert(A, b);
   drawPolyFromVertices(V', 'r');
   th = linspace(0,2*pi,20);

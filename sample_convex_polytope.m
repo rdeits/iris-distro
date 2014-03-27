@@ -1,7 +1,7 @@
 function x = sample_convex_polytope(A, b, n)
 % Generate n random samples from the convex polytope defined 
 % as the intersection of half-spaces Ax <= b
-
+import iris.thirdParty.polytopes.*;
 if nargin < 3
   n = 1;
 end

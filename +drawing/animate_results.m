@@ -1,4 +1,6 @@
 function animate_results(results, record, folder_name)
+import iris.thirdParty.polytopes.*;
+
 if nargin < 2
   record = false;
 else

@@ -17,6 +17,7 @@ b = [-lb;ub];
 start = [m/2 + 0.25; n/2 + 0.25];
 
 function callback(A,b,C,d,obstacles)
+  import iris.drawing.*
   h = draw_2d(A,b,C,d,obstacles,lb,ub);
 end
 [A,b,C,d] = inflate_region(obstacles, A, b, start, @callback);
