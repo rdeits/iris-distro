@@ -8,7 +8,5 @@ found at <http://docs.mosek.com/7.0/matlabfusion/Inner_and_outer_L_wner-John_Ell
 The algorithm can be demonstrated by adding the folder containing the
 "+iris" directory to the MATLAB path, then running:
 
-`
->>> import iris.test.*;
->>> test_poly_2d;
-`
+	>>> import iris.test.*;
+	>>> test_poly_2d;
