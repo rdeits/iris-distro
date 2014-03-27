@@ -4,14 +4,15 @@ if nargin < 2
 else
   if nargin < 3
     folder_name = ['videos/', datestr(now,'yyyy-mm-dd_HH.MM.SS')];
-    system(sprintf('mkdir -p %s', folder_name));
   end
 end
 if record
   frame = 1;
+  system(sprintf('mkdir -p %s', folder_name));
   w = VideoWriter([folder_name, '/', 'animation']);
   w.FrameRate = 5;
   w.open();
+  save([folder_name, '/', 'results'], 'results');
 end
 
 dim = length(results.start);
@@ -33,6 +34,7 @@ for j = 1:length(results.p_history)
     w.writeVideo(getframe(h));
     print(gcf, sprintf('%s/%d_a', folder_name, j), '-dpdf');
   end
+%   pause(0.1);
   C = results.e_history{j+1}.C;
   d = results.e_history{j+1}.d;
   draw(A, b, C, d, results.obstacles, lb, ub, results);
@@ -42,6 +44,7 @@ for j = 1:length(results.p_history)
     w.writeVideo(getframe(h));
     print(gcf, sprintf('%s/%d_b', folder_name, j), '-dpdf');
   end
+%   pause(0.1);
 end
   
 if record

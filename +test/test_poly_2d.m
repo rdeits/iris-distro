@@ -1,4 +1,4 @@
-function poly_segmentation_2d(record)
+function results = test_poly_2d(record)
 import iris.inflate_region;
 import iris.drawing.*;
 

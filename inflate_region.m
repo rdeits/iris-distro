@@ -7,12 +7,7 @@ results.obstacles = obstacles;
 results.n_obs = length(obstacles);
 
 t0 = cputime();
-% obs_lcon = cell(length(obstacles),1);
-% for j = 1:length(obstacles)
-%   [G, h] = vert2lcon(obstacles{j}');
-%   obs_lcon{j} = {G, h};
-% end
-% obstacles = pad_obstacle_points(obstacles);
+obstacles = pad_obstacle_points(obstacles);
 obstacle_pts = cell2mat(obstacles);
 
 if nargin < 5 || isempty(callback)
@@ -58,5 +53,4 @@ while true
 end
 
 results.iters = iter;
-% results.total_time = (now() - t0) * 24 * 60 * 60;
 results.total_time = cputime() - t0;
