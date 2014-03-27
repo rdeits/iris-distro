@@ -27,7 +27,10 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
     [~,idx] = min(dists);
     yi = ys(:,idx);
     xi = C*yi + d;
-    nhat = transformed_normal(yi, C);
+    nhat = 2 * Cinv * Cinv' * (xi - d);
+    nhat = nhat / norm(nhat);
+%     nhat = transformed_normal(yi, C);
+    valuecheck(nhat, transformed_normal(yi, C), 1e-6);
     b0 = nhat' * xi;
     if all(nhat' * obs - b0 >= 0)
       % nhat is feasible, so we can skip the optimization
@@ -70,7 +73,10 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
         b(i) = -nhat' * xi;
       else
         xstar = C*ystar + d;
-        nhat = transformed_normal(ystar, C);
+        nhat = 2 * Cinv * Cinv' * (xstar - d);
+        nhat = nhat / norm(nhat);
+        valuecheck(nhat, transformed_normal(ystar, C), 1e-6);
+%         nhat = transformed_normal(ystar, C);
         A(i,:) = nhat;
         b(i) = nhat' * xstar;
       end
