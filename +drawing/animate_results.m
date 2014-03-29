@@ -60,9 +60,11 @@ function draw(A, b, C, d, obstacles, lb, ub, results)
   if dim == 2
       draw_2d(A,b,C,d,obstacles,lb,ub);
       plot(results.start(1), results.start(2), 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 15);
-    else
+  elseif dim == 3
       draw_3d(A,b,C,d,obstacles,lb,ub);
       plot3(results.start(1), results.start(2), results.start(3), 'go', ...
         'MarkerFaceColor', 'g', 'MarkerSize', 15);
+  else
+    draw_Nd(A,b,C,d,obstacles,lb,ub);
   end
 end

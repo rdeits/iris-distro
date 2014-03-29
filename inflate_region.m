@@ -18,9 +18,7 @@ dim = size(A_bounds, 2);
 d = start;
 C = 0.01 * eye(dim);
 best_vol = -inf;
-volumes = [];
 iter = 1;
-ip_result = [];
 results.e_history{1} = struct('C', C, 'd', d);
 
 while true
@@ -43,7 +41,6 @@ while true
   results.e_time = results.e_time + toc;
   results.e_history{iter+1} = struct('C', C, 'd', d);
   
-  volumes(end+1) = cvx_optval;
   callback(A,b,C,d,obstacles);
   if abs(cvx_optval - best_vol)/best_vol < 2e-2
     break
