@@ -1,3 +1,6 @@
+Introduction
+============
+
 This package contains the IRIS algorithm for iterative convex regional
 inflation by semidefinite programming, implemented in MATLAB. It is
 designed to take an environment containing many (convex) obstacles and a
@@ -5,6 +8,9 @@ start point, and to compute a large convex obstacle-free region. This
 region can then be used to define linear constraints for some other
 objective function which the user might want to optimize over the
 obstacle-free space. 
+
+Setup
+=====
 
 The primary algorithm is distributed as:
 
@@ -28,3 +34,25 @@ to the MATLAB path, then running:
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
+
+Examples
+========
+Here are some animations of the algorithm running in various
+environments:
+
+![](rdeits.github.io/iris-distro/examples/poly_2d_N30/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_2d_N50/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_2d_N50_2/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_2d_N1000/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_3d/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_3d_2/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/c_space_3d/animation.gif)
+
+![](rdeits.github.io/iris-distro/examples/poly_4d/animation.gif)
+
