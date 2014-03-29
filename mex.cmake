@@ -1,7 +1,8 @@
 # Macros to handle compilation of MATLAB mex files.
 #
 
-#cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.3)
+# for cmake_parse_arguments
 
 macro(get_mex_option option_name)
   # usage: get_mex_option(option_name [NAMES names_to_try_in_order REQUIRED])
