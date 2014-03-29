@@ -3,29 +3,44 @@
 
 #cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-macro(get_mex_option option)
-  # usage: get_mex_option(option [, option_name])
+macro(get_mex_option option_name)
+  # usage: get_mex_option(option_name [NAMES names_to_try_in_order REQUIRED])
   # writes MEX_${option_name} 
+  set(ARG_NAMES "")
+  set(ARG_REQUIRED "")
   if ( ${ARGC} GREATER 1 )
-    set(option_name ${ARGV1})
-  else()
-    set(option_name ${option})     
+    cmake_parse_arguments(ARG "REQUIRED" "" "NAMES" ${ARGN})
+  endif()
+  if ( NOT ARG_NAMES )
+    set(ARG_NAMES ${option_name})     
   endif()
 
-  string(REGEX MATCH "${option}[^\r\n]*" option_line ${mexv_output}) # first line containing ${option}
-  if ( option_line )
-    string(REGEX REPLACE "[^=]+=(.*)" "\\1" value ${option_line})  # replace entire string with capturing group (after = )
-    string(STRIP ${value} svalue)
+  set(svalue "")
+  foreach (name ${ARG_NAMES})
+    string(REGEX MATCH "${name}[^\r\n]*" option_line ${mexv_output}) # first line containing ${name}
+    if ( option_line )
+       string(REGEX REPLACE "[^=:]+[=:](.*)" "\\1" value ${option_line})  # replace entire string with capturing group (after = )
+       string(STRIP ${value} svalue)
+       break()
+    endif()
+  endforeach()
+
+  if ( svalue )
     set(MEX_${option_name} ${svalue} PARENT_SCOPE)
-    # message(STATUS "MEX_${option_name} = ${svalue}")
+#    message(STATUS "MEX_${option_name} = ${svalue}")
   else()
-    message(WARNING "Could not find MEX_${option_name} using mex -v")
+    if ( ARG_REQUIRED )
+      message(FATAL_ERROR "Could not find MEX_${option_name} using mex -v")
+    else()
+     set(MEX_${option_name} "" PARENT_SCOPE)
+    endif()
   endif()
 endmacro()
 
 macro(get_mex_arguments afterstring)
   # writes MEX_${afterstring}_ARGUMENTS 
 
+  cmake_parse_arguments(ARG "REQUIRED" "" "" ${ARGN})
   set(arguments_name MEX_${afterstring}_ARGUMENTS)
 
   string(REGEX MATCH "${afterstring}.*" starting_with_afterstring ${mexv_output}) # everything starting with afterstring
@@ -37,10 +52,16 @@ macro(get_mex_arguments afterstring)
       set(${arguments_name} ${svalue} PARENT_SCOPE)
       # message(STATUS "${arguments_name} = ${svalue}")
     else()
-      message(WARNING "Could not find arguments line for ${afterstring} using mex -v")
+      if ( ARG_REQUIRED )
+        message(FATAL_ERROR "Could not find arguments line for ${afterstring} using mex -v")
+      endif()
+      set(${arguments_name} "" PARENT_SCOPE)
     endif()
   else()
-    message(WARNING "Could not find block containing arguments for ${afterstring} using mex -v")
+    if (ARG_REQUIRED) 
+      message(WARNING "Could not find block containing arguments for ${afterstring} using mex -v")
+    endif()
+    set(${arguments_name} "" PARENT_SCOPE)
   endif()
 endmacro()
 
@@ -79,21 +100,22 @@ function(mex_setup)
   set(mex ${mex} PARENT_SCOPE)
   set(MEX_EXT ${MEX_EXT} PARENT_SCOPE)
 
-  execute_process(COMMAND ${mex} -v OUTPUT_VARIABLE mexv_output ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/dummy.c "")
+  execute_process(COMMAND ${mex} -v ${CMAKE_CURRENT_BINARY_DIR}/dummy.c OUTPUT_VARIABLE mexv_output ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
   if ( WIN32 )
-    get_mex_option(COMPILER CC)
-    get_mex_option(COMPILER CXX)
+    get_mex_option(CC NAMES COMPILER REQUIRED)
+    get_mex_option(CXX NAMES COMPILER REQUIRED)
     
-    get_mex_option(COMPFLAGS CFLAGS)
-    get_mex_option(COMPFLAGS CXXFLAGS)
-    get_mex_option(OPTIMFLAGS COPTIMFLAGS)
-    get_mex_option(OPTIMFLAGS CXXOPTIMFLAGS)
-    get_mex_option(DEBUGFLAGS CDEBUGFLAGS)
-    get_mex_option(DEBUGFLAGS CXXDEBUGFLAGS)
+    get_mex_option(CFLAGS NAMES COMPFLAGS)
+    get_mex_option(CXXFLAGS NAMES COMPFLAGS)
+    get_mex_option(COPTIMFLAGS NAMES OPTIMFLAGS)
+    get_mex_option(CXXOPTIMFLAGS NAMES OPTIMFLAGS)
+    get_mex_option(CDEBUGFLAGS NAMES DEBUGFLAGS)
+    get_mex_option(CXXDEBUGFLAGS NAMES DEBUGFLAGS)
 
-    get_mex_option(LINKER LD)
-    get_mex_option(LINKFLAGS LDFLAGS)
-    get_mex_option(LINKDEBUGFLAGS LDDEBUGFLAGS)
+    get_mex_option(LD NAMES LINKER)
+    get_mex_option(LDFLAGS NAMES LINKFLAGS)
+    get_mex_option(LDDEBUGFLAGS NAMES LINKDEBUGFLAGS)
 
     if (MSVC)
         string(REGEX REPLACE "^.*implib:\"(.*)templib.x\" .*$" "\\1" tempdir "${MEX_LDFLAGS}")
@@ -105,15 +127,18 @@ function(mex_setup)
     	endif()
     endif()
   else()
-    get_mex_option(CC)
+    get_mex_option(CC REQUIRED)
  
-    get_mex_option(CFLAGS)
+    get_mex_option(CFLAGS REQUIRED)
+    get_mex_option(DEFINES)
+    get_mex_option(MATLABMEX)
+    get_mex_option(INCLUDE)
     get_mex_option(CDEBUGFLAGS)
     get_mex_option(COPTIMFLAGS)
     get_mex_option(CLIBS)
     get_mex_arguments(CC)
   
-    get_mex_option(CXX)
+    get_mex_option(CXX NAMES CXX CC REQUIRED)
     get_mex_option(CXXDEBUGFLAGS)
     get_mex_option(CXXOPTIMFLAGS)
     get_mex_option(CXXLIBS)
@@ -127,11 +152,12 @@ function(mex_setup)
 #  get_mex_option(FLIBS)
 #  get_mex_arguments(FC)
 
-    get_mex_option(LD)
-    get_mex_option(LDFLAGS)
+    get_mex_option(LD REQUIRED)
+    get_mex_option(LDFLAGS REQUIRED)
+    get_mex_option(LINKLIBS)
     get_mex_option(LDDEBUGFLAGS)
     get_mex_option(LDOPTIMFLAGS)
-    get_mex_option(LDEXTENSION)
+    get_mex_option(LDEXTENSION NAMES LDEXTENSION LDEXT REQUIRED)
     get_mex_arguments(LD)
 
 #  note: skipping LDCXX (and just always use LD)
@@ -169,11 +195,11 @@ function(add_mex)
   set (CMAKE_CXX_FLAGS_RELEASE_BK ${CMAKE_CXX_FLAGS_RELEASE})  
 
   # set global props
-  set (CMAKE_C_FLAGS_DEBUG ${MEX_CFLAGS} ${MEX_CDEBUGFLAGS} ${MEX_CC_ARGUMENTS})
-  set (CMAKE_C_FLAGS_RELEASE ${MEX_CFLAGS} ${MEX_COPTIMFLAGS} ${MEX_CC_ARGUMENTS})
+  set (CMAKE_C_FLAGS_DEBUG ${MEX_INCLUDE} ${MEX_CFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CDEBUGFLAGS} ${MEX_CC_ARGUMENTS})
+  set (CMAKE_C_FLAGS_RELEASE ${MEX_INCLUDE} ${MEX_CFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX}  ${MEX_COPTIMFLAGS} ${MEX_CC_ARGUMENTS})
 #  find_program (CMAKE_CXX_COMPILER ${MEX_CXX})
-  set (CMAKE_CXX_FLAGS_DEBUG ${MEX_CXXFLAGS} ${MEX_CXXDEBUGFLAGS} ${MEX_CXX_ARGUMENTS})
-  set (CMAKE_CXX_FLAGS_RELEASE ${MEX_CXXFLAGS} ${MEX_CXXOPTIMFLAGS} ${MEX_CXX_ARGUMENTS})
+  set (CMAKE_CXX_FLAGS_DEBUG ${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXXDEBUGFLAGS} ${MEX_CXX_ARGUMENTS})
+  set (CMAKE_CXX_FLAGS_RELEASE ${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXXOPTIMFLAGS} ${MEX_CXX_ARGUMENTS})
 
   list(FIND ARGV SHARED isshared)
   list(FIND ARGV EXECUTABLE isexe)
@@ -205,14 +231,14 @@ function(add_mex)
       add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
                          OUTPUT ${dummy_c_file})
       add_library(exelast STATIC ${dummy_c_file})
-      target_link_libraries(exelast ${MEX_CLIBS} -ldl)  # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
+      target_link_libraries(exelast ${MEX_CLIBS} ${MEX_LINKLIBS} -ldl)  # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
     endif()
 
     target_link_libraries(${target} exelast)
   elseif (isshared GREATER -1)
     set_target_properties(${target} PROPERTIES
-      LINK_FLAGS "${MEX_CLIBS}"
-#      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
+      LINK_FLAGS "${MEX_CLIBS} ${MEX_LINKLIBS}"
+#      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_LINKLIBS}" 
 #      LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
 #      LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
       )
@@ -229,7 +255,7 @@ function(add_mex)
     set_target_properties(${target} PROPERTIES 
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
-      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
+      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_LINKLIBS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
       LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
       LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
