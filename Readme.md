@@ -40,19 +40,19 @@ Examples
 Here are some animations of the algorithm running in various
 environments:
 
-![](rdeits.github.io/iris-distro/examples/poly_2d_N30/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_2d_N30/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_2d_N50/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_2d_N50/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_2d_N50_2/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_2d_N50_2/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_2d_N1000/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_2d_N1000/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_3d/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_3d/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_3d_2/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_3d_2/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/c_space_3d/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/c_space_3d/animation.gif)
 
-![](rdeits.github.io/iris-distro/examples/poly_4d/animation.gif)
+![](https://rdeits.github.io/iris-distro/examples/poly_4d/animation.gif)
 
