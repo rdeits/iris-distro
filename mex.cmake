@@ -304,6 +304,7 @@ function(compare_compilers outvar compiler1 compiler2)
 endfunction()
 
 
+include(CMakeParseArguments)
 mex_setup()
 
 compare_compilers(compilers_match "${CMAKE_C_COMPILER}" "${MEX_CC}")
