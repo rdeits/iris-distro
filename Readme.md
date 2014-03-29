@@ -41,27 +41,34 @@ Here are some animations of the algorithm running in various
 environments:
 
 2-dimensional space, 30 obstacles:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_2d_N30/animation.gif)
 
 2-dimensional space, 50 obstacles:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_2d_N50/animation.gif)
 
 2-dimensional space, 50 obstacles:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_2d_N50_2/animation.gif)
 
 2-dimensional space, 1000 obstacles:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_2d_N1000/animation.gif)
 
 3-dimensional space:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_3d/animation.gif)
 
 3-dimensional space:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_3d_2/animation.gif)
 
-3-dimensional configuration space of a rod-shaped robot translating and
-yawing:
+3-dimensional configuration space of a rod-shaped robot translating and yawing:
+
 ![](https://rdeits.github.io/iris-distro/examples/c_space_3d/animation.gif)
 
 3-dimensional slice of a 4-dimensional region among 4D obstacles:
+
 ![](https://rdeits.github.io/iris-distro/examples/poly_4d/animation.gif)
 
