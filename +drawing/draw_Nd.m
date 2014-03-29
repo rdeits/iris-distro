@@ -9,8 +9,10 @@ function [ h ] = draw_Nd( A,b,C,d,obstacles,lb,ub )
     obs = intersect_obs_with_plane(obstacles{j}, 3);
     drawPolyFromVertices(obs,'k','FaceAlpha',1);
   end
-  V = lcon2vert(A, b);
-  drawPolyFromVertices(intersect_obs_with_plane(V', 3), 'r');
+  if ~isempty(A)
+    V = lcon2vert(A, b);
+    drawPolyFromVertices(intersect_obs_with_plane(V', 3), 'r');
+  end
   xlim([lb(1),ub(1)])
   ylim([lb(2),ub(2)])
   zlim([lb(3),ub(3)])

@@ -8,14 +8,6 @@ else
     folder_name = ['videos/', datestr(now,'yyyy-mm-dd_HH.MM.SS')];
   end
 end
-if record
-  frame = 1;
-  system(sprintf('mkdir -p %s', folder_name));
-  w = VideoWriter([folder_name, '/', 'animation']);
-  w.FrameRate = 5;
-  w.open();
-  save([folder_name, '/', 'results'], 'results');
-end
 
 dim = length(results.start);
 C = results.e_history{1}.C;
@@ -25,6 +17,31 @@ b_bounds = results.p_history{1}.b(end-2*dim+1:end);
 bound_pts = lcon2vert(A_bounds, b_bounds);
 lb = min(bound_pts)';
 ub = max(bound_pts)';
+
+if record
+  frame = 1;
+  system(sprintf('mkdir -p %s', folder_name));
+  w = VideoWriter([folder_name, '/', 'animation']);
+  w.FrameRate = 5;
+  w.open();
+  save([folder_name, '/', 'results'], 'results');
+  
+  delay = 1/w.FrameRate;
+  delay1 = 1;
+  delay2 = 2;
+  gif_fname = [folder_name, '/', 'animation.gif'];
+  loops = 65525;
+  
+  draw([], [], C, d, results.obstacles, lb, ub, results);
+  h = gcf;
+  movegui(h);
+  w.writeVideo(getframe(h));
+  print(gcf, sprintf('%s/%d_a', folder_name, 0), '-dpdf');
+  img = getframe();
+  [M, c_map]= rgb2ind(img.cdata,256);
+  imwrite(M,c_map,[gif_fname],'gif','LoopCount',loops,'DelayTime',delay1);
+end
+
 clf;
 for j = 1:length(results.p_history)
   A = results.p_history{j}.A;
@@ -35,6 +52,9 @@ for j = 1:length(results.p_history)
     movegui(h);
     w.writeVideo(getframe(h));
     print(gcf, sprintf('%s/%d_a', folder_name, j), '-dpdf');
+    img = getframe();
+    [M, c_map]= rgb2ind(img.cdata,256);
+    imwrite(M,c_map,[gif_fname],'gif','WriteMode','append','DelayTime',delay)
   end
 %   pause(0.1);
   C = results.e_history{j+1}.C;
@@ -45,6 +65,13 @@ for j = 1:length(results.p_history)
     movegui(h);
     w.writeVideo(getframe(h));
     print(gcf, sprintf('%s/%d_b', folder_name, j), '-dpdf');
+    img = getframe();
+    [M, c_map]= rgb2ind(img.cdata,256);
+    if j==length(results.p_history)
+      imwrite(M,c_map,[gif_fname],'gif','WriteMode','append','DelayTime',delay2);
+    else
+      imwrite(M,c_map,[gif_fname],'gif','WriteMode','append','DelayTime',delay);
+    end
   end
 %   pause(0.1);
 end

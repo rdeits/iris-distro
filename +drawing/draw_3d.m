@@ -9,8 +9,10 @@ function h = draw_3d(A,b,C,d,obstacles,lb,ub)
     drawPolyFromVertices(obstacles{j},'k','FaceAlpha',0.5);
   end
   
-  V = lcon2vert(A, b);
-  drawPolyFromVertices(V', 'r');
+  if ~isempty(A)
+    V = lcon2vert(A, b);
+    drawPolyFromVertices(V', 'r');
+  end
   th = linspace(0,2*pi,20);
   y = [cos(th);sin(th);zeros(size(th))];
   for phi = linspace(0,pi,10)

@@ -25,9 +25,11 @@ for j = 1:size(A,1)-4
   pts = [x0 - 1000*u, x0 + 1000*u];
   plot(pts(1,:), pts(2,:), 'm--')
 end
-V = lcon2vert(A, b);
-k = convhull(V(:,1), V(:,2));
-plot(V(k,1), V(k,2), 'ro-', 'LineWidth', 2);
+if ~isempty(A)
+  V = lcon2vert(A, b);
+  k = convhull(V(:,1), V(:,2));
+  plot(V(k,1), V(k,2), 'ro-', 'LineWidth', 2);
+end
 th = linspace(0,2*pi,100);
 y = [cos(th);sin(th)];
 x = bsxfun(@plus, C*y, d);
