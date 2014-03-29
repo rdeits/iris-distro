@@ -7,7 +7,7 @@ function [ h ] = draw_Nd( A,b,C,d,obstacles,lb,ub )
   hold on
   for j = 1:length(obstacles)
     obs = intersect_obs_with_plane(obstacles{j}, 3);
-    drawPolyFromVertices(obs,'k','FaceAlpha',0.5);
+    drawPolyFromVertices(obs,'k','FaceAlpha',1);
   end
   V = lcon2vert(A, b);
   drawPolyFromVertices(intersect_obs_with_plane(V', 3), 'r');
