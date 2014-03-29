@@ -380,44 +380,44 @@ endfunction()
 macro(pods_use_pkg_config_packages target)
     if(${ARGC} LESS 2)
         message(WARNING "Useless invocation of pods_use_pkg_config_packages")
-        return()
-    endif()
-    find_package(PkgConfig REQUIRED)
+    else()
+        find_package(PkgConfig REQUIRED)
 
-    execute_process(COMMAND 
-        ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
-        RESULT_VARIABLE _pods_pkg_found OUTPUT_VARIABLE _pods_pkg_include_flags)
-    if (NOT _pods_pkg_found EQUAL 0)
-       message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find package ${ARGN}")
-    endif()
-    string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
-    string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
-	separate_arguments(_pods_pkg_include_flags)
-    #    message("include: ${_pods_pkg_include_flags}")
-    execute_process(COMMAND 
-        ${PKG_CONFIG_EXECUTABLE} --libs ${ARGN}
-        OUTPUT_VARIABLE _pods_pkg_ldflags)
-    string(STRIP ${_pods_pkg_ldflags} _pods_pkg_ldflags)
-    include_directories(${_pods_pkg_include_flags})
-    
-    # make the target depend on libraries that are cmake targets
-    if (_pods_pkg_ldflags)
-        string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
-	target_link_libraries(${target} ${_split_ldflags})
+        execute_process(COMMAND 
+            ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
+            RESULT_VARIABLE _pods_pkg_found OUTPUT_VARIABLE _pods_pkg_include_flags)
+        if (NOT _pods_pkg_found EQUAL 0)
+           message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find package ${ARGN}")
+        endif()
+        string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
+        string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
+    	separate_arguments(_pods_pkg_include_flags)
+        #    message("include: ${_pods_pkg_include_flags}")
+        execute_process(COMMAND 
+            ${PKG_CONFIG_EXECUTABLE} --libs ${ARGN}
+            OUTPUT_VARIABLE _pods_pkg_ldflags)
+        string(STRIP ${_pods_pkg_ldflags} _pods_pkg_ldflags)
+        include_directories(${_pods_pkg_include_flags})
+        
+        # make the target depend on libraries that are cmake targets
+        if (_pods_pkg_ldflags)
+            string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
+    	target_link_libraries(${target} ${_split_ldflags})
 
-        foreach(__ldflag ${_split_ldflags})
-                string(REGEX REPLACE "^-l" "" __depend_target_name ${__ldflag})
-                get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
-                if (NOT IS_TARGET STREQUAL "IS_TARGET-NOTFOUND")
-                    #message("---- ${target} depends on  ${libname}")
-                    add_dependencies(${target} ${__depend_target_name})
-                endif() 
-        endforeach()
- 	unset(_split_ldflags)
-    endif()
+            foreach(__ldflag ${_split_ldflags})
+                    string(REGEX REPLACE "^-l" "" __depend_target_name ${__ldflag})
+                    get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
+                    if (NOT IS_TARGET STREQUAL "IS_TARGET-NOTFOUND")
+                        #message("---- ${target} depends on  ${libname}")
+                        add_dependencies(${target} ${__depend_target_name})
+                    endif() 
+            endforeach()
+     	unset(_split_ldflags)
+        endif()
 
-    unset(_pods_pkg_include_flags)
-    unset(_pods_pkg_ldflags)
+        unset(_pods_pkg_include_flags)
+        unset(_pods_pkg_ldflags)
+    endif()
 endmacro()
 
 # pods_use_pkg_config_includes(<package-name> ...)
@@ -428,18 +428,17 @@ endmacro()
 macro(pods_use_pkg_config_includes)
     if(${ARGC} LESS 1)
         message(WARNING "Useless invocation of pods_use_pkg_config_includes")
-        return()
+    else()
+        find_package(PkgConfig REQUIRED)
+
+        execute_process(COMMAND 
+            ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
+            OUTPUT_VARIABLE _pods_pkg_include_flags)
+        string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
+        string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
+
+        include_directories(${_pods_pkg_include_flags})
     endif()
-
-    find_package(PkgConfig REQUIRED)
-
-    execute_process(COMMAND 
-        ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
-        OUTPUT_VARIABLE _pods_pkg_include_flags)
-    string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
-    string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
-
-    include_directories(${_pods_pkg_include_flags})
 endmacro()
 
 
