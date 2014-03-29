@@ -10,7 +10,7 @@ lb = [0;0];
 ub = [10;10];
 dim = 2;
 
-n_obs = 30;
+n_obs = 1000;
 obs_offsets = 2*[0.5, 0.5, -0.5, -0.5;
                      -0.5, 0.5, 0.5, -0.5];
 obs_centers = random('uniform', lb(1), ub(1), dim*n_obs, 1);
