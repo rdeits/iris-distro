@@ -69,7 +69,7 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
         % d is inside the obstacle. So we'll just reverse nhat to try to push the 
         % ellipsoid out of the obstacle. 
         disp('Warning: ellipse center is inside an obstacle.');
-        error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
+%         error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
         A(i,:) = -nhat';
         b(i) = -nhat' * xi;
       else
