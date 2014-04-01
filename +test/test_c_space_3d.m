@@ -10,9 +10,9 @@ end
 dim = 3;
 obstacles = {};
 base_obstacles = {};
-obs_offsets = 0.2*[0.5, 0.5, -0.5, -0.5;
-                   -0.5, 0.5, 0.5, -0.5];
 n_obs = 10;
+obs_offsets = 1/n_obs^(1/3)*0.3*[0.5, 0.5, -0.5, -0.5;
+                   -0.5, 0.5, 0.5, -0.5];
 bot = [-0.005,-0.005,0.005,0.005;-0.3,0.3,0.3,-0.3];
 for j = 1:n_obs
   center = random('uniform', 0, 4, 2, 1);
@@ -32,10 +32,10 @@ A_bounds = [-1,0,0;
 b_bounds = [-lb;ub];
 start = 0.5 * (lb + ub);
 
-profile on
+% profile on
 [A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start);
-profile viewer
-animate_results(results, record);
+% profile viewer
+% animate_results(results, record);
 figure(4)
 clf
 hold on
@@ -53,5 +53,6 @@ axis equal
 lb = lb - 0.3;
 ub = ub + 0.3;
 plot([lb(1),ub(1),ub(1),lb(1),lb(1)], [lb(2),lb(2),ub(2),ub(2),lb(2)], 'k--')
+project_c_space_region(gcf, A, b);
 axis off
 end
