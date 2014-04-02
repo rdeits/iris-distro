@@ -250,7 +250,7 @@ function(add_mex)
       add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
                          OUTPUT ${dummy_c_file})
       add_library(last STATIC ${dummy_c_file})
-      target_link_libraries(last ${MEX_CLIBS})
+      target_link_libraries(last ${MEX_CLIBS} ${MEX_LINKLIBS})
     endif()
 
     set_target_properties(${target} PROPERTIES 
