@@ -7,7 +7,13 @@ designed to take an environment containing many (convex) obstacles and a
 start point, and to compute a large convex obstacle-free region. This
 region can then be used to define linear constraints for some other
 objective function which the user might want to optimize over the
-obstacle-free space. 
+obstacle-free space. The algorithm is described in:
+
+R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regions of
+  obstacle-free space through semidefinite programming,&rdquo; Submitted
+  to: <em>Workshop on the Algorithmic Fundamentals of Robotics</em>, Aug. 2014.
+  [Online]. Available:
+  <a href='http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf'>http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf</a>
 
 Setup
 =====
