@@ -25,13 +25,13 @@ if record
   w.FrameRate = 5;
   w.open();
   save([folder_name, '/', 'results'], 'results');
-  
+
   delay = 1/w.FrameRate;
   delay1 = 1;
   delay2 = 2;
   gif_fname = [folder_name, '/', 'animation.gif'];
   loops = 65525;
-  
+
   draw([], [], C, d, results.obstacles, lb, ub, results);
   h = gcf;
   movegui(h);
@@ -75,7 +75,7 @@ for j = 1:length(results.p_history)
   end
 %   pause(0.1);
 end
-  
+
 if record
   w.close();
 end
@@ -86,7 +86,7 @@ function draw(A, b, C, d, obstacles, lb, ub, results)
   dim = length(results.start);
   if dim == 2
       draw_2d(A,b,C,d,obstacles,lb,ub);
-      plot(results.start(1), results.start(2), 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 15);
+      plot(results.start(1), results.start(2), 'go', 'MarkerFaceColor', 'g', 'MarkerSize', 8);
   elseif dim == 3
       draw_3d(A,b,C,d,obstacles,lb,ub);
       plot3(results.start(1), results.start(2), results.start(3), 'go', ...
