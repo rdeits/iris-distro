@@ -131,6 +131,7 @@ function(mex_setup)
     get_mex_option(CC REQUIRED)
  
     get_mex_option(CFLAGS REQUIRED)
+    get_mex_option(CXXFLAGS)
     get_mex_option(DEFINES)
     get_mex_option(MATLABMEX)
     get_mex_option(INCLUDE)
