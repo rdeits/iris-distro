@@ -1,5 +1,6 @@
 function results = test_c_space_3d(record)
 import iris.cspace.cspace3;
+import iris.cspace.project_c_space_region;
 import iris.inflate_region;
 import iris.drawing.*;
 
@@ -53,6 +54,10 @@ axis equal
 lb = lb - 0.3;
 ub = ub + 0.3;
 plot([lb(1),ub(1),ub(1),lb(1),lb(1)], [lb(2),lb(2),ub(2),ub(2),lb(2)], 'k--')
-project_c_space_region(gcf, A, b);
+[inner_poly, outer_poly] = project_c_space_region(A,b);
+patch(outer_poly(1,:), outer_poly(2,:), 'y', 'FaceAlpha', 0.5);
+if ~isempty(inner_poly)
+  patch(inner_poly(1,:), inner_poly(2,:), 'g', 'FaceAlpha', 0.5);
+end
 axis off
 end
