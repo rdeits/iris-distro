@@ -9,9 +9,9 @@ if nargin < 1
 end
 
 dim = 3;
-obstacles = {};
-base_obstacles = {};
+% obstacles = {};
 n_obs = 10;
+base_obstacles = cell(1,n_obs);
 obs_offsets = 1/n_obs^(1/3)*0.3*[0.5, 0.5, -0.5, -0.5;
                    -0.5, 0.5, 0.5, -0.5];
 bot = [-0.005,-0.005,0.005,0.005;-0.3,0.3,0.3,-0.3];
@@ -19,9 +19,8 @@ for j = 1:n_obs
   center = random('uniform', 0, 4, 2, 1);
   base_obstacle = bsxfun(@plus, center, obs_offsets);
   base_obstacles{j} = base_obstacle;
-  c_space_obs = cspace3(base_obstacle, bot, 10);
-  obstacles = [obstacles, c_space_obs];
 end
+obstacles = cspace3(base_obstacles, bot, 10);
 lb = [0;0;-pi];
 ub = [4;4;pi];
 A_bounds = [-1,0,0;
