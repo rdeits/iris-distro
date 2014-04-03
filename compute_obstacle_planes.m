@@ -1,6 +1,7 @@
-function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, d, obs_lcon)
-  
+function [A, b, infeas_start] = compute_obstacle_planes(obstacles, obstacle_pts, C, d, obs_lcon)
+
   dim = size(C,1);
+  infeas_start = false;
   Cinv = inv(C);
   pts_per_obs = size(obstacles{1},2);
   planes_to_use = false(length(obstacles),1);
@@ -9,19 +10,19 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
   image_dists = sum(image_pts.^2, 1);
   obs_image_dists = min(reshape(image_dists', pts_per_obs, []), [], 1);
   [~, obs_sort_idx] = sort(obs_image_dists);
-  
+
   A = zeros(length(obstacles),dim);
   b = zeros(length(obstacles),1);
-  
+
   for i = obs_sort_idx;
     if ~uncovered_obstacles(i)
       continue
     end
-    
+
     obs = obstacles{i};
     % TODO: we've already computed all the ys above
     ys = Cinv*(bsxfun(@minus, obs, d));
-    
+
     dists = sum(ys.^2);
     [~,idx] = min(dists);
     yi = ys(:,idx);
@@ -59,15 +60,16 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
 %       G2 = G * C;
 %       h2 = h - G * d;
 %       tic
-%       
+%
 %       % TODO: LDP approach seems to fail when the obstacle
 %       % has no interior
 %       ystar = ldp(-G2, -h2);
-      
+
       if norm(ystar) < 1e-3
-        % d is inside the obstacle. So we'll just reverse nhat to try to push the 
-        % ellipsoid out of the obstacle. 
+        % d is inside the obstacle. So we'll just reverse nhat to try to push the
+        % ellipsoid out of the obstacle.
         disp('Warning: ellipse center is inside an obstacle.');
+        infeas_start = true;
 %         error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
         A(i,:) = -nhat';
         b(i) = -nhat' * xi;
@@ -81,19 +83,19 @@ function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, 
         b(i) = nhat' * xstar;
       end
     end
-    
+
     check = bsxfun(@ge, A(i,:) * obstacle_pts, b(i));
     check = reshape(check', pts_per_obs, []);
     excluded = all(check, 1);
     uncovered_obstacles(excluded) = false;
-    
+
     planes_to_use(i) = true;
     uncovered_obstacles(i) = false;
-    
+
     if ~any(uncovered_obstacles)
       break
     end
-    
+
   end
   A = A(planes_to_use,:);
   b = b(planes_to_use);

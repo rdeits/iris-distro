@@ -23,7 +23,7 @@ results.e_history{1} = struct('C', C, 'd', d);
 
 while true
   tic
-  [A, b] = compute_obstacle_planes(obstacles, obstacle_pts, C, d);
+  [A, b, infeas_start] = compute_obstacle_planes(obstacles, obstacle_pts, C, d);
   results.p_time = results.p_time + toc;
   if iter > 1
     for i = 1:length(b)
@@ -33,7 +33,8 @@ while true
   end
   A = [A; A_bounds];
   b = [b; b_bounds];
-  if all(A * start <= b) || iter == 1
+
+  if all(A * start <= b) || iter == 1 || infeas_start
     results.p_history{iter} = struct('A', A, 'b', b);
   else
     hist = results.p_history{iter-1};
