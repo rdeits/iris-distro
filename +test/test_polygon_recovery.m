@@ -40,8 +40,9 @@ end
   function callback(A,b,C,d,obstacles)
     import iris.drawing.draw_2d;
     h = draw_2d(A,b,C,d,obstacles,lb,ub);
-    axis equal
-    pause
+%     axis equal
+    drawnow();
+%     pause
     if record
       w.writeVideo(getframe(h));
       frame = frame + 1;
