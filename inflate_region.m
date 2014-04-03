@@ -33,14 +33,22 @@ while true
   end
   A = [A; A_bounds];
   b = [b; b_bounds];
-  results.p_history{iter} = struct('A', A, 'b', b);
+  if all(A * start <= b) || iter == 1
+    results.p_history{iter} = struct('A', A, 'b', b);
+  else
+    hist = results.p_history{iter-1};
+    A = hist.A;
+    b = hist.b;
+    disp('Breaking early because start point is no longer contained in polytope');
+    break
+  end
   callback(A,b,C,d,obstacles);
-  
+
   tic
   [C, d, cvx_optval] = maximize_ellipse_in_polyhedron(A,b,C,d);
   results.e_time = results.e_time + toc;
   results.e_history{iter+1} = struct('C', C, 'd', d);
-  
+
   callback(A,b,C,d,obstacles);
   if abs(cvx_optval - best_vol)/best_vol < 2e-2
     break
