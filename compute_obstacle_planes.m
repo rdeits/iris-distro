@@ -1,5 +1,4 @@
 function [A, b, obs_lcon] = compute_obstacle_planes(obstacles, obstacle_pts, C, d, obs_lcon)
-  import iris.util.transformed_normal;
   
   dim = size(C,1);
   Cinv = inv(C);
