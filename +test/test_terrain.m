@@ -48,11 +48,8 @@ while true
   black_edges = [];
   [black_edges(1,:), black_edges(2,:)] = ind2sub(size(grid), find(component_boundary(grid, [r;c])));
 
-  obstacles = mat2cell(black_edges, 2, ones(1,size(black_edges,2)));
-  obstacles = cspace3(obstacles, bot, 4);
-
-  lb = [0;0;-pi];
-  ub = [size(grid,1); size(grid,2); pi];
+  lb = [180;70;-pi];
+  ub = [245; 160; pi];
   A_bounds = [-1,0,0;
               0,-1,0;
               0,0,-1;
@@ -60,6 +57,11 @@ while true
               0,1,0;
               0,0,1];
   b_bounds = [-lb;ub];
+
+  obs_mask = all(bsxfun(@minus, A_bounds([1,2,4,5],1:2) * black_edges, b_bounds([1,2,4,5])) <= max(max(bot)));
+  obstacles = mat2cell(black_edges(:,obs_mask) , 2, ones(1,sum(obs_mask)));
+  obstacles = cspace3(obstacles, bot, 4);
+
 
   [A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, [r;c;0]);
   profile viewer
