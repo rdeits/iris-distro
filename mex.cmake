@@ -232,7 +232,7 @@ function(add_mex)
       add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
                          OUTPUT ${dummy_c_file})
       add_library(exelast STATIC ${dummy_c_file})
-      target_link_libraries(exelast ${MEX_CLIBS} ${MEX_LDFLAGS} ${MEX_LINKLIBS} -ldl)  # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
+      target_link_libraries(exelast ${MEX_CLIBS} ${MEX_LINKLIBS} -ldl)  # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
     endif()
 
     target_link_libraries(${target} exelast)
