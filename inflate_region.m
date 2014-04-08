@@ -1,6 +1,8 @@
 function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, start, callback)
 import iris.*;
 
+require_containment = false;
+
 results = inflation_results();
 results.start = start;
 results.obstacles = obstacles;
@@ -34,14 +36,18 @@ while true
   A = [A; A_bounds];
   b = [b; b_bounds];
 
-  if all(A * start <= b) || iter == 1 || infeas_start
-    results.p_history{iter} = struct('A', A, 'b', b);
+  if require_containment
+    if all(A * start <= b) || iter == 1 || infeas_start
+      results.p_history{iter} = struct('A', A, 'b', b);
+    else
+      hist = results.p_history{iter-1};
+      A = hist.A;
+      b = hist.b;
+      disp('Breaking early because start point is no longer contained in polytope');
+      break
+    end
   else
-    hist = results.p_history{iter-1};
-    A = hist.A;
-    b = hist.b;
-    disp('Breaking early because start point is no longer contained in polytope');
-    break
+    results.p_history{iter} = struct('A', A, 'b', b);
   end
   callback(A,b,C,d,obstacles);
 
