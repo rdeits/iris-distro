@@ -32,12 +32,13 @@ end
 
 inner_poly = [];
 if ~isempty(top_face) && ~isempty(bottom_face)
-  [inner_poly(1,:), inner_poly(2,:)] = polybool('intersection',...
+  [inter_x, inter_y] = polybool('intersection',...
                             top_face(1,:), top_face(2,:),...
                             bottom_face(1,:), bottom_face(2,:));
-  % if ~isempty(inner_poly)
-  %   patch(inner_poly(1,:), inner_poly(2,:), 'g', 'FaceAlpha', 0.5);
-  % end
+  if ~isempty(inter_x)
+    inner_poly(1,:) = inter_x;
+    inner_poly(2,:) = inter_y;
+  end
 end
 
 end
