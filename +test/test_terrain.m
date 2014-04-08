@@ -26,45 +26,42 @@ Q = Q | imfilter(heights, [-1; 1]) - (0.06/mag) > 0;
 Q(isnan(heights)) = 1;
 % grid = Q(85:125,25:85);
 grid = ~Q;
-[all_squares(1,:), all_squares(2,:)] = ind2sub(size(grid), 1:length(reshape(grid,[],1)));
+lb = [180;70;-pi];
+ub = [245; 160; pi];
+A_bounds = [-1,0,0;
+            0,-1,0;
+            0,0,-1;
+            1,0,0;
+            0,1,0;
+            0,0,1];
+b_bounds = [-lb;ub];
 
 bot = world2px_2x3 * 0.75*[-0.0820,-0.0820, 0.1780, 0.1780;
                        0.0624,-0.0624, 0.0624,-0.0624;
                        0,0,0,0];
+% obstacles = segment_grid(~grid(lb(1):ub(1),lb(2):ub(2)));
+% for j = 1:length(obstacles)
+%   obstacles{j} = bsxfun(@plus, obstacles{j}, lb(1:2)-1);
+% end
+% obstacles = cspace3(obstacles, bot, 4);
 
 while true
   figure(6)
   imshow(grid, 'InitialMagnification', 'fit')
   [c,r] = ginput(1);
-  profile on
   if isempty(c)
     break
   end
   c = round(c);
   r = round(r);
-  clear white_squares black_squares black_edges
-  [white_squares(1,:), white_squares(2,:)] = ind2sub(size(grid), find(grid));
-  [black_squares(1,:), black_squares(2,:)] = ind2sub(size(grid), find(~grid));
   black_edges = [];
   [black_edges(1,:), black_edges(2,:)] = ind2sub(size(grid), find(component_boundary(grid, [r;c])));
-
-  lb = [180;70;-pi];
-  ub = [245; 160; pi];
-  A_bounds = [-1,0,0;
-              0,-1,0;
-              0,0,-1;
-              1,0,0;
-              0,1,0;
-              0,0,1];
-  b_bounds = [-lb;ub];
-
   obs_mask = all(bsxfun(@minus, A_bounds([1,2,4,5],1:2) * black_edges, b_bounds([1,2,4,5])) <= max(max(bot)));
   obstacles = mat2cell(black_edges(:,obs_mask) , 2, ones(1,sum(obs_mask)));
   obstacles = cspace3(obstacles, bot, 4);
 
 
   [A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, [r;c;0]);
-  profile viewer
 %   animate_results(results);
 
   [inner_poly, outer_poly] = project_c_space_region(A,b);
