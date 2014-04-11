@@ -23,10 +23,14 @@ The primary algorithm is distributed as:
 	inflate_region.m
 
 
-It requires both Gurobi and Mosek to be installed, and it additionally
+It requires both Gurobi and Mosek (with Mosek Fusion) to be installed, and it additionally
 relies on the implementation of the Lowner-John Inner ellipsoid function
 provided by Mosek, which cannot be distributed here. That code can be
 found at <http://docs.mosek.com/7.0/matlabfusion/Inner_and_outer_L_wner-John_Ellipsoids.html>
+
+Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
+
+	javaaddpath('/Users/rdeits/locomotion/lib/mosek/7/tools/platform/osx64x86/bin/mosekmatlab.jar');
 
 Due to MATLAB's package system, this repository must be cloned to a
 folder named "+iris".  The algorithm can be demonstrated by adding the
