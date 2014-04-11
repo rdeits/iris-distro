@@ -173,7 +173,20 @@ function(mex_setup)
   string(REPLACE "-bundle" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
+
+  # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
+  set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
+  add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
+  			OUTPUT ${dummy_c_file})
+
+  add_library(last STATIC ${dummy_c_file})
+  target_link_libraries(last ${MEX_CLIBS} ${MEX_LINKLIBS})
+
+  add_library(liblast STATIC ${dummy_c_file})
+  target_link_libraries(liblast "${MEXLIB_LDFLAGS}") 
+
   set (MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}" PARENT_SCOPE)
+  # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added C above)
   
 endfunction()
 
@@ -215,18 +228,26 @@ function(add_mex)
 
   list(FIND ARGV SHARED isshared)
   list(FIND ARGV EXECUTABLE isexe)
-  if (isshared EQUAL -1)
-    if (isexe EQUAL -1)
-        add_library(${target} MODULE ${ARGV})
-	  set_target_properties(${target} PROPERTIES 
-    	  COMPILE_FLAGS "-DMATLAB_MEX_FILE" 
-    	  )
-    else()
-	list(REMOVE_ITEM ARGV EXECUTABLE)
-	add_executable(${target} ${ARGV})
-    endif()
-  else()
+  if (isexe GREATER -1)
+    list(REMOVE_ITEM ARGV EXECUTABLE)
+    add_executable(${target} ${ARGV})
+    target_link_libraries(${target} liblast)
+  elseif (isshared GREATER -1)
     add_library(${target} ${ARGV})
+    target_link_libraries(${target} liblast)
+  else ()
+    add_library(${target} MODULE ${ARGV})
+    set_target_properties(${target} PROPERTIES 
+      COMPILE_FLAGS "-DMATLAB_MEX_FILE" 
+      PREFIX ""
+      SUFFIX ".${MEX_EXT}"
+      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
+      LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
+      LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
+      ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
+      )
+    target_link_libraries(${target} last)
   endif()
 
   # restore global props
@@ -236,50 +257,6 @@ function(add_mex)
   set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG_BK})  
   set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE_BK})  
 
-  if (isexe GREATER -1)
-    # see note below
-    if (NOT TARGET exelast) 
-
-      set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
-      add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
-                         OUTPUT ${dummy_c_file})
-      add_library(exelast STATIC ${dummy_c_file})
-      target_link_libraries(exelast "${MEXLIB_LDFLAGS}") 
-    endif()
-
-    target_link_libraries(${target} exelast)
-  elseif (isshared GREATER -1)
-    set_target_properties(${target} PROPERTIES
-      LINK_FLAGS "${MEXLIB_LDFLAGS}"
-#      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_LINKLIBS}" 
-#      LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
-#      LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
-      )
-  else()
-    # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the input files).  this is a nasty trick that I found online
-    if (NOT WIN32 AND NOT TARGET last) 
-      set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
-      add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
-                         OUTPUT ${dummy_c_file})
-      add_library(last STATIC ${dummy_c_file})
-      target_link_libraries(last ${MEX_CLIBS} ${MEX_LINKLIBS})
-    endif()
-
-    set_target_properties(${target} PROPERTIES 
-      PREFIX ""
-      SUFFIX ".${MEX_EXT}"
-      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
-      LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
-      LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
-      ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
-      )
-    if (NOT WIN32)
-        target_link_libraries(${target} last)
-    endif()
-  endif()
-
-  # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added CXX above)
 
 endfunction()
 
