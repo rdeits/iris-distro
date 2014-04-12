@@ -205,40 +205,32 @@ function(add_mex)
 
   include_directories( ${MATLAB_ROOT}/extern/include ${MATLAB_ROOT}/simulink/include )
 
-  # todo error if CMAKE_BUILD_TYPE is not Debug or Release
-
-  # set up compiler/linker options
-  # NOTE: due to a CMAKE quirk, the compiler flags for each build type
-  # need to be set via the global variables, while the linker flags
-  # need to be set using set_target_properties
-
-  # backup global props
-  set (CMAKE_C_FLAGS_DEBUG_BK ${CMAKE_C_FLAGS_DEBUG})
-  set (CMAKE_C_FLAGS_RELEASE_BK ${CMAKE_C_FLAGS_RELEASE})
-  set (CMAKE_CXX_COMPILER_BK ${CMAKE_CXX_COMPILER})
-  set (CMAKE_CXX_FLAGS_DEBUG_BK ${CMAKE_CXX_FLAGS_DEBUG})
-  set (CMAKE_CXX_FLAGS_RELEASE_BK ${CMAKE_CXX_FLAGS_RELEASE})  
-
-  # set global props
-  set (CMAKE_C_FLAGS_DEBUG ${MEX_INCLUDE} ${MEX_CFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CDEBUGFLAGS} ${MEX_CC_ARGUMENTS})
-  set (CMAKE_C_FLAGS_RELEASE ${MEX_INCLUDE} ${MEX_CFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX}  ${MEX_COPTIMFLAGS} ${MEX_CC_ARGUMENTS})
-#  find_program (CMAKE_CXX_COMPILER ${MEX_CXX})
-  set (CMAKE_CXX_FLAGS_DEBUG ${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXXDEBUGFLAGS} ${MEX_CXX_ARGUMENTS})
-  set (CMAKE_CXX_FLAGS_RELEASE ${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXXOPTIMFLAGS} ${MEX_CXX_ARGUMENTS})
+  # todo: handle C separately from CXX?
+  set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
+  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXDEBUGFLAGS}")
+  elseif (CMAKE_BUILD_TYPE MATCHES RELEASE)
+    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")    
+  endif()
 
   list(FIND ARGV SHARED isshared)
   list(FIND ARGV EXECUTABLE isexe)
   if (isexe GREATER -1)
     list(REMOVE_ITEM ARGV EXECUTABLE)
     add_executable(${target} ${ARGV})
+    get_source_file_property(lang ${ARGV} LANGUAGE) 
+    set_target_properties(${target} PROPERTIES 
+      COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
     target_link_libraries(${target} liblast)
   elseif (isshared GREATER -1)
     add_library(${target} ${ARGV})
+    set_target_properties(${target} PROPERTIES 
+      COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
     target_link_libraries(${target} liblast)
   else ()
     add_library(${target} MODULE ${ARGV})
     set_target_properties(${target} PROPERTIES 
-      COMPILE_FLAGS "-DMATLAB_MEX_FILE" 
+      COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}" 
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
       LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
@@ -249,14 +241,6 @@ function(add_mex)
       )
     target_link_libraries(${target} last)
   endif()
-
-  # restore global props
-  set (CMAKE_C_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG_BK})  
-  set (CMAKE_C_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE_BK})  
-  set (CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER_BK})
-  set (CMAKE_CXX_FLAGS_DEBUG ${CMAKE_CXX_FLAGS_DEBUG_BK})  
-  set (CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE_BK})  
-
 
 endfunction()
 
