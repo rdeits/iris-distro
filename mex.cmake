@@ -174,6 +174,21 @@ function(mex_setup)
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
 
+  # todo: handle C separately from CXX?
+  set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
+  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXDEBUGFLAGS}")
+  elseif (CMAKE_BUILD_TYPE MATCHES RELEASE)
+    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")    
+  endif()
+
+  if (${MEX_COMPILE_FLAGS} MATCHES "-ansi")
+    string(REPLACE "-ansi" "" MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
+    message(WARNING "Your MEX compiler flags contained '-ansi', but we've removed that flag for compatibility with C++11")
+  endif()
+
+  set(MEX_COMPILE_FLAGS ${MEX_COMPILE_FLAGS} PARENT_SCOPE)
+
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
   set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
   add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
@@ -205,20 +220,11 @@ function(add_mex)
 
   include_directories( ${MATLAB_ROOT}/extern/include ${MATLAB_ROOT}/simulink/include )
 
-  # todo: handle C separately from CXX?
-  set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
-  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXDEBUGFLAGS}")
-  elseif (CMAKE_BUILD_TYPE MATCHES RELEASE)
-    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")    
-  endif()
-
   list(FIND ARGV SHARED isshared)
   list(FIND ARGV EXECUTABLE isexe)
   if (isexe GREATER -1)
     list(REMOVE_ITEM ARGV EXECUTABLE)
     add_executable(${target} ${ARGV})
-    get_source_file_property(lang ${ARGV} LANGUAGE) 
     set_target_properties(${target} PROPERTIES 
       COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
     target_link_libraries(${target} liblast)
