@@ -45,27 +45,40 @@ function(get_relative_path from to var)
   set(${var} "${myvar}" PARENT_SCOPE)
 endfunction()
 
-function(cygwin_path var)
-  if (WIN32 AND cygpath) 
-    separate_arguments(${var})
-#    message("before cygpath: ${${var}}")
-    execute_process(COMMAND ${cygpath} ${${var}} OUTPUT_VARIABLE varout OUTPUT_STRIP_TRAILING_WHITESPACE)     
-    string(REGEX REPLACE "(\r?\n)+" ";" varout ${varout})
-#    message(FATAL_ERROR "after cygpath: ${varout}")
-    set(${var} ${varout} PARENT_SCOPE)
-  endif()
+function(call_cygpath format var)
+#  message("before cygpath: ${${var}}")
+  separate_arguments(${var})
+  execute_process(COMMAND ${cygpath} ${format} ${${var}} OUTPUT_VARIABLE varout OUTPUT_STRIP_TRAILING_WHITESPACE)     
+  string(REGEX REPLACE "(\r?\n)+" ";" varout ${varout})
+#  message(FATAL_ERROR "after cygpath ${format}: ${varout}")
+  set(${var} ${varout} PARENT_SCOPE)
 endfunction()
 
-function(windows_path var)
-  if (WIN32 AND cygpath AND ${var}) 
-    separate_arguments(${var})
-#    message("before cygpath: ${${var}}")
-    execute_process(COMMAND ${cygpath} -m ${${var}} OUTPUT_VARIABLE varout OUTPUT_STRIP_TRAILING_WHITESPACE)     
-    string(REGEX REPLACE "(\r?\n)+" ";" varout ${varout})
-#    message(FATAL_ERROR "after cygpath: ${varout}")
-    set(${var} ${varout} PARENT_SCOPE)
+# On windows, the compilers and the shell commands (potentially) use different syntax for their path strings.
+# These macros try to handle that case as cleanly as possible, and do nothing on non-windows
+macro(c_compiler_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
   endif()
-endfunction()
+endmacro()
+
+macro(java_compiler_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
+  endif()
+endmacro()
+
+macro(cmake_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
+  endif()
+endmacro()
+
+macro(shell_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-u ${var})
+  endif()
+endmacro()
 
 
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
@@ -167,7 +180,7 @@ function(pods_install_pkg_config_file)
     endforeach(word)
 
     set(prefix ${CMAKE_INSTALL_PREFIX})
-    cygwin_path(prefix)
+    shell_path(prefix)
 
     # write the .pc file out
     file(WRITE ${pc_fname}
@@ -213,7 +226,7 @@ function(pods_install_bash_setup package)
   endif()
 
   set(prefix ${CMAKE_INSTALL_PREFIX})
-  cygwin_path(prefix)
+  shell_path(prefix)
 
   set(filename ${CMAKE_BINARY_DIR}/config/pods_setup_all.sh)
   file(WRITE ${filename} 
@@ -421,7 +434,7 @@ macro(pods_use_pkg_config_packages target)
         string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
         string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
     	separate_arguments(_pods_pkg_include_flags)
-	windows_path(_pods_pkg_include_flags)
+	c_compiler_path(_pods_pkg_include_flags)
         #    message("include: ${_pods_pkg_include_flags}")
         include_directories(${_pods_pkg_include_flags})
 
@@ -433,7 +446,7 @@ macro(pods_use_pkg_config_packages target)
 	if (_pods_pkg_ld_dirs)
 	  separate_arguments(_pods_pkg_ld_dirs)
 	  string(REPLACE "-L" "" _pods_pkg_ld_dirs "${_pods_pkg_ld_dirs}")
-	  windows_path(_pods_pkg_ld_dirs)
+	  c_compiler_path(_pods_pkg_ld_dirs)
 	  foreach(__ld_dir ${_pods_pkg_ld_dirs})
 	    if (WIN32)  # only MSVC?
               target_link_libraries(${target} "-LIBPATH:${__ld_dir}")
@@ -496,7 +509,7 @@ macro(pods_use_pkg_config_includes)
         string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
         string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
 
-	windows_path(_pods_pkg_include_flags)
+	c_compiler_path(_pods_pkg_include_flags)
         include_directories(${_pods_pkg_include_flags})
     endif()
 endmacro()
@@ -527,10 +540,7 @@ function(pods_use_pkg_config_classpath)
         OUTPUT_VARIABLE _pods_pkg_classpath_flags)
       string(STRIP ${_pods_pkg_classpath_flags} _pods_pkg_classpath_flags)
       string(REPLACE " " ":" _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
-      
-      if (WIN32 AND cygpath)
-	  execute_process(COMMAND ${cygpath} -m "${_pods_pkg_classpath_flags}" OUTPUT_VARIABLE _pods_pkg_classpath_flags OUTPUT_STRIP_TRAILING_WHITESPACE)
-      endif()
+      java_compiler_path(_pods_pkg_classpath_flags)
       
       set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH}:${_pods_pkg_classpath_flags})
       string(REPLACE "::" ":" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
@@ -574,8 +584,8 @@ macro(pods_config_search_paths)
 
 
         # add build/lib/pkgconfig to the pkg-config search path
-	cygwin_path(PKG_CONFIG_OUTPUT_PATH)
-	cygwin_path(PKG_CONFIG_INSTALL_PATH)
+	shell_path(PKG_CONFIG_OUTPUT_PATH)
+	shell_path(PKG_CONFIG_INSTALL_PATH)
 
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH})
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH})
@@ -634,13 +644,8 @@ set(POD_NAME "${POD_NAME}" CACHE STRING "${POD_NAME}" )
 
 if ( WIN32 ) # convert to windows paths
    find_program(cygpath cygpath)
-   if ( cygpath )
-      execute_process(COMMAND ${cygpath} -m "${CMAKE_INSTALL_PREFIX}" OUTPUT_VARIABLE CMAKE_INSTALL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
-      message(STATUS "CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
-   endif()
 endif()
-
-
+cmake_path(CMAKE_INSTALL_PREFIX)
 
 #make sure we're running an out-of-source build
 enforce_out_of_source()
