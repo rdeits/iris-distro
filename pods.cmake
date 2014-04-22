@@ -467,9 +467,14 @@ function(pods_use_pkg_config_classpath)
         OUTPUT_VARIABLE _pods_pkg_classpath_flags)
       string(STRIP ${_pods_pkg_classpath_flags} _pods_pkg_classpath_flags)
       string(REPLACE " " ":" _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
-
+      
+      if (WIN32 AND cygpath)
+	  execute_process(COMMAND ${cygpath} -m "${_pods_pkg_classpath_flags}" OUTPUT_VARIABLE _pods_pkg_classpath_flags OUTPUT_STRIP_TRAILING_WHITESPACE)
+      endif()
+      
       set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH}:${_pods_pkg_classpath_flags})
       string(REPLACE "::" ":" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+      string(REGEX REPLACE "^:" "" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
 
       execute_process(COMMAND 
           ${PKG_CONFIG_EXECUTABLE} --print-requires ${arg}
@@ -509,6 +514,11 @@ macro(pods_config_search_paths)
 
 
         # add build/lib/pkgconfig to the pkg-config search path
+	if ( WIN32 AND cygpath )
+	  execute_process(COMMAND ${cygpath} "${PKG_CONFIG_OUTPUT_PATH}" OUTPUT_VARIABLE PKG_CONFIG_OUTPUT_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+	  execute_process(COMMAND ${cygpath} "${PKG_CONFIG_INSTALL_PATH}" OUTPUT_VARIABLE PKG_CONFIG_INSTALL_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+	endif()
+
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH})
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH})
 
