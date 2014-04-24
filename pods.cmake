@@ -27,6 +27,7 @@
 #   pods_install_python_script(...)
 #
 # Java
+#   pods_install_jars(...)
 #   pods_use_pkg_config_classpath(...)
 #
 # ----
@@ -124,6 +125,11 @@ function(pods_install_libraries)
     install(TARGETS ${ARGV} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 endfunction(pods_install_libraries)
 
+function(pods_install_jars)
+  foreach(jarfile ${ARGV})
+    install_jar(${jarfile} share/java)
+  endforeach()
+endfunction(pods_install_jars)
 
 # pods_install_pkg_config_file(<package-name> 
 #                              [VERSION <version>]
