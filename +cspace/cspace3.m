@@ -1,12 +1,17 @@
-function [c] = cspace3(obs, bot, n_theta)
+function [c] = cspace3(obs, bot, theta_steps)
 import iris.cspace.minkowski_sum;
 if ~iscell(obs)
   obs = {obs};
 end
 bot = -bot;
 
-th = linspace(-pi, pi, n_theta);
-c = cell(1,length(obs) * (n_theta-1));
+if isscalar(theta_steps)
+  th = linspace(-pi, pi, theta_steps);
+else
+  th = theta_steps;
+end
+
+c = cell(1,length(obs) * (length(th)-1));
 
 idx = 1;
 for k = 1:length(obs)
