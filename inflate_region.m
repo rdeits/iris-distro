@@ -1,7 +1,10 @@
-function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, start, callback)
+function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, start, callback, options)
 import iris.*;
 
-require_containment = false;
+if nargin < 6
+  options = struct();
+end
+if ~isfield(options, 'require_containment'); options.require_containment = false; end
 
 results = inflation_results();
 results.start = start;
@@ -36,7 +39,7 @@ while true
   A = [A; A_bounds];
   b = [b; b_bounds];
 
-  if require_containment
+  if options.require_containment
     if all(A * start <= b) || iter == 1 || infeas_start
       results.p_history{iter} = struct('A', A, 'b', b);
     else
