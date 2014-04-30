@@ -9,7 +9,7 @@ catch exception
   disp(exception.message);
   fprintf(1, 'Warning: Mosek Fusion call failed. Falling back to CVX\n');
   cvx_begin sdp quiet
-    cvx_solver Mosek
+    cvx_solver SDPT3
     variable C(dim,dim) semidefinite
     variable d(dim)
     maximize(det_rootn(C))
