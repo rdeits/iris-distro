@@ -6,8 +6,8 @@ dim = size(A,2);
 try
   [C,d] = lownerjohn_ellipsoid.lownerjohn_inner(A,b);
 catch exception
-  disp(getReport(exception));
-  fprintf(1, 'Warning: Mosek Fusion call failed. Falling back to CVX');
+  disp(exception.message);
+  fprintf(1, 'Warning: Mosek Fusion call failed. Falling back to CVX\n');
   cvx_begin sdp quiet
     cvx_solver Mosek
     variable C(dim,dim) semidefinite
