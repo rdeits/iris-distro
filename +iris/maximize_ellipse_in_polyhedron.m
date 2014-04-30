@@ -1,12 +1,11 @@
 function [C, d, volume] = maximize_ellipse_in_polyhedron(A,b,C,d)
-import mosek_lownerjohn.lownerjohn_ellipsoid;
+import iris.thirdParty.mosek_lownerjohn.lownerjohn_ellipsoid;
 
 dim = size(A,2);
 
-
-% try
+try
   [C,d] = lownerjohn_ellipsoid.lownerjohn_inner(A,b);
-% catch exception
+catch exception
   disp(getReport(exception));
   fprintf(1, 'Warning: Mosek Fusion call failed. Falling back to CVX');
   cvx_begin sdp quiet
@@ -20,7 +19,7 @@ dim = size(A,2);
          (C * (A(i,:)'))', (b(i) - A(i,:) * d)] >= 0;
       end
   cvx_end
-% end
+end
 
 volume = det(C);
 
