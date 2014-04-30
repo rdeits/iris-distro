@@ -23,24 +23,11 @@ The primary algorithm is distributed as:
 	inflate_region.m
 
 
-It requires both Gurobi and Mosek (with Mosek Fusion) to be installed, and it additionally
-relies on the implementation of the Lowner-John Inner ellipsoid function
-provided by Mosek, which cannot be distributed here. That code can be
-found at <http://docs.mosek.com/7.0/matlabfusion/Inner_and_outer_L_wner-John_Ellipsoids.html>
-
-Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
+It requires both Gurobi and Mosek (with Mosek Fusion) to be installed. Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
 
 	javaaddpath('/Users/rdeits/locomotion/lib/mosek/7/tools/platform/osx64x86/bin/mosekmatlab.jar');
 
-Due to MATLAB's package system, this repository must be cloned to a
-folder named "+iris".  The algorithm can be demonstrated by adding the
-folder containing the "+iris" directory, as well as the following
-third-party folders:
-
-	+iris/+thirdParty/polytopes
-	+iris/+thirdParty/geom_3d/geom3d/geom3d
-
-to the MATLAB path, then running:
+The code is distributed as a MATLAB package, so only the root directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running:
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
