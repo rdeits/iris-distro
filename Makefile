@@ -15,7 +15,7 @@ BUILD_PREFIX:=$(shell mkdir -p $(BUILD_PREFIX) && cd $(BUILD_PREFIX) && echo `pw
 $(shell mkdir -p $(BUILD_PREFIX)/matlab)
 
 all:
-	ln -s $(shell pwd)/+iris $(BUILD_PREFIX)/matlab/+iris
+	cp -r $(shell pwd)/+iris $(BUILD_PREFIX)/matlab/
 
 clean:
-	rm $(BUILD_PREFIX)/matlab/+iris
+	rm -r $(BUILD_PREFIX)/matlab/+iris
