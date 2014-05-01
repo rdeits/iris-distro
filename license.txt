@@ -1,4 +1,4 @@
-All software except +iris/+thirdParty/+mosek/ is:
+All software except +iris/+thirdParty and irispy/mosek is:
 Copyright (c) 2014, Robin Deits
 All rights reserved.
 

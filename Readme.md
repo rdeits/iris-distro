@@ -32,6 +32,10 @@ The code is distributed as a MATLAB package, so only the root directory (the one
 	>>> import iris.test.*;
 	>>> test_poly_2d;
 
+Python Implementation
+=====================
+A (very) new and experimental Python implementation of the base algorithm is also provided in irispy/. You can see a demonstration of its operation in the irispy_exploration.ipynb (an IPython notebook).
+
 Examples
 ========
 Here are some animations of the algorithm running in various
