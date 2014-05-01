@@ -34,7 +34,7 @@ The code is distributed as a MATLAB package, so only the root directory (the one
 
 Python Implementation
 =====================
-A (very) new and experimental Python implementation of the base algorithm is also provided in irispy/. You can see a demonstration of its operation in the irispy_exploration.ipynb (an IPython notebook).
+A (very) new and experimental Python implementation of the base algorithm is also provided in irispy/. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/irispy_exploration.ipynb)
 
 Examples
 ========
