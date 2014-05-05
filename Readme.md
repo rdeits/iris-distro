@@ -27,14 +27,19 @@ It requires both Gurobi and Mosek (with Mosek Fusion) to be installed. Installin
 
 	javaaddpath('/Users/rdeits/locomotion/lib/mosek/7/tools/platform/osx64x86/bin/mosekmatlab.jar');
 
-The code is distributed as a MATLAB package, so only the root directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running:
+The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running:
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
 
+
+Pods Compatibility
+==================
+This software is designed to be compatible with the Pods guidelines: http://sourceforge.net/p/pods/home/Home/ If that means nothing to you, don't worry about it: just make sure the `matlab` folder is on your MATLAB path and/or the `python` folder is on your pythonpath.
+
 Python Implementation
 =====================
-A (very) new and experimental Python implementation of the base algorithm is also provided in irispy/. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/irispy_exploration.ipynb)
+A (very) new and experimental Python implementation of the base algorithm is also provided in `python/irispy`. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/irispy_exploration.ipynb)
 
 Examples
 ========

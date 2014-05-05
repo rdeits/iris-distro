@@ -111,7 +111,7 @@ def geometric_mean(M,x,t):
     x_padding = M.variable(m,Domain.unbounded())
     M.constraint(Expr.sub(x_padding, Variable.repeat(t,m)), Domain.equalsTo(0.0))
     # set the last m elements equal to t
-    x = Variable.stack(x,x_padding)
+    x = Variable.vstack(x,x_padding)
 
   M.constraint(Expr.sub(Expr.mul(2.0**(l/2.0), t),rec(x)), Domain.equalsTo(0.0))
 
