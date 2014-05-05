@@ -34,11 +34,16 @@ The code is distributed as a MATLAB package, so only the `matlab` directory (the
 
 
 Pods Compatibility
-==================
-This software is designed to be compatible with the Pods guidelines: http://sourceforge.net/p/pods/home/Home/ If that means nothing to you, don't worry about it: just make sure the `matlab` folder is on your MATLAB path and/or the `python` folder is on your pythonpath.
+------------------
+
+This software is designed to be compatible with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If that means nothing to you, don't worry about it: just make sure the `matlab` folder is on your MATLAB path and/or the `python` folder is on your `PYTHONPATH`. If you are familiar with Pods, then you can also use the wrapper pods provided by the RobotLocomotion group to satisfy the Gurobi and Mosek dependencies (licenses for both must be acquired separately).
+
+* Gurobi: <https://github.com/RobotLocomotion/gurobi>
+* Mosek: <https://github.com/RobotLocomotion/mosek>
 
 Python Implementation
-=====================
+---------------------
+
 A (very) new and experimental Python implementation of the base algorithm is also provided in `python/irispy`. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/python/irispy_exploration.ipynb)
 
 Examples
