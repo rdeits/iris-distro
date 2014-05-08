@@ -30,7 +30,7 @@ for j = 1:n_samples
     ok = false;
     while ~ok
       n_obs = round(ns_obs(j))
-      obs_centers = random('uniform', lb(1), ub(1), dim*n_obs, 1);
+      obs_centers = rand(dim*n_obs, 1) .* (ub(1) - lb(1)) + lb(1);
       obs_pts = bsxfun(@plus, obs_centers, repmat(obs_offsets ./ sqrt(n_obs), n_obs, 1));
       obstacles = mat2cell(obs_pts, dim*ones(n_obs,1), size(obs_offsets,2))';
       try

@@ -4,7 +4,7 @@ import iris.inflate_region;
 
 m = 10;
 n = 10;
-grid = random('uniform', 0, 1, m,n) < 0.5;
+grid = rand(m, n) < 0.5;
 
 idx = find(~grid);
 [r,c] = ind2sub(size(grid), idx);

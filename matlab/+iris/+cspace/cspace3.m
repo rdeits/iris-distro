@@ -16,10 +16,10 @@ c = cell(1,length(obs) * (length(th)-1));
 idx = 1;
 for k = 1:length(obs)
   for j = 1:(length(th)-1)
-    rbot0 = rotmat(th(j)) * bot;
+    rbot0 = iris.util.rotmat(th(j)) * bot;
     c_obs0 = minkowski_sum(rbot0, obs{k});
 
-    rbot1 = rotmat(th(j+1)) * bot;
+    rbot1 = iris.util.rotmat(th(j+1)) * bot;
     c_obs1 = minkowski_sum(rbot1, obs{k});
     c_pts = [c_obs0, c_obs1;
             th(j)*ones(1,size(c_obs0,2)), th(j+1)*ones(1,size(c_obs1,2))];

@@ -16,7 +16,7 @@ obs_offsets = 1/n_obs^(1/3)*0.3*[0.5, 0.5, -0.5, -0.5;
                    -0.5, 0.5, 0.5, -0.5];
 bot = [-0.005,-0.005,0.005,0.005;-0.3,0.3,0.3,-0.3];
 for j = 1:n_obs
-  center = random('uniform', 0, 4, 2, 1);
+  center = rand(2,1) .* 4;
   base_obstacle = bsxfun(@plus, center, obs_offsets);
   base_obstacles{j} = base_obstacle;
 end
@@ -45,7 +45,7 @@ for j = 1:length(base_obstacles)
 end
 x = iris.sample_convex_polytope(A,b,50);
 for k = 1:size(x,2)
-  R = rotmat(x(3,k));
+  R = iris.util.rotmat(x(3,k));
   bot_x = bsxfun(@plus, R * bot, x(1:2,k));
   patch(bot_x(1,:), bot_x(2,:), 'k');
 end
