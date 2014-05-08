@@ -10,6 +10,13 @@ def streamprinter(text):
 env = mosek.Env()
 
 def mosek_ldp(ys):
+    """
+    Use mosek to compute the point in the convex hull of the points in [ys] which is closest to the origin.
+
+    @input ys: an array of size [dimension x number of points]
+
+    @returns ystar: a vector of size [dimension]
+    """
     dim = ys.shape[0]
     pts_per_obstacle = ys.shape[1]
     # env.set_Stream(mosek.streamtype.log, streamprinter)
