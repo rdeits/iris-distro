@@ -1,7 +1,7 @@
 import sys
 
 from scipy.io import loadmat, savemat
-from irispy.mosek.lownerjohn_ellipsoid import lownerjohn_inner
+from irispy.mosek_ellipsoid.lownerjohn_ellipsoid import lownerjohn_inner
 
 """
 MATLAB wrapper to the python lownerjohn_inner function (the MATLAB interface to Mosek Fusion fails after any call to 'clear java', so we can use this interface instead).
