@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 
 from irispy.hyperplanes import compute_obstacle_planes
-from irispy.mosek.lownerjohn_ellipsoid import lownerjohn_inner
+from irispy.mosek_ellipsoid.lownerjohn_ellipsoid import lownerjohn_inner
 
 def inflate_region(obstacle_pts, A_bounds, b_bounds, start, require_containment=False):
     A_bounds = np.array(A_bounds)
