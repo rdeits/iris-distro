@@ -14,6 +14,10 @@ function [A, b, infeas_start] = compute_obstacle_planes(obstacles, obstacle_pts,
   A = zeros(length(obstacles),dim);
   b = zeros(length(obstacles),1);
 
+  clear prob;
+  clear model params;
+  [~, res] = mosekopt('symbcon echo(0)');
+
   for i = obs_sort_idx;
     if ~uncovered_obstacles(i)
       continue
@@ -29,28 +33,32 @@ function [A, b, infeas_start] = compute_obstacle_planes(obstacles, obstacle_pts,
     xi = C*yi + d;
     nhat = 2 * Cinv * Cinv' * (xi - d);
     nhat = nhat / norm(nhat);
-%     nhat = transformed_normal(yi, C);
-%     valuecheck(nhat, transformed_normal(yi, C), 1e-6);
     b0 = nhat' * xi;
     if all(nhat' * obs - b0 >= 0)
       % nhat is feasible, so we can skip the optimization
       A(i,:) = nhat';
       b(i) = b0;
     else
-      clear model params
-      nw = size(ys,2);
-      nvar = dim + nw;
-      model.Q = sparse(diag([ones(1,dim),zeros(1,nw)]));
-      model.obj = zeros(nvar,1);
-      model.A = sparse([[-eye(dim), ys];
-                        [zeros(1,dim), ones(1,nw)]]);
-      model.rhs = [zeros(dim,1); 1];
-      model.lb = [-inf * ones(dim,1); zeros(nw, 1)];
-      model.ub = [inf * ones(dim,1); ones(nw, 1)];
-      model.sense = '=';
-      params.outputflag = 0;
-      result = gurobi(model, params);
-      ystar = result.x(1:dim);
+       nw = size(ys,2);
+%         [~, res] = mosekopt('symbcon echo(0)');
+      nvar= 1 + dim+nw;
+      prob.c   = [zeros(1, dim+nw) , 1];
+      prob.a   = sparse([ [-eye(dim), ys, zeros(dim,1)];[ zeros(1,dim), ones(1,nw),0] ]);
+      prob.blc = [zeros(dim,1);1];
+      prob.buc = [zeros(dim,1);1];
+      prob.blx = [-inf*ones(dim,1);zeros(nw+1,1)];
+      prob.bux = inf*ones(nvar,1);
+
+      % Specify the cones.
+      prob.cones.type   = [res.symbcon.MSK_CT_QUAD];
+      prob.cones.sub    = [nvar, 1:dim];
+      prob.cones.subptr = [1];
+
+      % Optimize the problem.
+      [~,solution]=mosekopt('minimize echo(0)',prob);
+      %toc
+      ystar = solution.sol.itr.xx(1:dim);
+
 %       if isempty(obs_lcon{i})
 %         [G, h] = vert2lcon(obstacles{i}');
 %         obs_lcon{i} = {G,h};
