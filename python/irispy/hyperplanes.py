@@ -1,13 +1,17 @@
 from __future__ import division
 import numpy as np
-import gurobipy
+
+try:
+    from irispy.gurobi_ldp import gurobi_ldp as ldp
+except ImportError:
+    from irispy.mosek_ldp import mosek_ldp as ldp
+
 
 def compute_obstacle_planes(obstacle_pts, C, d):
     dim = C.shape[0]
     infeas_start = False
     Cinv = np.linalg.inv(C);
     n_obs = obstacle_pts.shape[2]
-    pts_per_obstacle = obstacle_pts.shape[1]
 
     uncovered_obstacles = np.ones(n_obs, dtype=np.bool)
     image_pts = Cinv.dot(obstacle_pts.reshape((dim,-1)) - d.reshape((-1,1))).reshape(obstacle_pts.shape)
@@ -27,7 +31,6 @@ def compute_obstacle_planes(obstacle_pts, C, d):
 
         dists = image_dists[:,i]
         idx = np.argmin(dists)
-        yi = ys[:,idx]
         xi = obs[:,idx]
         nhat = 2 * (Cinv.dot(Cinv.T)).dot(xi - d)
         nhat = nhat / np.linalg.norm(nhat)
@@ -37,17 +40,8 @@ def compute_obstacle_planes(obstacle_pts, C, d):
             ai = nhat
             bi = b0
         else:
-            m = gurobipy.Model("ldp")
-            ws = [m.addVar(lb=0, ub=1) for j in range(pts_per_obstacle)]
-            vs = [m.addVar(lb=-gurobipy.GRB.INFINITY, ub=gurobipy.GRB.INFINITY) for j in range(dim)]
-            m.update()
-            for j in range(dim):
-                con = gurobipy.LinExpr()
-                m.addConstr(gurobipy.LinExpr(list(ys[j,:]), ws) == vs[j])
-            m.addConstr(gurobipy.quicksum(ws) == 1)
-            m.setObjective(gurobipy.quicksum([vs[j] * vs[j] for j in range(dim)]))
-            m.optimize()
-            ystar = np.array([v.x for v in vs])
+            ystar = ldp(ys)
+
             if np.linalg.norm(ystar) < 1e-3:
                 # d is inside the obstacle. So we'll just reverse nhat to try
                 # to push the ellipsoid out of the obstacle.
@@ -76,3 +70,4 @@ def compute_obstacle_planes(obstacle_pts, C, d):
     A = np.vstack(ais)
     b = np.hstack(bs)
     return A, b, infeas_start
+
