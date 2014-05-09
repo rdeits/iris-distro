@@ -5,7 +5,7 @@ from scipy import ndimage
 from collections import OrderedDict
 
 import drc
-from irispy.cspace import cspace3
+from irispy.cspace import rotmat
 from irispy.iris import inflate_region
 
 DEFAULT_FOOT_CONTACTS = np.array([[-0.1170, -0.1170, 0.1170, 0.1170],
@@ -16,9 +16,9 @@ DEFAULT_CONTACT_SLICES = {(0.05, 0.35): np.array([[-0.1170, -0.1170, 0.1170, 0.1
                           (0.35, .75): np.array([[-0.1170, -0.1170, 0.25, 0.25],
                                           [.25, -.25, .25, -.25]]),
                           (0.75, 1.15): np.array([[-0.2, -0.2, 0.25, 0.25],
-                                          [.35, -.35, .35, -.35]]),
+                                          [.4, -.4, .4, -.4]]),
                           (1.15, 1.85): np.array([[-0.35, -0.35, 0.25, 0.25],
-                                          [.5, -.5, .5, -.5]])
+                                          [.4, -.4, .4, -.4]])
                           }
 
 def classify_terrain(heights, px2world):
@@ -101,6 +101,7 @@ class TerrainSegmentation:
         return A_bounds, b_bounds
 
     def getCObs(self, start, obs_pts, A_bounds, b_bounds, bot=None):
+
         start = np.array(start).reshape((3,))
 
         if bot is None:
@@ -111,8 +112,28 @@ class TerrainSegmentation:
                              axis=0).reshape(obs_pts.shape[1:])
         obs_mask = np.any(obs_pt_mask, axis=0)
         self.last_obs_mask = obs_mask
-        c_obs = cspace3(obs_pts[:,:,obs_mask], bot, 4)
-        return c_obs
+
+        # Fast c-obs computation for all point obstacles
+        assert(obs_pts.shape[1] == 1)
+        n_active_obs = np.sum(obs_mask)
+        theta_steps = 5
+        thetas = np.linspace(start[2]-np.pi, start[2]+np.pi, num=theta_steps)
+        c_bot = -np.array(bot)
+        c_obs = []
+        for j, _ in enumerate(thetas[:-1]):
+            th0 = thetas[j]
+            th1 = thetas[j+1]
+            c_bot0 = rotmat(th0).dot(c_bot)
+            c_bot1 = rotmat(th1).dot(c_bot)
+            c_obs0 = np.vstack((c_bot0.reshape(2,-1,1) + obs_pts[:,:,obs_mask],
+                                th0 + np.zeros((1, c_bot0.shape[1], n_active_obs))))
+            c_obs1 = np.vstack((c_bot1.reshape(2,-1,1) + obs_pts[:,:,obs_mask],
+                                th1 + np.zeros((1, c_bot1.shape[1], n_active_obs))))
+            c_obs.append(np.hstack((c_obs0, c_obs1)))
+        return np.dstack(c_obs)
+
+        # c_obs = cspace3(obs_pts[:,:,obs_mask], bot, 4)
+        # return c_obs
 
 
     @property
