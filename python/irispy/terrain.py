@@ -11,10 +11,15 @@ from irispy.iris import inflate_region
 DEFAULT_FOOT_CONTACTS = np.array([[-0.1170, -0.1170, 0.1170, 0.1170],
                                   [0.0562, -0.0562, 0.0562, -0.0562]])
 DEFAULT_BOUNDING_BOX_WIDTH = 1
-DEFAULT_CONTACT_SLICES = {(0.05, 0.3): np.array([[-0.1170, -0.1170, 0.1170, 0.1170],
+DEFAULT_CONTACT_SLICES = {(0.05, 0.35): np.array([[-0.1170, -0.1170, 0.1170, 0.1170],
                                           [0.0562, -0.0562, 0.0562, -0.0562]]),
-                          (0.3, 1.0): np.array([[-0.1170, -0.1170, 0.30, 0.30],
-                                          [.25, -.25, .25, -.25]])}
+                          (0.35, .75): np.array([[-0.1170, -0.1170, 0.25, 0.25],
+                                          [.25, -.25, .25, -.25]]),
+                          (0.75, 1.15): np.array([[-0.2, -0.2, 0.25, 0.25],
+                                          [.35, -.35, .35, -.35]]),
+                          (1.15, 1.85): np.array([[-0.35, -0.35, 0.25, 0.25],
+                                          [.5, -.5, .5, -.5]])
+                          }
 
 def classify_terrain(heights, px2world):
     # heights[np.isnan(heights)] = 0 # TODO: make sure these are filled properly
@@ -42,7 +47,6 @@ def terrain_body_obs(heights, px2world_2x3, pose, ht_range):
     # TODO: use a plane fit, rather than just a horizontal plane
     C, R = np.meshgrid(range(heights.shape[1]), range(heights.shape[0]))
     delta = heights - pose[2]
-    print delta
     obs_mask = np.logical_and(ht_range[0] <= delta, delta <= ht_range[1])
     cr = np.vstack((C[obs_mask], R[obs_mask]))
     obs_flat = px2world_2x3.dot(np.vstack((cr, np.ones(cr.shape[1]))))
@@ -79,9 +83,7 @@ class TerrainSegmentation:
         c_obs = self.getCObs(start, self.edge_pts_xy, A_bounds, b_bounds)
 
         for hts, bot in self.contact_slices.iteritems():
-            print "adding body obstacles in height range:", hts
             body_obs_xyz = terrain_body_obs(self.heights, self.px2world_2x3, pose, hts)
-            print body_obs_xyz.size
             if body_obs_xyz.size > 0:
                 c_obs = np.dstack((c_obs, self.getCObs(start, body_obs_xyz[:2,:], A_bounds, b_bounds, bot=bot)))
 
