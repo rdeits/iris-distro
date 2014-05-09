@@ -17,7 +17,7 @@ def inflate_region(obstacle_pts, A_bounds, b_bounds, start, require_containment=
 
     while True:
         A, b, infeas_start = compute_obstacle_planes(obstacle_pts, C, d)
-        print "number of hyperplanes:", len(b)
+        # print "number of hyperplanes:", len(b)
         A = np.vstack((A, A_bounds))
         b = np.hstack((b, b_bounds))
 

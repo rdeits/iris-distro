@@ -5,8 +5,8 @@ class InfeasiblePolytopeError(Exception):
     pass
 
 def lcon_to_vert(A, b):
-    print "A", repr(A)
-    print "b", repr(b)
+    # print "A", repr(A)
+    # print "b", repr(b)
     rows0 = np.hstack((b.reshape((-1,1)), -A))
     # pycddlib seems to occasionally crash for certain polytopes. Reducing the precision of A and b fixes this for some reason.
     rows = np.array(rows0, dtype=np.float16)
