@@ -54,6 +54,8 @@ def cspace3(obs, bot, theta_steps):
                                np.hstack((th0 + np.zeros(c_obs0.shape[1]),
                                           th1 + np.zeros(c_obs1.shape[1])))))
             c_obs.append(c_pts)
+    if len(c_obs) == 0:
+        return np.zeros((3, bot.shape[1] * 2, 0))
     max_n_vert = max((x.shape[1] for x in c_obs))
     return np.dstack((np.pad(c, pad_width=((0,0), (0,max_n_vert-c.shape[1])), mode='edge') for c in c_obs))
 

@@ -174,7 +174,6 @@ def lownerjohn_inner(A, b):
 
       # (bi - ai^T*d, C*ai) \in Q, i=1..m
       M.constraint("qc", Expr.hstack(Expr.sub(b, Expr.mul(A,d)), Expr.mul(A,C.transpose())), Domain.inQCone())
-      #[ M.constraint( "qc%d" %i, Expr.vstack(Expr.sub(b[i],Expr.dot(A[i],d)), Expr.mul(C,A[i])), \
       #                    Domain.inQCone() ) for i in range(m) ]
       # t <= det(C)^{1/n}
       det_rootn(M, C, t)

@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-
+import mosek.fusion
 from irispy.hyperplanes import compute_obstacle_planes
 from irispy.mosek_ellipsoid.lownerjohn_ellipsoid import lownerjohn_inner
 
@@ -31,7 +31,12 @@ def inflate_region(obstacle_pts, A_bounds, b_bounds, start, require_containment=
         else:
             results['p_history'].append({'A': A, 'b': b})
 
-        C, d = lownerjohn_inner(A, b)
+        try:
+            C, d = lownerjohn_inner(A, b)
+        except mosek.fusion.SolutionError:
+            print "Breaking early beause ellipsoid maximization failed"
+            break
+
         C = np.array(C)
         d = np.array(d)
 
