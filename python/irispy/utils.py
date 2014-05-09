@@ -5,7 +5,12 @@ class InfeasiblePolytopeError(Exception):
     pass
 
 def lcon_to_vert(A, b):
-    mat = cdd.Matrix([np.hstack((b[j], -A[j,:])) for j in range(A.shape[0])])
+    print "A", repr(A)
+    print "b", repr(b)
+    rows0 = np.hstack((b.reshape((-1,1)), -A))
+    # pycddlib seems to occasionally crash for certain polytopes. Reducing the precision of A and b fixes this for some reason.
+    rows = np.array(rows0, dtype=np.float16)
+    mat = cdd.Matrix(rows)
     mat.rep_type = cdd.RepType.INEQUALITY
     poly = cdd.Polyhedron(mat)
     ext = poly.get_generators()
