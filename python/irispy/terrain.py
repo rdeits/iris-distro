@@ -92,8 +92,6 @@ class TerrainSegmentation:
 
     def getBoundingPolytope(self, start):
         start = np.array(start).reshape((3,))
-        print start
-        print self.bounding_box_width
         lb = np.hstack((start[:2] - self.bounding_box_width / 2, start[2] - np.pi))
         ub = np.hstack((start[:2] + self.bounding_box_width / 2, start[2] + np.pi))
         A_bounds = np.vstack((-np.eye(3), np.eye(3)))
