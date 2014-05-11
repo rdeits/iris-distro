@@ -29,7 +29,7 @@ figure(1)
 clf
 plot_mesh(vertices, faces, normals)
 
-seed_idx = 12;
+seed_idx = 10;
 seed_pt = mean(vertices(:,faces(:,seed_idx)), 2);
 seed_normal = normals(:,seed_idx);
 xprime = vertices(:,faces(1,seed_idx)) - seed_pt;
@@ -71,3 +71,4 @@ b_3d = [b_3d; dot(seed_normal, seed_pt) + 1e-2; -dot(seed_normal, seed_pt)];
 figure(1)
 V = iris.thirdParty.polytopes.lcon2vert(A_3d, b_3d);
 iris.drawing.drawPolyFromVertices(V', 'r');
+plot3(seed_pt(1), seed_pt(2), seed_pt(3), 'go', 'MarkerSize', 10, 'MarkerFacecolor', 'g');
