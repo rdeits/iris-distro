@@ -35,8 +35,10 @@ y = [cos(th);sin(th)];
 x = bsxfun(@plus, C*y, d);
 plot(x(1,:), x(2,:), 'b-', 'LineWidth', 2);
 plot([lb(1),ub(1),ub(1),lb(1),lb(1)], [lb(2),lb(2),ub(2),ub(2),lb(2)], 'k-')
-xlim([lb(1)-0.5,ub(1)+0.5])
-ylim([lb(2)-0.5,ub(2)+0.5])
+
+pad = (ub - lb) * 0.05;
+xlim([lb(1)-pad(1),ub(1)+pad(1)])
+ylim([lb(2)-pad(2),ub(2)+pad(2)])
 axis off
 % drawnow()
 % pause()
