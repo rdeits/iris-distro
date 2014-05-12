@@ -32,6 +32,6 @@ start = 0.5 * (ub + lb);
 profile on
 [A,b,C,d,results] = iris.inflate_region(obstacles, A_bounds, b_bounds, start);
 profile viewer
-% animate_results(results, record);
+animate_results(results, record);
 
 end

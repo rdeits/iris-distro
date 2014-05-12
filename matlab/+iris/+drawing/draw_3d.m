@@ -16,7 +16,9 @@ function h = draw_3d(A,b,C,d,obstacles,lb,ub)
   th = linspace(0,2*pi,20);
   y = [cos(th);sin(th);zeros(size(th))];
   for phi = linspace(0,pi,10)
-    y = [y, axis2rotmat([1,0,0,phi])*y];
+    T = makehgtform('xrotate', phi);
+    R = T(1:3,1:3);
+    y = [y, R * y];
   end
   x = bsxfun(@plus, C*y, d);
   drawPolyFromVertices(x, 'b', 'FaceAlpha', 1)
