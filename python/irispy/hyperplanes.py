@@ -45,7 +45,7 @@ def compute_obstacle_planes(obstacle_pts, C, d):
             if np.linalg.norm(ystar) < 1e-3:
                 # d is inside the obstacle. So we'll just reverse nhat to try
                 # to push the ellipsoid out of the obstacle.
-                print "Warning: ellipse center is inside an obstacle"
+                # print "Warning: ellipse center is inside an obstacle"
                 infeas_start = True
                 ai = -nhat
                 bi = -nhat.dot(xi)
