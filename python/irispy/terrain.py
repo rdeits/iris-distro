@@ -3,10 +3,12 @@ from __future__ import division
 import numpy as np
 from scipy import ndimage
 from collections import OrderedDict
+from scipy.spatial import ConvexHull
 
 import drc
 from irispy.cspace import rotmat
 from irispy.iris import inflate_region
+from irispy.utils import lcon_to_vert, InfeasiblePolytopeError
 
 DEFAULT_FOOT_CONTACTS = np.array([[-0.1170, -0.1170, 0.1170, 0.1170],
                                   [0.0562, -0.0562, 0.0562, -0.0562]])
@@ -173,3 +175,19 @@ class SafeTerrainRegion:
         print self.A
         print self.b
         return msg
+
+    def xy_polytope(self):
+        """
+        Project the 3D c-space polytope Ax <= b to a list of vertices in the xy plane
+        """
+        try:
+            V = lcon_to_vert(self.A, self.b)
+            hull = ConvexHull(V[:2,:].T)
+            return V[:2,hull.vertices]
+        except InfeasiblePolytopeError:
+            print "Infeasible polytope"
+            return np.zeros((2,0))
+
+
+
+
