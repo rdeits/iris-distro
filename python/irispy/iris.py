@@ -27,7 +27,7 @@ def inflate_region(obstacle_pts, A_bounds, b_bounds, start, require_containment=
             else:
                 A = results['p_history'][-1]['A']
                 b = results['p_history'][-1]['b']
-                print "Breaking early because start point is no longer contained in polytope"
+                # print "Breaking early because start point is no longer contained in polytope"
                 break
         else:
             results['p_history'].append({'A': A, 'b': b})
@@ -35,7 +35,7 @@ def inflate_region(obstacle_pts, A_bounds, b_bounds, start, require_containment=
         iters += 1
 
         if iters > iter_limit:
-            print "iter limit reached"
+            # print "iter limit reached"
             break
 
         try:
