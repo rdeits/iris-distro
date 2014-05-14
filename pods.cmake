@@ -439,13 +439,14 @@ macro(pods_use_pkg_config_packages target)
         if (NOT _pods_pkg_found EQUAL 0)
            message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find packages ${ARGN}")
         endif()
-        string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
-	string(REPLACE " " ";" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
-	foreach (__inc_flag ${_pods_pkg_include_flags})
-	  string(REPLACE "-I" "" __inc_flag "${__inc_flag}")
-	  c_compiler_path(__inc_flag)
-#              message("include: ${__inc_flag}")
-          include_directories(${__inc_flag})
+	string(REPLACE "-I" ";" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
+	foreach (__inc_dir ${_pods_pkg_include_flags})
+          string(STRIP ${__inc_dir} __inc_dir)
+	  if (__inc_dir)
+	    c_compiler_path(__inc_dir)
+#              message("include: ${__inc_dir}")
+            include_directories(${__inc_dir})
+          endif()
         endforeach()
 
         execute_process(COMMAND 
@@ -453,18 +454,19 @@ macro(pods_use_pkg_config_packages target)
             OUTPUT_VARIABLE _pods_pkg_ld_dirs
 	    OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-	if (_pods_pkg_ld_dirs)
-          string(REPLACE " " ";" _pods_pkg_ld_dirs "${_pods_pkg_ld_dirs}")
-	  foreach(__ld_dir ${_pods_pkg_ld_dirs})
-	    string(REPLACE "-L" "" __ld_dir "${__ld_dir}")
+        string(REPLACE "-L" ";" _pods_pkg_ld_dirs "${_pods_pkg_ld_dirs}")
+	foreach(__ld_dir ${_pods_pkg_ld_dirs})
+	  string(STRIP ${__ld_dir} __ld_dir)
+	  if (__ld_dir)
 	    c_compiler_path(__ld_dir)
 	    if (WIN32)  # only MSVC?
               target_link_libraries(${target} "-LIBPATH:${__ld_dir}")
             else()
 	      target_link_libraries(${target} "-L${__ld_dir}")
             endif()
-	  endforeach()
-	endif()
+          endif()
+	endforeach()
+
 
         execute_process(COMMAND 
           ${PKG_CONFIG_EXECUTABLE} --libs-only-l ${ARGN}
