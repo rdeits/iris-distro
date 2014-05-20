@@ -9,7 +9,7 @@ def streamprinter(text):
 
 env = mosek.Env()
 
-def mosek_ldp(ys):
+def ldp(ys):
     """
     Use mosek to compute the point in the convex hull of the points in [ys] which is closest to the origin.
 

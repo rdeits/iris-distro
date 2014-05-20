@@ -5,7 +5,7 @@ grb_model = gurobipy.Model("ldp")
 grb_model.setParam('OutputFlag', False)
 
 
-def gurobi_ldp(ys):
+def ldp(ys):
     """
     Use gurobi to compute the point in the convex hull of the points in [ys] which is closest to the origin.
 

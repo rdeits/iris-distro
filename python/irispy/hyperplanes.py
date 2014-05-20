@@ -2,9 +2,15 @@ from __future__ import division
 import numpy as np
 
 try:
-    from irispy.gurobi_ldp import gurobi_ldp as ldp
+    import irispy.ldp_cvxgen
+    _fast_solver_enabled = True
 except ImportError:
-    from irispy.mosek_ldp import mosek_ldp as ldp
+    _fast_solver_enabled = False
+
+try:
+    from irispy.ldp_gurobi import ldp
+except ImportError:
+    from irispy.ldp_mosek import ldp
 
 
 def compute_obstacle_planes(obstacle_pts, C, d):
@@ -40,6 +46,8 @@ def compute_obstacle_planes(obstacle_pts, C, d):
             ai = nhat
             bi = b0
         else:
+            if _fast_solver_enabled and np.all(ys.shape <= irispy.ldp_cvxgen.MAX_SIZE):
+                ystar = irispy.ldp_cvxgen.ldp(ys)
             ystar = ldp(ys)
 
             if np.linalg.norm(ystar) < 1e-3:
