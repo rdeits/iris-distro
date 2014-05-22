@@ -19,6 +19,12 @@ def compute_obstacle_planes(obstacle_pts, C, d):
     Cinv = np.linalg.inv(C);
     n_obs = obstacle_pts.shape[2]
 
+    if n_obs == 0:
+        A = np.empty((0, dim))
+        b = np.empty((0))
+        infeas_start = False
+        return A, b, infeas_start
+
     uncovered_obstacles = np.ones(n_obs, dtype=np.bool)
     image_pts = Cinv.dot(obstacle_pts.reshape((dim,-1)) - d.reshape((-1,1))).reshape(obstacle_pts.shape)
     image_dists = np.sum(np.power(image_pts, 2), axis=0)
