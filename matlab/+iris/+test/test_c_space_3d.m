@@ -11,29 +11,24 @@ end
 dim = 3;
 % obstacles = {};
 n_obs = 10;
-base_obstacles = cell(1,n_obs);
-obs_offsets = 1/n_obs^(1/3)*0.3*[0.5, 0.5, -0.5, -0.5;
-                   -0.5, 0.5, 0.5, -0.5];
-bot = [-0.005,-0.005,0.005,0.005;-0.3,0.3,0.3,-0.3];
-for j = 1:n_obs
-  center = rand(2,1) .* 4;
-  base_obstacle = bsxfun(@plus, center, obs_offsets);
-  base_obstacles{j} = base_obstacle;
-end
-obstacles = cspace3(base_obstacles, bot, 10);
 lb = [0;0;-pi];
 ub = [4;4;pi];
+bot = [-0.005,-0.005,0.005,0.005;-0.3,0.3,0.3,-0.3];
 A_bounds = [-1,0,0;
             0,-1,0;
             0,0,-1;
             1,0,0;
             0,1,0;
             0,0,1];
+base_obstacles = iris.test.random_obstacles(2, n_obs, lb(1:2), ub(1:2));
+base_obstacles = mat2cell(reshape(base_obstacles(:,1,:), 2, []), 2, ones(1, n_obs));
+obstacles = cspace3(base_obstacles, bot, 10);
+obstacle_pts = reshape(cell2mat(obstacles), [dim, 8, length(obstacles)]);
 b_bounds = [-lb;ub];
 start = 0.5 * (lb + ub);
 
 % profile on
-[A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start);
+[A,b,C,d,results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start);
 % profile viewer
 % animate_results(results, record);
 figure(4)

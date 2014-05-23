@@ -6,7 +6,7 @@ function h = draw_3d(A,b,C,d,obstacles,lb,ub)
   cla
   hold on
   for j = 1:length(obstacles)
-    drawPolyFromVertices(obstacles{j},'k','FaceAlpha',0.5);
+    drawPolyFromVertices(obstacles(:,:,j),'k','FaceAlpha',0.5);
   end
   
   if ~isempty(A)

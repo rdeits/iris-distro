@@ -9,14 +9,7 @@ ub = [10;10;10];
 dim = 3;
 
 n_obs = 20;
-obs_offsets = 3*[0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5, -0.5;
-                   -0.5, 0.5, 0.5, -0.5, -0.5, 0.5, 0.5, -0.5;
-                   -0.5,-0.5,-0.5,-0.5, 0.5, 0.5, 0.5, 0.5];
-obs_centers = rand(dim*n_obs, 1) .* (ub(1) - lb(1)) + lb(1);
-obs_pts = bsxfun(@plus, obs_centers, repmat(obs_offsets ./ sqrt(n_obs), n_obs, 1));
-obstacles = mat2cell(obs_pts, dim*ones(n_obs,1), size(obs_offsets,2))';
-
-
+obstacles = iris.test.random_obstacles(dim, n_obs, lb, ub);
 
 A_bounds = [-1,0,0;
             0,-1,0;

@@ -10,4 +10,5 @@ for j = 1:size(a,2)
 end
 
 k = convhull(p(1,:), p(2,:), 'simplify', true);
-p = p(:,k);
+assert(k(1) == k(end));
+p = p(:,k(1:end-1));

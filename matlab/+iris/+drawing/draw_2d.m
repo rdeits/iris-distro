@@ -3,11 +3,12 @@ import iris.thirdParty.polytopes.*;
 h = figure(2);
 cla
 hold on
-for j = 1:length(obstacles)
-  if size(obstacles{j},2) > 1
-    patch(obstacles{j}(1,:), obstacles{j}(2,:), 'k');
+n_obs = size(obstacles, 3);
+for j = 1:n_obs
+  if size(obstacles, 2) > 1
+    patch(obstacles(1,:,j), obstacles(2,:,j), 'k');
   else
-    plot(obstacles{j}(1), obstacles{j}(2), 'ko');
+    plot(obstacles(1,:,j), obstacles(2,:,j), 'ko');
   end
 end
 for j = 1:size(A,1)-4

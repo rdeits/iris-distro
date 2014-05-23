@@ -1,23 +1,18 @@
-function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, start, callback, options)
+function [A, b, C, d, results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start, options)
 import iris.*;
 
-if nargin < 6
+if nargin < 5
   options = struct();
 end
 if ~isfield(options, 'require_containment'); options.require_containment = false; end
+if ~isfield(options, 'error_on_infeas_start'); options.error_on_infeas_start = false; end
 
 results = inflation_results();
 results.start = start;
-results.obstacles = obstacles;
-results.n_obs = length(obstacles);
+results.obstacles = obstacle_pts;
+results.n_obs = size(obstacle_pts, 3);
 
-t0 = cputime();
-obstacles = pad_obstacle_points(obstacles);
-obstacle_pts = cell2mat(obstacles);
-
-if nargin < 5 || isempty(callback)
-  callback = @callback_silent;
-end
+t0 = tic;
 
 dim = size(A_bounds, 2);
 d = start;
@@ -28,7 +23,10 @@ results.e_history{1} = struct('C', C, 'd', d);
 
 while true
   tic
-  [A, b, infeas_start] = compute_obstacle_planes(obstacles, obstacle_pts, C, d);
+  [A, b, infeas_start] = compute_obstacle_planes(obstacle_pts, C, d);
+  if options.error_on_infeas_start and infeas_start
+    error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
+  end
   results.p_time = results.p_time + toc;
   if iter > 1
     for i = 1:length(b)
@@ -52,14 +50,12 @@ while true
   else
     results.p_history{iter} = struct('A', A, 'b', b);
   end
-  callback(A,b,C,d,obstacles);
 
   tic
   [C, d, cvx_optval] = maximize_ellipse_in_polyhedron(A,b,C,d);
   results.e_time = results.e_time + toc;
   results.e_history{iter+1} = struct('C', C, 'd', d);
 
-  callback(A,b,C,d,obstacles);
   if abs(cvx_optval - best_vol)/best_vol < 2e-2
     break
   end
@@ -68,4 +64,4 @@ while true
 end
 
 results.iters = iter;
-results.total_time = cputime() - t0;
+results.total_time = toc(t0);

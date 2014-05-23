@@ -11,13 +11,13 @@ end
 lb = -ones(N,1);
 ub = ones(N,1);
 dim = N;
-
-obstacles = {};
 n_obs = 50;
+
+obstacles = zeros(dim, 2^dim, n_obs);
 for j = 1:n_obs
   center = rand(dim, 1) .* (ub(1) - lb(1)) + lb(1);
   offsets = rand(dim, 2^dim) .* (0.3 - (-0.3)) + (-0.3);
-  obstacles{j} = bsxfun(@plus, center, offsets);
+  obstacles(:,:,j) = bsxfun(@plus, center, offsets);
 end
 
 A_bounds = [];
