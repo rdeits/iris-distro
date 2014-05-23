@@ -17,6 +17,7 @@ def compute_obstacle_planes(obstacle_pts, C, d):
     dim = C.shape[0]
     infeas_start = False
     Cinv = np.linalg.inv(C);
+    Cinv2 = Cinv.dot(Cinv.T)
     n_obs = obstacle_pts.shape[2]
 
     if n_obs == 0:
@@ -44,7 +45,7 @@ def compute_obstacle_planes(obstacle_pts, C, d):
         dists = image_dists[:,i]
         idx = np.argmin(dists)
         xi = obs[:,idx]
-        nhat = 2 * (Cinv.dot(Cinv.T)).dot(xi - d)
+        nhat = 2 * Cinv2.dot(xi - d)
         nhat = nhat / np.linalg.norm(nhat)
         b0 = nhat.dot(xi)
         if np.all(nhat.dot(obs) - b0 >= 0):
@@ -65,7 +66,7 @@ def compute_obstacle_planes(obstacle_pts, C, d):
                 bi = -nhat.dot(xi)
             else:
                 xstar = C.dot(ystar) + d
-                nhat = 2 * Cinv.dot(Cinv.T).dot(xstar - d)
+                nhat = 2 * Cinv2.dot(xstar - d)
                 nhat = nhat / np.linalg.norm(nhat)
                 ai = nhat
                 bi = nhat.dot(xstar)
