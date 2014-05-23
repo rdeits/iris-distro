@@ -72,7 +72,7 @@ function [A, b, infeas_start] = compute_obstacle_planes(obstacle_pts, C, d)
       end
     end
 
-    check = bsxfun(@ge, A(i,:) * reshape(obstacle_pts, dim, []), b(i));
+    check = A(i,:) * reshape(obstacle_pts, dim, []) >= b(i);
     check = reshape(check', pts_per_obs, []);
     excluded = all(check, 1);
     uncovered_obstacles(excluded) = false;
