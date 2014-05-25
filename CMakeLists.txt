@@ -14,3 +14,27 @@ pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
 # This script gets installed to ${CMAKE_INSTALL_PREFIX}/bin/hello-python
 # and automatically sets the correct python path.
 # pods_install_python_script(hello-python hello.main)
+
+# setup matlab pods-compliance
+include(cmake/matlab_pods.cmake)
+pods_configure_matlab_paths()
+
+get_relative_path("${CMAKE_INSTALL_PREFIX}/matlab" "${CMAKE_CURRENT_SOURCE_DIR}/matlab" relpath)
+
+message(STATUS "Writing addpath_iris.m and rmpath_iris.m to ${CMAKE_INSTALL_PREFIX}/matlab") 
+file(WRITE ${CMAKE_INSTALL_PREFIX}/matlab/addpath_iris.m
+	   "function addpath_iris()\n"
+	   "  mfiledir = fileparts(which(mfilename));\n"
+	   "  wd = cd(fullfile(mfiledir,'${relpath}'));\n"
+	   "  addpath_iris();\n"
+	   "  cd(wd);\n"
+    )
+
+file(WRITE ${CMAKE_INSTALL_PREFIX}/matlab/rmpath_iris.m
+	   "function rmpath_iris()\n"
+	   "  mfiledir = fileparts(which(mfilename));\n"
+	   "  wd = cd(fullfile(mfiledir,'${relpath}'));\n"
+	   "  rmpath_iris();\n"
+	   "  cd(wd);\n"
+    )
+
