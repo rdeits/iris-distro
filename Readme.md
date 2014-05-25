@@ -23,7 +23,7 @@ The primary algorithm is distributed as:
 	inflate_region.m
 
 
-It requires both Gurobi and Mosek (with Mosek Fusion) to be installed. Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
+It requires Mosek (with Mosek Fusion) to be installed. Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
 
 	javaaddpath('/Users/rdeits/locomotion/lib/mosek/7/tools/platform/osx64x86/bin/mosekmatlab.jar');
 
@@ -44,7 +44,7 @@ This software is designed to be compatible with the Pods guidelines: <http://sou
 Python Implementation
 ---------------------
 
-A (very) new and experimental Python implementation of the base algorithm is also provided in `python/irispy`. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/python/irispy_exploration.ipynb)
+An experimental Python implementation of the base algorithm is also provided in `python/irispy`. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/python/irispy_exploration.ipynb)
 
 Python Requirements
 -------------------
