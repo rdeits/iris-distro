@@ -433,29 +433,37 @@ macro(pods_use_pkg_config_packages target)
     else()
         find_package(PkgConfig REQUIRED)
 
-        execute_process(COMMAND 
-            ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
-            RESULT_VARIABLE _pods_pkg_found OUTPUT_VARIABLE _pods_pkg_include_flags)
-        if (NOT _pods_pkg_found EQUAL 0)
+	set(PODS_PKG_FOUND "")
+	set(PODS_PKG_LIBRARIES "")
+	set(PODS_PKG_LIBRARY_DIRS "")
+	set(PODS_PKG_LDFLAGS "")
+	set(PODS_PKG_LDFLAGS_OTHER "")
+	set(PODS_PKG_INCLUDE_DIRS "")
+	set(PODS_PKG_CFLAGS "")
+	set(PODS_PKG_CFLAGS_OTHER "")
+
+	pkg_check_modules(PODS_PKG ${ARGN})
+        if (NOT PODS_PKG_FOUND)
            message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find packages ${ARGN}")
         endif()
-	string(REPLACE "-I" ";" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
-	foreach (__inc_dir ${_pods_pkg_include_flags})
+#	message(STATUS "using pkg ${ARGN}")
+#	message(STATUS "  LIBRARIES = ${PODS_PKG_LIBRARIES}")
+#	message(STATUS "  LIBRARY_DIRS = ${PODS_PKG_LIBRARY_DIRS}")
+#	message(STATUS "  LDFLAGS = ${PODS_PKG_LDFLAGS}")
+#	message(STATUS "  LDFLAGS_OTHER = ${PODS_PKG_LDFLAGS_OTHER}")
+#	message(STATUS "  INCLUDE_DIRS = ${PODS_PKG_INCLUDE_DIRS}")
+#	message(STATUS "  CFLAGS = ${PODS_PKG_CFLAGS}")
+#	message(STATUS "  CFLAGS_OTHER = ${PODS_PKG_CFLAGS_OTHER}")
+	foreach (__inc_dir ${PODS_PKG_INCLUDE_DIRS})
           string(STRIP ${__inc_dir} __inc_dir)
 	  if (__inc_dir)
 	    c_compiler_path(__inc_dir)
-#              message("include: ${__inc_dir}")
+#	    message("include: ${__inc_dir}")
             include_directories(${__inc_dir})
           endif()
         endforeach()
 
-        execute_process(COMMAND 
-            ${PKG_CONFIG_EXECUTABLE} --libs-only-L ${ARGN}
-            OUTPUT_VARIABLE _pods_pkg_ld_dirs
-	    OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-        string(REPLACE "-L" ";" _pods_pkg_ld_dirs "${_pods_pkg_ld_dirs}")
-	foreach(__ld_dir ${_pods_pkg_ld_dirs})
+	foreach(__ld_dir ${PODS_PKG_LIBRARY_DIRS})
 	  string(STRIP ${__ld_dir} __ld_dir)
 	  if (__ld_dir)
 	    c_compiler_path(__ld_dir)
@@ -468,49 +476,33 @@ macro(pods_use_pkg_config_packages target)
 	endforeach()
 
 
-        execute_process(COMMAND 
-          ${PKG_CONFIG_EXECUTABLE} --libs-only-l ${ARGN}
-          OUTPUT_VARIABLE _pods_pkg_ldflags
-	  OUTPUT_STRIP_TRAILING_WHITESPACE)
-        
 	# make the target depend on libraries that are cmake targets
-        if (_pods_pkg_ldflags)
-          string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
+	foreach(__depend_target_name ${PODS_PKG_LIBRARIES})
+#         message(STATUS "${target} depends on  ${__depend_target_name}")
+          get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
+          if (IS_TARGET)
+	    target_link_libraries(${target} ${__depend_target_name})
+          else()
+	    target_link_libraries(${target} ${__depend_target_name})
+	    # ask cmake to actually find the library (tried this to help when i had only dynamic versions of some libraries, and msvc was only looking for static)
+#	    set(mylib "")
+#	    find_library(mylib ${__depend_target_name} HINTS ${_pods_pkg_ld_dirs})
+#            message(STATUS ${mylib})
+#	    if (NOT mylib)
+#	      message(FATAL_ERROR "Could not find library ${__depend_target_name} specified in pkg-config ${ARGN} (looked in ${_pods_pkg_ld_dirs} in addition to the usual places)")
+#	    else()
+#              message(STATUS "FOUND ${mylib}")
+#	    endif()
+#	    target_link_libraries(${target} ${mylib})
+          endif() 
+        endforeach()
 
-          foreach(__ldflag ${_split_ldflags})
-            string(REGEX REPLACE "^-l" "" __depend_target_name ${__ldflag})
-#           message(STATUS "${target} depends on  ${__depend_target_name}")
-            get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
-            if (IS_TARGET)
-	      target_link_libraries(${target} ${__depend_target_name})
-            else()
-	      target_link_libraries(${target} ${__depend_target_name})
-	      # ask cmake to actually find the library (tried this to help when i had only dynamic versions of some libraries, and msvc was only looking for static)
-#	      set(mylib "")
-#	      find_library(mylib ${__depend_target_name} HINTS ${_pods_pkg_ld_dirs})
-#              message(STATUS ${mylib})
-#	      if (NOT mylib)
-#	        message(FATAL_ERROR "Could not find library ${__depend_target_name} specified in pkg-config ${ARGN} (looked in ${_pods_pkg_ld_dirs} in addition to the usual places)")
-#	      else()
-#                message(STATUS "FOUND ${mylib}")
-#	      endif()
-#	      target_link_libraries(${target} ${mylib})
-            endif() 
-          endforeach()
-     	  unset(_split_ldflags)
+	if (PODS_PKG_LDFLAGS_OTHER)
+      	  target_link_libraries(${target} ${PODS_PKG_LDFLAGS_OTHER})
         endif()
 
-        execute_process(COMMAND 
-            ${PKG_CONFIG_EXECUTABLE} --libs-only-other ${ARGN}
-            OUTPUT_VARIABLE _pods_pkg_ldflags
-	    OUTPUT_STRIP_TRAILING_WHITESPACE)
-	if (_pods_pkg_ldflags)
-          string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
-      	  target_link_libraries(${target} ${_split_ldflags})
-        endif()
+	# TODO: Handle PODS_PKG_CFLAGS_OTHER
 
-        unset(_pods_pkg_include_flags)
-        unset(_pods_pkg_ldflags)
     endif()
 endmacro()
 
