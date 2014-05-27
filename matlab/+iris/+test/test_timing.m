@@ -3,7 +3,7 @@ function [all_results] = test_timing(dim)
 lb = zeros(dim,1);
 ub = 10 * ones(dim,1);
 n_samples = 6;
-n_trials = 10;
+n_trials = 100;
 ns_obs = logspace(1, 6, n_samples);
 
 A_bounds = [-diag(ones(dim, 1)); diag(ones(dim,1))];
