@@ -10,8 +10,8 @@ lb = [0;0];
 ub = [10;10];
 dim = 2;
 
-n_obs = 30;
-obstacle_pts = iris.test.random_obstacles(dim, n_obs, lb, ub);
+n_obs = 20;
+obstacle_pts = iris.test.random_obstacles(dim, n_obs, lb, ub, 5);
 
 A_bounds = [-1,0;0,-1;1,0;0,1];
 b_bounds = [-lb; ub];

@@ -9,7 +9,8 @@ ub = [10;10;10];
 dim = 3;
 
 n_obs = 20;
-obstacles = iris.test.random_obstacles(dim, n_obs, lb, ub);
+% obstacles = iris.test.random_obstacles(dim, n_obs, lb, ub,3);
+obstacles = iris.test.random_cubic_obstacles(dim, n_obs, lb, ub);
 
 A_bounds = [-1,0,0;
             0,-1,0;

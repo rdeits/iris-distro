@@ -6,7 +6,8 @@ hold on
 n_obs = size(obstacles, 3);
 for j = 1:n_obs
   if size(obstacles, 2) > 1
-    patch(obstacles(1,:,j), obstacles(2,:,j), 'k');
+    k = convhull(obstacles(1,:,j), obstacles(2,:,j));
+    patch(obstacles(1,k,j), obstacles(2,k,j), 'k');
   else
     plot(obstacles(1,:,j), obstacles(2,:,j), 'ko');
   end

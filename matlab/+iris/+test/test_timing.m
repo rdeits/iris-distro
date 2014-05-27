@@ -16,7 +16,7 @@ for j = 1:n_samples
     ok = false;
     while ~ok
       n_obs = round(ns_obs(j))
-      obstacle_pts = iris.test.random_obstacles(dim, n_obs, lb, ub);
+      obstacle_pts = iris.test.random_cubic_obstacles(dim, n_obs, lb, ub);
       try
         [A,b,C,d,results] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, start, []);
         ok = true;
