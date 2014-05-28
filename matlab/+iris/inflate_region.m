@@ -23,8 +23,8 @@ results.e_history{1} = struct('C', C, 'd', d);
 
 while true
   tic
-  [A, b, infeas_start] = compute_obstacle_planes(obstacle_pts, C, d);
-  if options.error_on_infeas_start and infeas_start
+  [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d);
+  if options.error_on_infeas_start && infeas_start
     error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
   end
   results.p_time = results.p_time + toc;
@@ -52,7 +52,7 @@ while true
   end
 
   tic
-  [C, d, cvx_optval] = maximize_ellipse_in_polyhedron(A,b,C,d);
+  [C, d, cvx_optval] = maximal_ellipse(A,b);
   results.e_time = results.e_time + toc;
   results.e_history{iter+1} = struct('C', C, 'd', d);
 

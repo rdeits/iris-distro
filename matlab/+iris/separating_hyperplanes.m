@@ -1,4 +1,4 @@
-function [A, b, infeas_start] = compute_obstacle_planes(obstacle_pts, C, d)
+function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
 
   dim = size(C,1);
   infeas_start = false;
@@ -51,9 +51,9 @@ function [A, b, infeas_start] = compute_obstacle_planes(obstacle_pts, C, d)
       b(i) = b0;
     else
       if all(size(ys) <= [3, 8])
-        ystar = iris.cvxgen_ldp(ys);
+        ystar = iris.least_distance.cvxgen_ldp(ys);
       else
-        ystar = iris.mosek_ldp(ys, res);
+        ystar = iris.least_distance.mosek_ldp(ys, res);
       end
 
       if norm(ystar) < 1e-3

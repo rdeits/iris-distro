@@ -6,8 +6,12 @@ hold on
 n_obs = size(obstacles, 3);
 for j = 1:n_obs
   if size(obstacles, 2) > 1
-    k = convhull(obstacles(1,:,j), obstacles(2,:,j));
-    patch(obstacles(1,k,j), obstacles(2,k,j), 'k');
+    if size(obstacles, 2) > 2
+      k = convhull(obstacles(1,:,j), obstacles(2,:,j));
+    else
+      k = [1,2,1];
+    end
+    patch(obstacles(1,k,j), obstacles(2,k,j), 'k', 'FaceAlpha', 0.2, 'LineWidth', 2);
   else
     plot(obstacles(1,:,j), obstacles(2,:,j), 'ko');
   end

@@ -1,4 +1,4 @@
-function [C, d] = py_lownerjohn_inner(A, b)
+function [C, d] = py_mosek_ellipsoid(A, b)
 
 fname = tempname();
 save(fname, 'A', 'b');
