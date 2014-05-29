@@ -2,7 +2,7 @@ function [C, d] = spot_ellipsoid(A, b)
 
 n = size(A, 2);
 
-tic
+% tic
 pr = spotsosprog;
 [pr, t] = pr.newFree(1);
 [pr, Z] = pr.newFree(n, n);
@@ -23,7 +23,7 @@ end
 [pr, g] = geo_mean_recursive(pr, x);
 pr = pr.withEqs(2^(l/2) * t - g);
 
-fprintf(1, 'setup: %f\n', toc);
+% fprintf(1, 'setup: %f\n', toc);
 
 % tic
 % disp('mosek')
@@ -34,16 +34,16 @@ fprintf(1, 'setup: %f\n', toc);
 % double(sol.eval(d))
 % fprintf(1, 'mosek: %f\n', toc);
 
-tic
+% tic
 solver = @spot_sedumi;
 sol = pr.minimize(-t, solver);
 % sol.eval(lor)
-fprintf(1, 'sedumi: %f\n', toc);
+% fprintf(1, 'sedumi: %f\n', toc);
 
-tic
+% tic
 C = double(sol.eval(C));
 d = double(sol.eval(d));
-fprintf(1, 'extract: %f\n', toc);
+% fprintf(1, 'extract: %f\n', toc);
 
 end
 
