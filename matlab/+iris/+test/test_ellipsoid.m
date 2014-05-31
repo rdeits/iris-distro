@@ -21,14 +21,17 @@ for j = 1:n
   valuecheck(C_cvx, C, 1e-3);
   valuecheck(d_cvx, d, 1e-3);
   
-  [C_pym, d_pym] = iris.inner_ellipsoid.py_mosek_ellipsoid(A, b);
-  valuecheck(C_pym, C, 1e-3);
-  valuecheck(d_pym, d, 1e-3);
+%   [C_pym, d_pym] = iris.inner_ellipsoid.py_mosek_ellipsoid(A, b);
+%   valuecheck(C_pym, C, 1e-3);
+%   valuecheck(d_pym, d, 1e-3);
+%   
+%   [C_sp, d_sp] = iris.inner_ellipsoid.spot_ellipsoid(A, b);
+%   valuecheck(C_sp, C, 1e-3);
+%   valuecheck(d_sp, d, 1e-3);
   
-  [C_sp, d_sp] = iris.inner_ellipsoid.spot_ellipsoid(A, b);
-  valuecheck(C_sp, C, 1e-3);
-  valuecheck(d_sp, d, 1e-3);
-  
+  [C_nof, d_nof] = iris.inner_ellipsoid.mosek_nofusion(A, b);
+  valuecheck(C_nof, C, 1e-3);
+  valuecheck(d_nof, d, 1e-3);
 end
 
 tic
@@ -43,14 +46,26 @@ for j = 1:n
 end
 fprintf('cvx: %f s\n', toc/n);
 
-tic
-for j = 1:n
-  [C, d] = iris.inner_ellipsoid.py_mosek_ellipsoid(A,b);
-end
-fprintf('py mosek: %f s\n', toc/n);
+% tic
+% for j = 1:n
+%   [C, d] = iris.inner_ellipsoid.py_mosek_ellipsoid(A,b);
+% end
+% fprintf('py mosek: %f s\n', toc/n);
+
+% tic
+% for j = 1:n
+%   [C, d] = iris.inner_ellipsoid.spot_ellipsoid(A,b);
+% end
+% fprintf('spot: %f s\n', toc/n);
 
 tic
 for j = 1:n
-  [C, d] = iris.inner_ellipsoid.spot_ellipsoid(A,b);
+  [C, d] = iris.inner_ellipsoid.mosek_nofusion(A, b);
 end
-fprintf('spot: %f s\n', toc/n);
+fprintf('nofusion: %f s\n', toc/n);
+
+end
+
+function valuecheck(x, y, eps)
+  assert(all(all(abs(x - y) < eps)));
+end
