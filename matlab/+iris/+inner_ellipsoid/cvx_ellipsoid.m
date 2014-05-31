@@ -3,7 +3,7 @@ function [C, d] = cvx_ellipsoid(A, b)
 dim = size(A,2);
 
 cvx_begin sdp quiet
-  cvx_solver Mosek
+  cvx_solver SDPT3
   variable C(dim,dim) semidefinite
   variable d(dim)
   maximize(det_rootn(C))
