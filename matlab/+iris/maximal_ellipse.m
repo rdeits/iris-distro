@@ -1,18 +1,11 @@
 function [C, d, volume] = maximal_ellipse(A,b)
 
-try
-  [C,d] = iris.inner_ellipsoid.mosek_ellipsoid(A,b);
-catch exception
-  disp(exception.message);
-  disp('Warning: Mosek Fusion call failed. Falling back to python interface');
-  try
-    [C, d] = iris.inner_ellipsoid.py_mosek_ellipsoid(A, b);
-  catch exception
-    disp(exception.message);
-    disp('Warning: Mosek python call *also* failed. Trying one last time with CVX');
-    [C, d] = iris.inner_ellipsoid.cvx_ellipsoid(A, b);
-  end
-end
+[C, d] = iris.inner_ellipsoid.mosek_nofusion(A, b);
+
+% If Mosek fails for you, you can use CVX with the free SDPT3 solver,
+% but it will be much (about 100X) slower. Just swap the above line for the
+% following:
+% [C, d] = iris.inner_ellipsoid.cvx_ellipsoid(A, b);
 
 volume = det(C);
 

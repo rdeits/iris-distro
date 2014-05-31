@@ -7,8 +7,10 @@ for j = 1:n
   dim = randi([2,5],1);
   lb = rand(dim,1) * 2 - 1;
   ub = lb + rand(1) + 1;
-  inputs{end+1} = struct('A', [-diag(ones(dim,1)); diag(ones(dim,1))],...
-                         'b', [-lb; ub]);
+  A = [-diag(ones(dim,1)); diag(ones(dim,1))];
+  b = [-lb; ub];
+  inputs{end+1} = struct('A', A,...
+                         'b', b);
 end
 
 

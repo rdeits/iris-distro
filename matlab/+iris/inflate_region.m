@@ -1,6 +1,8 @@
 function [A, b, C, d, results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start, options)
 import iris.*;
 
+DEBUG = false;
+
 if nargin < 5
   options = struct();
 end
@@ -28,7 +30,7 @@ while true
     error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
   end
   results.p_time = results.p_time + toc;
-  if iter > 1
+  if iter > 1 && DEBUG
     for i = 1:length(b)
       assert(min(eig([(b(i) - A(i,:) * d) * eye(dim), C * (A(i,:)');
          (C * (A(i,:)'))', (b(i) - A(i,:) * d)])) >= -1e-3);

@@ -1,8 +1,14 @@
 function [C, d] = mosek_nofusion(A, b)
-% 
-% A = [-diag(ones(3,1)); diag(ones(3,1))];
-% b = [0;0;0;1;1;1];
+% Find the largest ellipsoid in the polytope defined by Ax <= b. This
+% should return the same result as iris.inner_ellipsoid.mosek_ellipsoid.m.
+% It implements the same algorithm, but does not use the Mosek Fusion
+% symbolic API, and is consequently about 2X faster. You can compare all of
+% the available ellipsoid solvers with iris.test.test_ellipsoid.m.
 
+
+DEBUG = false;
+
+% tic
 [m, n] = size(A);
 l = ceil(log2(n));
 
@@ -24,8 +30,13 @@ ndx.f = reshape(ndx.f, m, n);
 
 ncon = n * m + m + n + n + (2^l - n) + 1 + (n * (n-1) / 2) + (2^l - 1);
 
-clear prob
+nabar = n * m * n + n + n + (n * (n-1) / 2);
+abar_ptr = 1;
+
+% Mosek suggests running the following so we can look up the cone types:
 % [r, res] = mosekopt('symbcon');
+% but this takes about as long as actually solving the SDP, so we'll just
+% cowboy up and hard-code them.
 MSK_CT_RQUAD = 1;
 MSK_CT_QUAD = 0;
 
@@ -41,11 +52,11 @@ prob.a = zeros(ncon, nvar);
 prob.blc = -inf(ncon,1);
 prob.buc = inf(ncon,1);
 
-prob.bara.subi = [];
-prob.bara.subj = [];
-prob.bara.subk = [];
-prob.bara.subl = [];
-prob.bara.val = [];
+prob.bara.subi = nan(1, nabar);
+prob.bara.subj = nan(1, nabar);
+prob.bara.subk = nan(1, nabar);
+prob.bara.subl = nan(1, nabar);
+prob.bara.val = nan(1, nabar);
 
 prob.cones.type = [];
 prob.cones.sub = [];
@@ -56,21 +67,23 @@ for i = 1:m
   % a_i^T C = [f_{i,1}, f_{i,2}, ..., f_{i,n}]
   for j = 1:n
     % (a_i^T C)_j = f_{i,j}
-    prob.bara.subi = [prob.bara.subi, repmat(con_ndx, 1, n)];
-    prob.bara.subj = [prob.bara.subj, ones(1, n)];
+    prob.bara.subi(abar_ptr:abar_ptr+n-1) = con_ndx;
+    prob.bara.subj(abar_ptr:abar_ptr+n-1) = 1;
     
     % Do some silliness because Mosek will fail if we try to specify
     % elements of Abar above the diagonal. 
-    subk = repmat(j, 1, n);
+    subk = j + zeros(1, n);
     subl = 1:n;
     swap_mask = subk < subl;
     swap = subk(swap_mask);
     subk(swap_mask) = subl(swap_mask);
     subl(swap_mask) = swap;
     
-    prob.bara.subk = [prob.bara.subk, subk];
-    prob.bara.subl = [prob.bara.subl, subl];
-    prob.bara.val = [prob.bara.val, A(i,:)];
+    prob.bara.subk(abar_ptr:abar_ptr+n-1) = subk;
+    prob.bara.subl(abar_ptr:abar_ptr+n-1) = subl;
+    prob.bara.val(abar_ptr:abar_ptr+n-1) = A(i,:);
+    abar_ptr = abar_ptr + n;
+    
     prob.a(con_ndx, ndx.f(i,j)) = -1;
     prob.blc(con_ndx) = 0;
     prob.buc(con_ndx) = 0;
@@ -83,26 +96,15 @@ for i = 1:m
   con_ndx = con_ndx + 1;
 end
 
-% for j = 1:n
-%   % Xbar_{n+j,j} == z_j
-%   prob.bara.subi = [prob.bara.subi, con_ndx];
-%   prob.bara.subj = [prob.bara.subj, 1];
-%   prob.bara.subk = [prob.bara.subk, n+j];
-%   prob.bara.subl = [prob.bara.subl, j];
-%   prob.bara.val = [prob.bara.val, 1];
-%   prob.a(con_ndx, ndx.z(j)) = -1;
-%   prob.blc(con_ndx) = 0;
-%   prob.buc(con_ndx) = 0;
-%   con_ndx = con_ndx + 1;
-% end
-
 for j = 1:n
   % Xbar_{n+j,n+j} == z_j
-  prob.bara.subi = [prob.bara.subi, con_ndx];
-  prob.bara.subj = [prob.bara.subj, 1];
-  prob.bara.subk = [prob.bara.subk, n+j];
-  prob.bara.subl = [prob.bara.subl, j];
-  prob.bara.val = [prob.bara.val, 1];
+  prob.bara.subi(abar_ptr) = con_ndx;
+  prob.bara.subj(abar_ptr) = 1;
+  prob.bara.subk(abar_ptr) = n+j;
+  prob.bara.subl(abar_ptr) = j;
+  prob.bara.val(abar_ptr) = 1;
+  abar_ptr = abar_ptr + 1;
+  
   prob.a(con_ndx, ndx.z(j)) = -1;
   prob.blc(con_ndx) = 0;
   prob.buc(con_ndx) = 0;
@@ -111,11 +113,13 @@ end
 
 for j = 1:n
   % Xbar_{n+j,n+j} == z_j
-  prob.bara.subi = [prob.bara.subi, con_ndx];
-  prob.bara.subj = [prob.bara.subj, 1];
-  prob.bara.subk = [prob.bara.subk, n+j];
-  prob.bara.subl = [prob.bara.subl, n+j];
-  prob.bara.val = [prob.bara.val, 1];
+  prob.bara.subi(abar_ptr) = con_ndx;
+  prob.bara.subj(abar_ptr) = 1;
+  prob.bara.subk(abar_ptr) = n+j;
+  prob.bara.subl(abar_ptr) = n+j;
+  prob.bara.val(abar_ptr) = 1;
+  abar_ptr = abar_ptr + 1;
+  
   prob.a(con_ndx, ndx.z(j)) = -1;
   prob.blc(con_ndx) = 0;
   prob.buc(con_ndx) = 0;
@@ -134,17 +138,27 @@ end
 % Off-diagonal elements of Y22 are 0
 for k = n+1:(2*n-1)
   for j = k+1:2*n
-    prob.bara.subi = [prob.bara.subi, con_ndx];
-    prob.bara.subj = [prob.bara.subj, 1];
-    prob.bara.subk = [prob.bara.subk, j];
-    prob.bara.subl = [prob.bara.subl, k];
-    prob.bara.val = [prob.bara.val, 1];
+    prob.bara.subi(abar_ptr) = con_ndx;
+    prob.bara.subj(abar_ptr) = 1;
+    prob.bara.subk(abar_ptr) = j;
+    prob.bara.subl(abar_ptr) = k;
+    prob.bara.val(abar_ptr) = 1;
+    abar_ptr = abar_ptr + 1;
+    
     prob.blc(con_ndx) = 0;
     prob.buc(con_ndx) = 0;
     con_ndx = con_ndx + 1;
   end
 end
 
+if DEBUG
+  assert(~any(isnan(prob.bara.subi)));
+  assert(~any(isnan(prob.bara.subj)));
+  assert(~any(isnan(prob.bara.subk)));
+  assert(~any(isnan(prob.bara.subl)));
+  assert(~any(isnan(prob.bara.val)));
+end
+ 
 % 2^(l/2)t == s_{2l - 1}
 prob.a(con_ndx, ndx.t) = 2^(l/2);
 prob.a(con_ndx, ndx.s(end)) = -1;
@@ -162,7 +176,9 @@ for j = 1:(2^l - 1)
   con_ndx = con_ndx + 1;
 end
 
-assert(con_ndx == ncon + 1);
+if DEBUG
+  assert(con_ndx == ncon + 1);
+end
 
 cone_ptr = 1;
 lhs = [ndx.z, ndx.sprime];
@@ -175,11 +191,6 @@ for j = 1:(2^l - 1)
   cone_ptr = cone_ptr + 3;
 end
 
-% prob.cones.type = [prob.cones.type, res.symbcon.MSK_CT_RQUAD];
-% prob.cones.sub = [prob.cones.sub, ndx.z(1), ndx.z(2), ndx.s(1)];
-% prob.cones.subptr = [prob.cones.subptr, cone_ptr];
-% cone_ptr = cone_ptr + 3;
-
 for i = 1:m
   prob.cones.type = [prob.cones.type, MSK_CT_QUAD];
   prob.cones.sub = [prob.cones.sub, ndx.g(i), ndx.f(i,:)];
@@ -188,8 +199,13 @@ for i = 1:m
 end
 
 prob.a = sparse(prob.a);
-[r, res] = mosekopt('maximize echo(0)', prob);
 
+% fprintf('setup: %f s\n', toc);
+% tic
+[r, res] = mosekopt('maximize echo(0)', prob);
+% fprintf('solve: %f s\n', toc);
+
+% tic
 Y = zeros(2*n, 2*n);
 flat_ndx = 1;
 for k = 1:2*n
@@ -198,35 +214,45 @@ for k = 1:2*n
     flat_ndx = flat_ndx + 1;
   end
 end
+
+% This seems to be a bug in Mosek, as far as I can tell. Even in very
+% simple cases, the off-diagonal terms in Y always come out to be exactly
+% half of their expecte value. This is easy to see by comparing the
+% diagonal of Y21 to Y22--they are constrained to be the same, but the 
+% values in Y21 are precisely half those of Y22. Sadness.
+Y = Y + tril(Y,-1);
+
+% Reflect Y to turn the lower-triangular form into a full matrix
 Y = Y + tril(Y,-1)';
-Y;
 C = Y(1:n, 1:n);
 d = res.sol.itr.xx(ndx.d);
-f = res.sol.itr.xx(ndx.f);
-g = res.sol.itr.xx(ndx.g);
-z = res.sol.itr.xx(ndx.z);
-t = res.sol.itr.xx(ndx.t);
-s = res.sol.itr.xx(ndx.s);
-sprime = res.sol.itr.xx(ndx.sprime);
+% fprintf('extract: %f s\n', toc)
 
-for j = 1:2^l
-  if j <= n
-    assert(abs(z(j) - Y(n+j,n+j)) < 1e-4);
-  else
-    assert(abs(z(j) - t) < 1e-4);
+if DEBUG
+  f = res.sol.itr.xx(ndx.f);
+  g = res.sol.itr.xx(ndx.g);
+  z = res.sol.itr.xx(ndx.z);
+  t = res.sol.itr.xx(ndx.t);
+  s = res.sol.itr.xx(ndx.s);
+  sprime = res.sol.itr.xx(ndx.sprime);
+
+  for j = 1:2^l
+    if j <= n
+      assert(abs(z(j) - Y(n+j,n+j)) < 1e-4);
+    else
+      assert(abs(z(j) - t) < 1e-4);
+    end
   end
+
+  for i = 1:m
+    assert(all(abs(A(i,:) * C - f(i,:)) < 1e-4));
+    assert(all(abs(b(i) - A(i,:) * d - g(i)) < 1e-4));
+  end
+
+  assert(abs(2^(l/2) * t - s(end)) < 1e-4);
+
+  Y22 = Y(n+1:2*n, n+1:2*n);
+  assert(all(all(abs(Y22 - diag(diag(Y22))) < 1e-4)));
+
+  assert(all(abs(s - sprime) < 1e-4));
 end
-
-for i = 1:m
-  assert(all(abs(A(i,:) * C - f(i,:)) < 1e-4));
-  assert(all(abs(b(i) - A(i,:) * d - g(i)) < 1e-4));
-end
-% assert(all(all((abs(diag(diag(Y(n+1:2*n,1:n))) - Y(n+1:2*n,n+1:2*n)) < 1e-4))));
-
-assert(abs(2^(l/2) * t - s(end)) < 1e-4);
-
-Y22 = Y(n+1:2*n, n+1:2*n);
-assert(all(all(abs(Y22 - diag(diag(Y22))) < 1e-4)));
-
-assert(all(abs(s - sprime) < 1e-4));
-% assert(abs(t - (det(C) ^ (1/n))) < 1e-4);
