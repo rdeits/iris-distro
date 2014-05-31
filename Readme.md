@@ -1,13 +1,7 @@
 Introduction
 ============
 
-This package contains the IRIS algorithm for iterative convex regional
-inflation by semidefinite programming, implemented in MATLAB. It is
-designed to take an environment containing many (convex) obstacles and a
-start point, and to compute a large convex obstacle-free region. This
-region can then be used to define linear constraints for some other
-objective function which the user might want to optimize over the
-obstacle-free space. The algorithm is described in:
+This package contains the IRIS algorithm for iterative convex regional inflation by semidefinite programming, implemented in MATLAB and Python. It is designed to take an environment containing many (convex) obstacles and a start point, and to compute a large convex obstacle-free region. This region can then be used to define linear constraints for some other objective function which the user might want to optimize over the obstacle-free space. The algorithm is described in:
 
 R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regions of
   obstacle-free space through semidefinite programming,&rdquo; Submitted
@@ -22,12 +16,7 @@ The primary algorithm is distributed as:
 
 	inflate_region.m
 
-
-It requires Mosek (with Mosek Fusion) to be installed. Installing Mosek Fusion involves adding a `.jar` file to your Matlab javaclasspath. I put the following into my `startup.m` file (you can find this file by typing `edit startup` at the Matlab console):
-
-	javaaddpath('/Users/rdeits/locomotion/lib/mosek/7/tools/platform/osx64x86/bin/mosekmatlab.jar');
-
-The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running:
+The MATLAB implementation requires the Mosek toolbox for MATLAB, and the Python implementation currently requires both Mosek and Gurobi. The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
