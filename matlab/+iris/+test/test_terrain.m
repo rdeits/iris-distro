@@ -1,4 +1,5 @@
 function selected_points = test_terrain()
+% NOTEST
 
 import iris.terrain_grid.*;
 import iris.inflate_region;

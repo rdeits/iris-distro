@@ -4,7 +4,7 @@ if nargin < 2
   fname = 'timing.dat'
 end
 
-n_trials = 100;
+n_trials = 10;
 n_obs = reshape([all_results.n_obs], n_trials, []);
 iters = reshape([all_results.iters], n_trials, []);
 total_time = reshape([all_results.total_time], n_trials, []);

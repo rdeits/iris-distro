@@ -30,9 +30,9 @@ start = 0.5 .* (rand(2,1) .* (ub - lb) + lb);
 % start = [0;0.98];
 
 
-profile on
+% profile on
 [A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start);
-profile viewer
+% profile viewer
 iris.drawing.animate_results(results, record);
 
 end

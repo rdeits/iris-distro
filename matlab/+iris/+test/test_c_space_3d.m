@@ -36,7 +36,11 @@ clf
 hold on
 for j = 1:length(base_obstacles)
   obs = base_obstacles{j};
-  patch(obs(1,:), obs(2,:), 'k');
+  if size(obs, 2) > 2
+    patch(obs(1,:), obs(2,:), 'k');
+  else
+    plot(obs(1,:), obs(2,:), 'ko-', 'MarkerFaceColor', 'k');
+  end
 end
 x = iris.sample_convex_polytope(A,b,50);
 for k = 1:size(x,2)

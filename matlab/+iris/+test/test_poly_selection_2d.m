@@ -1,11 +1,12 @@
 function test_poly_selection_2d()
+% NOTEST
 
 import iris.terrain_grid.*;
 import iris.inflate_region;
 import iris.thirdParty.polytopes.*;
 lcmgl = drake.util.BotLCMGLClient(lcm.lcm.LCM.getSingleton(), 'segmentation');
 % load('example_feas_map.mat','Q');
-load('example_heights.mat','heights','px2world');
+load('data/example_heights.mat','heights','px2world');
 px2world(1,end) = px2world(1,end) - sum(px2world(1,1:3)); % stupid matlab 1-indexing...
 px2world(2,end) = px2world(2,end) - sum(px2world(2,1:3));
 resample = 2;

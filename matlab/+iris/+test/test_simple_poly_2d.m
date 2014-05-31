@@ -21,9 +21,9 @@ b_bounds = [-lb; ub];
 
 start = [3;5];
 
-profile on
+% profile on
 [A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start);
-profile viewer
+% profile viewer
 animate_results(results,record);
 
 end

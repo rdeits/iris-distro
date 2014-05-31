@@ -4,7 +4,7 @@ obstacles = {};
 while any(any(grid))
   [mask, A, b, obs] = inflate_grid_region([],grid);
   grid(mask) = 0;
-  sum(sum(grid))
+%   sum(sum(grid))
   obstacles{end+1} = obs;
 end
 

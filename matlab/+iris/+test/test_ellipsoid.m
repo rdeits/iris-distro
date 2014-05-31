@@ -1,8 +1,10 @@
-function test_ellipsoid()
+function test_ellipsoid(n)
 % Benchmark inscribed ellipsoid algorithms and make sure they agree
 
+if nargin < 1
+  n = 20;
+end
 inputs = {};
-n = 20;
 for j = 1:n
   dim = randi([2,5],1);
   lb = rand(dim,1) * 2 - 1;

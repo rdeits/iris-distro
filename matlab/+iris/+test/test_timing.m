@@ -1,9 +1,12 @@
 function [all_results] = test_timing(dim)
+% NOTEST
+% Benchmark IRIS as a function of number of obstacles (for WAFR 2014 paper)
+
 
 lb = zeros(dim,1);
 ub = 10 * ones(dim,1);
 n_samples = 6;
-n_trials = 100;
+n_trials = 10;
 ns_obs = logspace(1, 6, n_samples);
 
 A_bounds = [-diag(ones(dim, 1)); diag(ones(dim,1))];

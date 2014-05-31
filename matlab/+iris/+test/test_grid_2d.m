@@ -2,7 +2,7 @@ import iris.inflate_region;
 import iris.terrain_grid.*;
 import iris.thirdParty.polytopes.*;
 
-load('example_feas_map.mat');
+load('data/example_feas_map.mat');
 grid = Q(85:125,25:85);
 dists = obs_dist(grid);
 [~, i0] = max(reshape(dists, [], 1));
@@ -22,15 +22,16 @@ obstacles = {};
 for j = 1:size(black_edges,2)
   obstacles{j} = bsxfun(@plus, black_edges(:,j), offsets);
 end
+obstacle_pts = reshape(cell2mat(obstacles), 2, 1, []);
 
 lb = [0;0];
 ub = [size(grid,1); size(grid,2)];
 A_bounds = [-1,0;0,-1;1,0;0,1];
 b_bounds = [-lb; ub];
 
-profile on
-[A,b,C,d] = inflate_region(obstacles, A_bounds, b_bounds, start);
-profile viewer
+% profile on
+[A,b,C,d] = inflate_region(obstacle_pts, A_bounds, b_bounds, start);
+% profile viewer
 
 figure(2)
 clf

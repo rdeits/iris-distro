@@ -42,6 +42,7 @@ if record
   imwrite(M,c_map,[gif_fname],'gif','LoopCount',loops,'DelayTime',delay1);
 end
 
+figure(2);
 clf;
 for j = 1:length(results.p_history)
   A = results.p_history{j}.A;
@@ -73,7 +74,7 @@ for j = 1:length(results.p_history)
       imwrite(M,c_map,[gif_fname],'gif','WriteMode','append','DelayTime',delay);
     end
   end
-%   pause(0.1);
+%   pause(0.25);
 end
 
 if record

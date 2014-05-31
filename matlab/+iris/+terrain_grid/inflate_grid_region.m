@@ -23,7 +23,7 @@ obs_centers = reshape(black_edges, [], 1);
 n_obs = size(black_edges, 2);
 obs_pts = bsxfun(@plus, obs_centers, repmat(obs_offsets, n_obs, 1));
 obstacles = mat2cell(obs_pts, dim*ones(n_obs,1), size(obs_offsets,2))';
-
+obstacle_pts = reshape(cell2mat(obstacles), 2, 4, []);
 % obstacles = mat2cell(black_edges, 2, ones(1,size(black_edges,2)));
 
 lb = [0;0];
@@ -31,7 +31,7 @@ ub = [size(grid,1); size(grid,2)];
 A_bounds = [-1,0;0,-1;1,0;0,1];
 b_bounds = [-lb; ub];
 
-[A,b,C,d] = inflate_region(obstacles, A_bounds, b_bounds, x0);
+[A,b,C,d] = inflate_region(obstacle_pts, A_bounds, b_bounds, x0);
 
 
 % for i = 1:size(A,2)
