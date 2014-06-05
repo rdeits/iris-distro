@@ -194,9 +194,6 @@ function(mex_setup)
   add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
   			OUTPUT ${dummy_c_file})
 
-  add_library(last STATIC ${dummy_c_file})
-  target_link_libraries(last ${MEX_CLIBS} ${MEX_LINKLIBS})
-
   add_library(liblast STATIC ${dummy_c_file})
   target_link_libraries(liblast "${MEXLIB_LDFLAGS}") 
 
@@ -239,13 +236,12 @@ function(add_mex)
       COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}" 
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
-      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
       LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
       LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
       )
-    target_link_libraries(${target} last)
+    target_link_libraries(${target} liblast)
   endif()
 
 endfunction()
