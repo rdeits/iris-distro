@@ -174,6 +174,23 @@ function(mex_setup)
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
 
+#  string(REGEX MATCH "-L[^ ]*" MEX_RPATH ${MEXLIB_LDFLAGS})
+#  set(MEX_RPATH ${MEX_RPATH} PARENT_SCOPE)
+
+#  # manually find full library path
+#  string(REGEX MATCH "-L[^ ]*" __ld_dir ${MEXLIB_LDFLAGS})  # I'm expecting only one lib path
+#  string(REGEX REPLACE "^-L" "" __ld_dir ${__ld_dir})
+#  string(REPLACE "\"" "" __ld_dir ${__ld_dir})  # remove quotes (will this work on windows?)
+#  string(REGEX MATCHALL "-l[^ ]*" __libstr ${MEXLIB_LDFLAGS})
+#  foreach(__lib ${__libstr})
+#    string(REPLACE "-l" "" __lib "${__lib}")
+#    find_library("my${__lib}" NAMES "${__lib}" PATHS ${__ld_dir} NO_DEFAULT_PATH)
+#    find_library(my${__lib} NAMES "${__lib}")
+#    message(STATUS "replacing -l${__lib} with ${my${__lib}}")
+#    string(REPLACE "-l${__lib}" "${my${__lib}}" MEXLIB_LDFLAGS ${MEXLIB_LDFLAGS})
+#  endforeach()
+
+
   # todo: handle C separately from CXX?
   set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
   if (CMAKE_BUILD_TYPE MATCHES DEBUG)
@@ -224,6 +241,7 @@ function(add_mex)
     add_executable(${target} ${ARGV})
     set_target_properties(${target} PROPERTIES 
       COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
+#      INSTALL_RPATH "${CMAKE_INSTALL_PATH};${MEX_RPATH}")
     target_link_libraries(${target} liblast)
   elseif (isshared GREATER -1)
     add_library(${target} ${ARGV})
