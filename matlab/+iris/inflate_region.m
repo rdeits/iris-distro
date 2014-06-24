@@ -8,6 +8,10 @@ if nargin < 5
 end
 if ~isfield(options, 'require_containment'); options.require_containment = false; end
 if ~isfield(options, 'error_on_infeas_start'); options.error_on_infeas_start = false; end
+if iscell(obstacle_pts)
+  padded = pad_obstacle_points(obstacle_pts);
+  obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacle_pts)));
+end
 
 results = inflation_results();
 results.start = start;
