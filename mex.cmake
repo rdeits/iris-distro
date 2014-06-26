@@ -133,8 +133,8 @@ function(mex_setup)
   else()
     get_mex_option(CC REQUIRED)
  
-    get_mex_option(CFLAGS REQUIRED)
-    get_mex_option(CXXFLAGS)
+#    get_mex_option(CFLAGS REQUIRED)
+    get_mex_option(CXXFLAGS NAMES CXXFLAGS CFLAGS REQUIRED)
     get_mex_option(DEFINES)
     get_mex_option(MATLABMEX)
     get_mex_option(INCLUDE)
@@ -204,7 +204,7 @@ function(mex_setup)
     message(WARNING "Your MEX compiler flags contained '-ansi', but we've removed that flag for compatibility with C++11")
   endif()
 
-  set(MEX_COMPILE_FLAGS ${MEX_COMPILE_FLAGS} PARENT_SCOPE)
+  set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}" PARENT_SCOPE)
 
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
   set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
