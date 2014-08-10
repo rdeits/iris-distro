@@ -24,8 +24,8 @@ function test_uav_demo(dim)
 %            obstacles to be represented only in x, y, which has the effect of ensuring
 %            that the discrete poses of the UAV trajectory are outside the obstacles,
 %            but not the straight-line path between those poses. '4d' uses a four-
-%            dimensional representation of the obstacles to ensure that the straight-
-%            line path is also obstacle-free.
+%            dimensional representation of the obstacles  in x, y, xdot, ydot to ensure 
+%            that the straight-line path is also obstacle-free.
 
 if nargin < 1
   dim = '2d';
