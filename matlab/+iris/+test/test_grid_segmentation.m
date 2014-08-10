@@ -9,13 +9,15 @@ imshow(grid, 'InitialMagnification', 'fit');
 hold on;
 
 % profile on
+t0 = tic;
 obstacles = iris.terrain_grid.segment_grid(grid);
+toc(t0);
 % profile viewer
 
 figure(16)
 for j = 1:length(obstacles)
   obs = obstacles{j};
-  plot(obs(2,:), obs(1,:), 'r.-');
+  plot(obs(2,:), obs(1,:), 'r-');
 end
 
 end
