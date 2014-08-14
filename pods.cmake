@@ -385,10 +385,12 @@ function(pods_install_python_packages py_src_dir)
 endfunction()
 
 
-# pods_find_pkg_config(<package-name>)
+# pods_find_pkg_config(<package-name> <minimum_version>)
 #
 # Invokes `pkg-config --exists <package-name>` and, per the cmake standard,
 # sets the variable <package-name>_FOUND if it succeeds
+#
+# Takes an optional minimum version number as the second argument.
 #
 # example usage:
 #   pods_find_pkg_config(eigen3)
@@ -396,14 +398,19 @@ endfunction()
 #      ... do something ...
 #   endif()
 function(pods_find_pkg_config)
-    if(NOT ${ARGC} EQUAL 1)
-      message(FATAL_ERROR "pods_find_pkg_config takes only a single argument")
-    endif()
     find_package(PkgConfig REQUIRED)
 
-    execute_process(COMMAND
+    if(${ARGC} EQUAL 1)
+      execute_process(COMMAND
         ${PKG_CONFIG_EXECUTABLE} --exists ${ARGV}
         RESULT_VARIABLE found)
+    elseif(${ARGC} EQUAL 2)
+      execute_process(COMMAND
+        ${PKG_CONFIG_EXECUTABLE} --atleast-version=${ARGV2} ${ARGV1}
+        RESULT_VARIABLE found)
+    else()
+      message(FATAL_ERROR "pods_find_pkg_config take one or two arguments")
+    endif()
 
     if (found EQUAL 0)
        message(STATUS "Found ${ARGV}")
