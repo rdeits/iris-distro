@@ -406,7 +406,7 @@ function(pods_find_pkg_config)
         RESULT_VARIABLE found)
     elseif(${ARGC} EQUAL 2)
       execute_process(COMMAND
-        ${PKG_CONFIG_EXECUTABLE} --atleast-version=${ARGV2} ${ARGV1}
+        ${PKG_CONFIG_EXECUTABLE} --atleast-version=${ARGV1} ${ARGV0}
         RESULT_VARIABLE found)
     else()
       message(FATAL_ERROR "pods_find_pkg_config take one or two arguments")
@@ -416,7 +416,7 @@ function(pods_find_pkg_config)
        message(STATUS "Found ${ARGV}")
        set(${ARGV}_FOUND 1 PARENT_SCOPE)
     else()
-      message(WARNING "Could not find ${ARGV1} (version >= ${ARGV2}) using pods_find_pkg_config")
+      message(WARNING "Could not find ${ARGV0} (version >= ${ARGV1}) using pods_find_pkg_config")
       set(${ARGV}_FOUND 0 PARENT_SCOPE)
     endif()
 endfunction()
