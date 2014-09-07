@@ -133,8 +133,8 @@ function(mex_setup)
   else()
     get_mex_option(CC REQUIRED)
  
-    get_mex_option(CFLAGS REQUIRED)
-    get_mex_option(CXXFLAGS)
+#    get_mex_option(CFLAGS REQUIRED)
+    get_mex_option(CXXFLAGS NAMES CXXFLAGS CFLAGS REQUIRED)
     get_mex_option(DEFINES)
     get_mex_option(MATLABMEX)
     get_mex_option(INCLUDE)
@@ -174,6 +174,23 @@ function(mex_setup)
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
 
+#  string(REGEX MATCH "-L[^ ]*" MEX_RPATH ${MEXLIB_LDFLAGS})
+#  set(MEX_RPATH ${MEX_RPATH} PARENT_SCOPE)
+
+#  # manually find full library path
+#  string(REGEX MATCH "-L[^ ]*" __ld_dir ${MEXLIB_LDFLAGS})  # I'm expecting only one lib path
+#  string(REGEX REPLACE "^-L" "" __ld_dir ${__ld_dir})
+#  string(REPLACE "\"" "" __ld_dir ${__ld_dir})  # remove quotes (will this work on windows?)
+#  string(REGEX MATCHALL "-l[^ ]*" __libstr ${MEXLIB_LDFLAGS})
+#  foreach(__lib ${__libstr})
+#    string(REPLACE "-l" "" __lib "${__lib}")
+#    find_library("my${__lib}" NAMES "${__lib}" PATHS ${__ld_dir} NO_DEFAULT_PATH)
+#    find_library(my${__lib} NAMES "${__lib}")
+#    message(STATUS "replacing -l${__lib} with ${my${__lib}}")
+#    string(REPLACE "-l${__lib}" "${my${__lib}}" MEXLIB_LDFLAGS ${MEXLIB_LDFLAGS})
+#  endforeach()
+
+
   # todo: handle C separately from CXX?
   set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
   if (CMAKE_BUILD_TYPE MATCHES DEBUG)
@@ -187,15 +204,12 @@ function(mex_setup)
     message(WARNING "Your MEX compiler flags contained '-ansi', but we've removed that flag for compatibility with C++11")
   endif()
 
-  set(MEX_COMPILE_FLAGS ${MEX_COMPILE_FLAGS} PARENT_SCOPE)
+  set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}" PARENT_SCOPE)
 
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
   set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
   add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
   			OUTPUT ${dummy_c_file})
-
-  add_library(last STATIC ${dummy_c_file})
-  target_link_libraries(last ${MEX_CLIBS} ${MEX_LINKLIBS})
 
   add_library(liblast STATIC ${dummy_c_file})
   target_link_libraries(liblast "${MEXLIB_LDFLAGS}") 
@@ -227,6 +241,7 @@ function(add_mex)
     add_executable(${target} ${ARGV})
     set_target_properties(${target} PROPERTIES 
       COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
+#      INSTALL_RPATH "${CMAKE_INSTALL_PATH};${MEX_RPATH}")
     target_link_libraries(${target} liblast)
   elseif (isshared GREATER -1)
     add_library(${target} ${ARGV})
@@ -239,13 +254,12 @@ function(add_mex)
       COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}" 
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
-      LINK_FLAGS "${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS}" # -Wl,-rpath ${CMAKE_INSTALL_PREFIX}/lib"  
       LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
       LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
       )
-    target_link_libraries(${target} last)
+    target_link_libraries(${target} liblast)
   endif()
 
 endfunction()

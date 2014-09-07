@@ -174,6 +174,10 @@ function(lcmtypes_build_c)
     file(APPEND "${__agg_h_fname}" "\n#endif\n")
 
     add_library(${LCMTYPES_C_LIBNAME} ${LCMTYPES_C_SOURCEFILES} ${LCMTYPES_C_HEADERFILES})
+
+    if (WIN32)  # only for MSVC?
+      set_source_files_properties(${LCMTYPES_C_SOURCEFILES} PROPERTIES COMPILE_FLAGS /TP)
+    endif()
     pods_use_pkg_config_packages(${LCMTYPES_C_LIBNAME} lcm)
     pods_install_libraries(${LCMTYPES_C_LIBNAME})
 

@@ -27,6 +27,7 @@
 #   pods_install_python_script(...)
 #
 # Java
+#   pods_install_jars(...)
 #   pods_use_pkg_config_classpath(...)
 #
 # ----
@@ -39,14 +40,52 @@ function(get_relative_path from to var)
   find_program(mypy NAMES python2.7 python2.6) # PythonInterp finds a symlink on cygwin, which then fails in the execute process below
 #  message(from=${from})
 #  message(to=${to})
-  get_filename_component(from "${from}" ABSOLUTE)  
-  get_filename_component(to "${to}" ABSOLUTE)  
+  get_filename_component(from "${from}" ABSOLUTE)
+  get_filename_component(to "${to}" ABSOLUTE)
   execute_process(COMMAND "${mypy}" "-c" "import os; print os.path.relpath('${to}','${from}')" OUTPUT_VARIABLE myvar OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(${var} "${myvar}" PARENT_SCOPE)
 endfunction()
 
+function(call_cygpath format var)
+#  message("before cygpath: ${${var}}")
+#  separate_arguments(${var})
+  string(REGEX REPLACE "([^\\\\]) " "\\1;" ${var} ${${var}})  # separate arguments didn't respect the "Program\ Files"... it resulted in "Program;Files"
+  string(REGEX REPLACE "\\\\" "" ${var} "${${var}}")  # now zap the \
+  execute_process(COMMAND ${cygpath} ${format} ${${var}} OUTPUT_VARIABLE varout OUTPUT_STRIP_TRAILING_WHITESPACE)
+  string(REGEX REPLACE "(\r?\n)+" ";" varout ${varout})
+#  message("after cygpath ${format}: ${varout}")
+  set(${var} ${varout} PARENT_SCOPE)
+endfunction()
+
+# On windows, the compilers and the shell commands (potentially) use different syntax for their path strings.
+# These macros try to handle that case as cleanly as possible, and do nothing on non-windows
+macro(c_compiler_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
+  endif()
+endmacro()
+
+macro(java_compiler_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
+  endif()
+endmacro()
+
+macro(cmake_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-m ${var})
+  endif()
+endmacro()
+
+macro(shell_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-u ${var})
+  endif()
+endmacro()
+
+
 # pods_install_headers(<header1.h> ... DESTINATION <subdir_name>)
-# 
+#
 # Install a (list) of header files.
 #
 # Header files will all be installed to include/<subdir_name>
@@ -88,15 +127,20 @@ function(pods_install_libraries)
     install(TARGETS ${ARGV} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 endfunction(pods_install_libraries)
 
+function(pods_install_jars)
+  foreach(jarfile ${ARGV})
+    install_jar(${jarfile} share/java)
+  endforeach()
+endfunction(pods_install_jars)
 
-# pods_install_pkg_config_file(<package-name> 
+# pods_install_pkg_config_file(<package-name>
 #                              [VERSION <version>]
 #                              [DESCRIPTION <description>]
 #                              [CFLAGS <cflag> ...]
 #                              [LIBS <lflag> ...]
 #                              [CLASSPATH <target-jar1> <target-jar2> ...]
 #                              [REQUIRES <required-package-name> ...])
-# 
+#
 # Create and install a pkg-config .pc file.
 #
 # example:
@@ -105,7 +149,7 @@ endfunction(pods_install_libraries)
 function(pods_install_pkg_config_file)
     list(GET ARGV 0 pc_name)
     # TODO error check
-    
+
     set(pc_version 0.0.1)
     set(pc_description ${pc_name})
     set(pc_requires "")
@@ -113,7 +157,7 @@ function(pods_install_pkg_config_file)
     set(pc_cflags "")
     set(pc_classpath "")
     set(pc_fname "${PKG_CONFIG_OUTPUT_PATH}/${pc_name}.pc")
-    
+
     set(modewords LIBS CFLAGS CLASSPATH REQUIRES VERSION DESCRIPTION)
     set(curmode "")
 
@@ -143,9 +187,12 @@ function(pods_install_pkg_config_file)
         endif(${mode_index} GREATER -1)
     endforeach(word)
 
+    set(prefix ${CMAKE_INSTALL_PREFIX})
+    shell_path(prefix)
+
     # write the .pc file out
     file(WRITE ${pc_fname}
-        "prefix=${CMAKE_INSTALL_PREFIX}\n"
+        "prefix=${prefix}\n"
         "exec_prefix=\${prefix}\n"
         "libdir=\${exec_prefix}/lib\n"
         "includedir=\${prefix}/include\n"
@@ -161,19 +208,19 @@ function(pods_install_pkg_config_file)
 
     # mark the .pc file for installation to the lib/pkgconfig directory
     install(FILES ${pc_fname} DESTINATION lib/pkgconfig)
-    
+
 endfunction(pods_install_pkg_config_file)
 
-# pods_install_bash_setup(<package-name> <line1> <line2> ...) 
-# 
+# pods_install_bash_setup(<package-name> <line1> <line2> ...)
+#
 # Create and install the lines into config/${package}_setup.sh
 #
 # example:
 #    pods_install_bash_setup(mypod "export LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib")
 function(pods_install_bash_setup package)
   list(REMOVE_AT ARGV 0)
-  set(filename ${CMAKE_BINARY_DIR}/config/${package}_setup.sh)  
-  
+  set(filename ${CMAKE_BINARY_DIR}/config/${package}_setup.sh)
+
   # todo: add a \n at the end of every element of ARGV?
   file(WRITE ${filename} ${ARGV} )
 
@@ -183,16 +230,19 @@ function(pods_install_bash_setup package)
   if (APPLE)
      set(LD_LIBRARY_PATH DYLD_LIBRARY_PATH)
   elseif()
-     set(LD_LIBRARY_PATH LD_LIBRARY_PATH) 
+     set(LD_LIBRARY_PATH LD_LIBRARY_PATH)
   endif()
 
+  set(prefix ${CMAKE_INSTALL_PREFIX})
+  shell_path(prefix)
+
   set(filename ${CMAKE_BINARY_DIR}/config/pods_setup_all.sh)
-  file(WRITE ${filename} 
+  file(WRITE ${filename}
     "# THIS FILE IS AUTOMATICALLY GENERATED.  ANY EDITS YOU MAKE WILL LIKELY BE OVERWRITTEN.\n"
     "\n"
-    "export PATH=$PATH:${CMAKE_INSTALL_PREFIX}/bin\n"
-    "export ${LD_LIBRARY_PATH}=\$${LD_LIBRARY_PATH}:${CMAKE_INSTALL_PREFIX}/lib\n"
-    "for i in ${CMAKE_INSTALL_PREFIX}/config/*_setup.sh; do\n"
+    "export PATH=$PATH:${prefix}/bin\n"
+    "export ${LD_LIBRARY_PATH}=\$${LD_LIBRARY_PATH}:${prefix}/lib\n"
+    "for i in ${prefix}/config/*_setup.sh; do\n"
     "  echo sourcing $i;\n"
     "  source $i;\n"
     "done\n"
@@ -209,9 +259,9 @@ endfunction()
 #
 # A launcher script will be installed to bin/<script_name>. The script simply
 # adds <install-prefix>/lib/pythonX.Y/dist-packages
-# and  <install-prefix>/lib/pythonX.Y/site-packages 
-# to the PYTHONPATH, and then 
-# invokes `python -m <python_module>` or `python python_file` 
+# and  <install-prefix>/lib/pythonX.Y/site-packages
+# to the PYTHONPATH, and then
+# invokes `python -m <python_module>` or `python python_file`
 # depending on whether the function was passed a module name or script file.
 #
 # example:
@@ -221,40 +271,40 @@ function(pods_install_python_script script_name python_module_or_file)
     find_package(PythonInterp REQUIRED)
 
     # which python version?
-    execute_process(COMMAND 
+    execute_process(COMMAND
         ${PYTHON_EXECUTABLE} -c "import sys; sys.stdout.write(sys.version[:3])"
         OUTPUT_VARIABLE pyversion)
 
     # where do we install .py files to?
-    set(python_install_dir 
+    set(python_install_dir
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/dist-packages)
-    set(python_old_install_dir #todo: when do we get rid of this? 
+    set(python_old_install_dir #todo: when do we get rid of this?
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/site-packages)
-        
+
     if (python_module_or_file MATCHES ".+\\.py") #ends with a .py
-        get_filename_component(py_file ${python_module_or_file} ABSOLUTE)     
-            
+        get_filename_component(py_file ${python_module_or_file} ABSOLUTE)
+
         if (NOT EXISTS ${py_file})
             message(FATAL_ERROR "${python_module_or_file} is not an absolute or relative path to a python script")
         endif()
-        
+
         #get the directory where we'll install the script ${sanitized_POD_NAME}_scripts
         string(REGEX REPLACE "[^a-zA-Z0-9]" "_" __sanitized_pod_name "${POD_NAME}")
         set(pods_scripts_dir "${python_install_dir}/${__sanitized_pod_name}_scripts")
-                
+
         # install the python script file
         install(FILES ${py_file}  DESTINATION "${pods_scripts_dir}")
 
         get_filename_component(py_script_name ${py_file} NAME)
         # write the bash script file
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} 
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name}
             "#!/bin/sh\n"
             "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
-            "exec ${PYTHON_EXECUTABLE} ${pods_scripts_dir}/${py_script_name} $*\n")    
+            "exec ${PYTHON_EXECUTABLE} ${pods_scripts_dir}/${py_script_name} $*\n")
     else()
         get_filename_component(py_module ${python_module_or_file} NAME) #todo: check whether module exists?
         # write the bash script file
-        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name} 
+        file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${script_name}
             "#!/bin/sh\n"
             "export PYTHONPATH=${python_install_dir}:${python_old_install_dir}:\${PYTHONPATH}\n"
             "exec ${PYTHON_EXECUTABLE} -m ${py_module} $*\n")
@@ -272,12 +322,12 @@ endfunction()
 function(_pods_install_python_package py_src_dir py_module_name)
     find_package(PythonInterp REQUIRED)
     # which python version?
-    execute_process(COMMAND 
+    execute_process(COMMAND
         ${PYTHON_EXECUTABLE} -c "import sys; sys.stdout.write(sys.version[:3])"
         OUTPUT_VARIABLE pyversion)
 
     # where do we install .py files to?
-    set(python_install_dir 
+    set(python_install_dir
         ${CMAKE_INSTALL_PREFIX}/lib/python${pyversion}/dist-packages)
 
     if(EXISTS "${py_src_dir}/__init__.py")
@@ -303,23 +353,23 @@ endfunction()
 # the current python version (e.g., 2.6)
 #
 # For each <src_dir> pass in, it will do the following:
-# If <src_dir> is a python package (it has a __init__.py file) it will be installed 
+# If <src_dir> is a python package (it has a __init__.py file) it will be installed
 # along with any .py files in subdirectories
 #
 # Otherwise the script searches for and installs any python packages in <src_dir>
 function(pods_install_python_packages py_src_dir)
     get_filename_component(py_src_abs_dir ${py_src_dir} ABSOLUTE)
     if(ARGC GREATER 1)
-        #install each module seperately 
-        foreach(py_module ${ARGV}) 
+        #install each module seperately
+        foreach(py_module ${ARGV})
             pods_install_python_packages(${py_module})
         endforeach()
     elseif(EXISTS "${py_src_abs_dir}/__init__.py")
         #install the single module by name
-        get_filename_component(py_module_name ${py_src_abs_dir} NAME) 
-        _pods_install_python_package(${py_src_abs_dir} ${py_module_name})            
+        get_filename_component(py_module_name ${py_src_abs_dir} NAME)
+        _pods_install_python_package(${py_src_abs_dir} ${py_module_name})
     else()
-        # install any packages within the passed in py_src_dir 
+        # install any packages within the passed in py_src_dir
         set(_installed_a_package FALSE)
         file(GLOB sub-dirs RELATIVE ${py_src_abs_dir} ${py_src_abs_dir}/*)
         foreach(sub-dir ${sub-dirs})
@@ -335,31 +385,39 @@ function(pods_install_python_packages py_src_dir)
 endfunction()
 
 
-# pods_find_pkg_config(<package-name>)
+# pods_find_pkg_config(<package-name> <minimum_version>)
 #
-# Invokes `pkg-config --exists <package-name>` and, per the cmake standard, 
+# Invokes `pkg-config --exists <package-name>` and, per the cmake standard,
 # sets the variable <package-name>_FOUND if it succeeds
+#
+# Takes an optional minimum version number as the second argument.
 #
 # example usage:
 #   pods_find_pkg_config(eigen3)
 #   if (eigen3_FOUND)
-#      ... do something ... 
+#      ... do something ...
 #   endif()
 function(pods_find_pkg_config)
-    if(NOT ${ARGC} EQUAL 1)
-      message(FATAL_ERROR "pods_find_pkg_config takes only a single argument")
-    endif()
     find_package(PkgConfig REQUIRED)
 
-    execute_process(COMMAND 
+    if(${ARGC} EQUAL 1)
+      execute_process(COMMAND
         ${PKG_CONFIG_EXECUTABLE} --exists ${ARGV}
         RESULT_VARIABLE found)
+    elseif(${ARGC} EQUAL 2)
+      execute_process(COMMAND
+        ${PKG_CONFIG_EXECUTABLE} --atleast-version=${ARGV1} ${ARGV0}
+        RESULT_VARIABLE found)
+    else()
+      message(FATAL_ERROR "pods_find_pkg_config take one or two arguments")
+    endif()
 
     if (found EQUAL 0)
-       message(STATUS "Found ${ARGV}")
-       set(${ARGV}_FOUND 1 PARENT_SCOPE)
+       message(STATUS "Found ${ARGV0}")
+       set(${ARGV0}_FOUND 1 PARENT_SCOPE)
     else()
-	message(WARNING "Could not find ${ARGV} using pods_find_pkg_config")	
+      message(WARNING "Could not find ${ARGV0} (version >= ${ARGV1}) using pods_find_pkg_config")
+      set(${ARGV}_FOUND 0 PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -383,40 +441,76 @@ macro(pods_use_pkg_config_packages target)
     else()
         find_package(PkgConfig REQUIRED)
 
-        execute_process(COMMAND 
-            ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
-            RESULT_VARIABLE _pods_pkg_found OUTPUT_VARIABLE _pods_pkg_include_flags)
-        if (NOT _pods_pkg_found EQUAL 0)
-           message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find package ${ARGN}")
-        endif()
-        string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
-        string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
-    	separate_arguments(_pods_pkg_include_flags)
-        #    message("include: ${_pods_pkg_include_flags}")
-        execute_process(COMMAND 
-            ${PKG_CONFIG_EXECUTABLE} --libs ${ARGN}
-            OUTPUT_VARIABLE _pods_pkg_ldflags)
-        string(STRIP ${_pods_pkg_ldflags} _pods_pkg_ldflags)
-        include_directories(${_pods_pkg_include_flags})
-        
-        # make the target depend on libraries that are cmake targets
-        if (_pods_pkg_ldflags)
-            string(REPLACE " " ";" _split_ldflags ${_pods_pkg_ldflags})
-    	target_link_libraries(${target} ${_split_ldflags})
+	set(PODS_PKG_FOUND "")
+	set(PODS_PKG_LIBRARIES "")
+	set(PODS_PKG_LIBRARY_DIRS "")
+	set(PODS_PKG_LDFLAGS "")
+	set(PODS_PKG_LDFLAGS_OTHER "")
+	set(PODS_PKG_INCLUDE_DIRS "")
+	set(PODS_PKG_CFLAGS "")
+	set(PODS_PKG_CFLAGS_OTHER "")
 
-            foreach(__ldflag ${_split_ldflags})
-                    string(REGEX REPLACE "^-l" "" __depend_target_name ${__ldflag})
-                    get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
-                    if (NOT IS_TARGET STREQUAL "IS_TARGET-NOTFOUND")
-                        #message("---- ${target} depends on  ${libname}")
-                        add_dependencies(${target} ${__depend_target_name})
-                    endif() 
-            endforeach()
-     	unset(_split_ldflags)
+	pkg_check_modules(PODS_PKG ${ARGN})
+        if (NOT PODS_PKG_FOUND)
+           message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find packages ${ARGN}")
+        endif()
+#	message(STATUS "using pkg ${ARGN}")
+#	message(STATUS "  LIBRARIES = ${PODS_PKG_LIBRARIES}")
+#	message(STATUS "  LIBRARY_DIRS = ${PODS_PKG_LIBRARY_DIRS}")
+#	message(STATUS "  LDFLAGS = ${PODS_PKG_LDFLAGS}")
+#	message(STATUS "  LDFLAGS_OTHER = ${PODS_PKG_LDFLAGS_OTHER}")
+#	message(STATUS "  INCLUDE_DIRS = ${PODS_PKG_INCLUDE_DIRS}")
+#	message(STATUS "  CFLAGS = ${PODS_PKG_CFLAGS}")
+#	message(STATUS "  CFLAGS_OTHER = ${PODS_PKG_CFLAGS_OTHER}")
+	foreach (__inc_dir ${PODS_PKG_INCLUDE_DIRS})
+          string(STRIP ${__inc_dir} __inc_dir)
+	  if (__inc_dir)
+	    c_compiler_path(__inc_dir)
+#	    message("include: ${__inc_dir}")
+            include_directories(${__inc_dir})
+          endif()
+        endforeach()
+
+	foreach(__ld_dir ${PODS_PKG_LIBRARY_DIRS})
+	  string(STRIP ${__ld_dir} __ld_dir)
+	  if (__ld_dir)
+	    c_compiler_path(__ld_dir)
+	    if (WIN32)  # only MSVC?
+              target_link_libraries(${target} "-LIBPATH:${__ld_dir}")
+            else()
+	      target_link_libraries(${target} "-L${__ld_dir}")
+            endif()
+          endif()
+	endforeach()
+
+
+	# make the target depend on libraries that are cmake targets
+	foreach(__depend_target_name ${PODS_PKG_LIBRARIES})
+#         message(STATUS "${target} depends on  ${__depend_target_name}")
+          get_target_property(IS_TARGET ${__depend_target_name} LOCATION)
+          if (IS_TARGET)
+	    target_link_libraries(${target} ${__depend_target_name})
+          else()
+	    target_link_libraries(${target} ${__depend_target_name})
+	    # ask cmake to actually find the library (tried this to help when i had only dynamic versions of some libraries, and msvc was only looking for static)
+#	    set(mylib "")
+#	    find_library(mylib ${__depend_target_name} HINTS ${_pods_pkg_ld_dirs})
+#            message(STATUS ${mylib})
+#	    if (NOT mylib)
+#	      message(FATAL_ERROR "Could not find library ${__depend_target_name} specified in pkg-config ${ARGN} (looked in ${_pods_pkg_ld_dirs} in addition to the usual places)")
+#	    else()
+#              message(STATUS "FOUND ${mylib}")
+#	    endif()
+#	    target_link_libraries(${target} ${mylib})
+          endif()
+        endforeach()
+
+	if (PODS_PKG_LDFLAGS_OTHER)
+      	  target_link_libraries(${target} ${PODS_PKG_LDFLAGS_OTHER})
         endif()
 
-        unset(_pods_pkg_include_flags)
-        unset(_pods_pkg_ldflags)
+	# TODO: Handle PODS_PKG_CFLAGS_OTHER
+
     endif()
 endmacro()
 
@@ -431,12 +525,13 @@ macro(pods_use_pkg_config_includes)
     else()
         find_package(PkgConfig REQUIRED)
 
-        execute_process(COMMAND 
+        execute_process(COMMAND
             ${PKG_CONFIG_EXECUTABLE} --cflags-only-I ${ARGN}
             OUTPUT_VARIABLE _pods_pkg_include_flags)
         string(STRIP ${_pods_pkg_include_flags} _pods_pkg_include_flags)
         string(REPLACE "-I" "" _pods_pkg_include_flags "${_pods_pkg_include_flags}")
 
+	c_compiler_path(_pods_pkg_include_flags)
         include_directories(${_pods_pkg_include_flags})
     endif()
 endmacro()
@@ -460,18 +555,20 @@ function(pods_use_pkg_config_classpath)
     endif()
     find_package(PkgConfig REQUIRED)
 
-    foreach(arg ${ARGV}) 
+    foreach(arg ${ARGV})
       string(STRIP ${arg} _arg)
-      execute_process(COMMAND 
+      execute_process(COMMAND
         ${PKG_CONFIG_EXECUTABLE} --variable=classpath ${arg}
         OUTPUT_VARIABLE _pods_pkg_classpath_flags)
       string(STRIP ${_pods_pkg_classpath_flags} _pods_pkg_classpath_flags)
       string(REPLACE " " ":" _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
+      java_compiler_path(_pods_pkg_classpath_flags)
 
       set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH}:${_pods_pkg_classpath_flags})
       string(REPLACE "::" ":" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
+      string(REGEX REPLACE "^:" "" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
 
-      execute_process(COMMAND 
+      execute_process(COMMAND
           ${PKG_CONFIG_EXECUTABLE} --print-requires ${arg}
           OUTPUT_VARIABLE _pods_pkg_classpath_requires OUTPUT_STRIP_TRAILING_WHITESPACE)
 
@@ -482,7 +579,7 @@ function(pods_use_pkg_config_classpath)
 
       set( ${_arg}_CLASSPATH "${_pods_pkg_classpath_flags}" PARENT_SCOPE )
     endforeach()
- 
+
     set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH} PARENT_SCOPE )
 
 endfunction()
@@ -500,7 +597,7 @@ macro(pods_config_search_paths)
 	    set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 	    set(INCLUDE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/include)
 	    set(PKG_CONFIG_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/pkgconfig)
-		
+
 		#set where files should be installed to
 	    set(LIBRARY_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib)
 	    set(EXECUTABLE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/bin)
@@ -509,6 +606,9 @@ macro(pods_config_search_paths)
 
 
         # add build/lib/pkgconfig to the pkg-config search path
+	shell_path(PKG_CONFIG_OUTPUT_PATH)
+	shell_path(PKG_CONFIG_INSTALL_PATH)
+
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH})
         set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH})
 
@@ -519,7 +619,7 @@ macro(pods_config_search_paths)
         # add build/lib to the link path
         link_directories(${LIBRARY_OUTPUT_PATH})
         link_directories(${LIBRARY_INSTALL_PATH})
-        
+
 
         # abuse RPATH
         if(${CMAKE_INSTALL_RPATH})
@@ -531,8 +631,8 @@ macro(pods_config_search_paths)
         # for osx, which uses "install name" path rather than rpath
         #set(CMAKE_INSTALL_NAME_DIR ${LIBRARY_OUTPUT_PATH})
         set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_RPATH})
-        
-        # hack to force cmake always create install and clean targets 
+
+        # hack to force cmake always create install and clean targets
         install(FILES DESTINATION)
         string(RANDOM LENGTH 32 __rand_target__name__)
         add_custom_target(${__rand_target__name__})
@@ -544,13 +644,13 @@ endmacro(pods_config_search_paths)
 
 macro(enforce_out_of_source)
     if(CMAKE_BINARY_DIR STREQUAL PROJECT_SOURCE_DIR)
-      message(FATAL_ERROR 
+      message(FATAL_ERROR
       "\n
-      Do not run cmake directly in the pod directory. 
+      Do not run cmake directly in the pod directory.
       use the supplied Makefile instead!  You now need to
       remove CMakeCache.txt and the CMakeFiles directory.
 
-      Then to build, simply type: 
+      Then to build, simply type:
        $ make
       ")
     endif()
@@ -559,20 +659,15 @@ endmacro(enforce_out_of_source)
 #set the variable POD_NAME to the directory path, and set the cmake PROJECT_NAME
 if(NOT POD_NAME)
     get_filename_component(POD_NAME ${CMAKE_SOURCE_DIR} NAME)
-    message(STATUS "POD_NAME is not set... Defaulting to directory name: ${POD_NAME}") 
+    message(STATUS "POD_NAME is not set... Defaulting to directory name: ${POD_NAME}")
 endif(NOT POD_NAME)
 project(${POD_NAME})
 set(POD_NAME "${POD_NAME}" CACHE STRING "${POD_NAME}" )
 
 if ( WIN32 ) # convert to windows paths
    find_program(cygpath cygpath)
-   if ( cygpath )
-      execute_process(COMMAND ${cygpath} -m "${CMAKE_INSTALL_PREFIX}" OUTPUT_VARIABLE CMAKE_INSTALL_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
-      message(STATUS "CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
-   endif()
 endif()
-
-
+cmake_path(CMAKE_INSTALL_PREFIX)
 
 #make sure we're running an out-of-source build
 enforce_out_of_source()

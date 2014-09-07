@@ -17,13 +17,14 @@ open(my $in, 'pod-build/matlab_ctests');
 open(my $ctestfile, '>>', 'pod-build/CTestTestfile.cmake');
 
 while (<$in>) {
-  ($test,$testdir) = split(' ');
+  ($test,$testdir,$props) = split(' ',$_,3);
   $testname = $testdir."/".$test;
   $testname =~ s/\Q$CMAKE_SOURCE_DIR\///;
 
 #  $failcondition = "1";   # missing dependency => failure
   $failcondition = "~strncmp(ex.identifier,'Drake:MissingDependency',23)";  # missing dependency => pass
 
-  print $ctestfile "ADD_TEST($testname \"$CMAKE_SOURCE_DIR/cmake/matlab_clean.pl\" \"-nosplash\" \"-nodisplay\" \"-r\" \"addpath('$CMAKE_INSTALL_PREFIX/matlab'); addpath_$POD_NAME; rng('shuffle'); rng_state=rng; global g_disable_botvis; g_disable_botvis=true; try, feval('$test'); catch ex, disp(getReport(ex,'extended')); disp(''); disp(sprintf('To reproduce this test use rng(%d,''%s'')',rng_state.Seed,rng_state.Type)); knownIssue('$testname',ex); force_close_system; exit($failcondition); end; force_close_system; exit(0)\")\n";
-  print $ctestfile "SET_TESTS_PROPERTIES($testname PROPERTIES  WORKING_DIRECTORY \"$testdir\")\n";
+  print $ctestfile "ADD_TEST($testname \"$CMAKE_SOURCE_DIR/cmake/matlab_clean.pl\" \"-nosplash\" \"-nodisplay\" \"-r\" \"rng('shuffle'); rng_state=rng; disp(sprintf('To reproduce this test use rng(%d,''%s'')',rng_state.Seed,rng_state.Type)); disp(' '); addpath('$CMAKE_INSTALL_PREFIX/matlab'); addpath_$POD_NAME; global g_disable_visualizers; g_disable_visualizers=true; try, feval('$test'); catch ex, disp(getReport(ex,'extended')); disp(' '); fprintf('<testname>$testname</testname> <error_id>%s</error_id> <error_message>%s</error_message>',ex.identifier,ex.message); disp(' '); force_close_system; exit($failcondition); end; force_close_system; exit(0)\")\n";
+  $props = "WORKING_DIRECTORY \"$testdir\" $props";
+  print $ctestfile "SET_TESTS_PROPERTIES($testname PROPERTIES " . $props .")\n";
 }
