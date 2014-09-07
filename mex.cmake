@@ -169,7 +169,7 @@ function(mex_setup)
   endif()
 
   # figure out LDFLAGS for exes and shared libraries
-  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS} "-ldl") # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
+  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS}) # removed "-ldl") # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
   string(REPLACE "-bundle" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
@@ -289,7 +289,7 @@ mex_setup()
 
 compare_compilers(compilers_match "${CMAKE_C_COMPILER}" "${MEX_CC}")
 if (NOT compilers_match)
-   message(FATAL_ERROR "Your cmake C compiler is: \"${CMAKE_C_COMPILER}\" but your mex options use: \"${MEX_CC}\".  You must use the same compilers.  You can either:\n  a) reconfigure the mex compiler by running 'mex -setup' in  MATLAB, or\n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.\n")
+   message(FATAL_ERROR "Your cmake C compiler is: \"${CMAKE_C_COMPILER}\" but your mex options use: \"${MEX_CC}\" (the compiler version strings are printed above).  You must use the same compilers.  You can either:\n  a) reconfigure the mex compiler by running 'mex -setup' in  MATLAB, or\n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.\n")
 endif()
 
 compare_compilers(compilers_match "${CMAKE_CXX_COMPILER}" "${MEX_CXX}")
