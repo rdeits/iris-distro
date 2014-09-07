@@ -53,7 +53,7 @@ macro(get_mex_arguments afterstring)
       string(REGEX REPLACE "[^=]+=(.*)" "\\1" value ${arguments_line}) # replace entire string with capturing group (after =)
       string(STRIP ${value} svalue)
       set(${arguments_name} ${svalue} PARENT_SCOPE)
-      # message(STATUS "${arguments_name} = ${svalue}")
+#      message(STATUS "${arguments_name} = ${svalue}")
     else()
       if ( ARG_REQUIRED )
         message(FATAL_ERROR "Could not find arguments line for ${afterstring} using mex -v")
@@ -118,6 +118,7 @@ function(mex_setup)
 
     get_mex_option(LD NAMES LINKER)
     get_mex_option(LDFLAGS NAMES LINKFLAGS)
+    get_mex_option(LINKLIBS)
     get_mex_option(LDDEBUGFLAGS NAMES LINKDEBUGFLAGS)
 
     if (MSVC)
@@ -207,12 +208,15 @@ function(mex_setup)
   set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}" PARENT_SCOPE)
 
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
-  set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
-  add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
+  if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILE_IS_GNUCXX)
+    set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
+    add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
   			OUTPUT ${dummy_c_file})
 
-  add_library(liblast STATIC ${dummy_c_file})
-  target_link_libraries(liblast "${MEXLIB_LDFLAGS}") 
+
+    add_library(liblast STATIC ${dummy_c_file})
+    target_link_libraries(liblast ${MEXLIB_LDFLAGS})  
+  endif()
 
   set (MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}" PARENT_SCOPE)
   # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added C above)
@@ -254,12 +258,18 @@ function(add_mex)
       COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}" 
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
-      LINK_FLAGS_DEBUG	"${MEX_LDDEBUGFLAGS}"
-      LINK_FLAGS_RELEASE	"${MEX_LDOPTIMFLAGS}"
+      LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
+      LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
       )
-    target_link_libraries(${target} liblast)
+    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+        # see comment by the definition of liblast above
+        set_target_properties(${target} PROPERTIES
+	  LINK_FLAGS_DEBUG "${MEX_LDDEBUGFLAGS}"
+          LINK_FLAGS_RELEASE "${MEX_LDOPTIMFLAGS}")
+        target_link_libraries(${target} liblast) 
+    endif()
   endif()
 
 endfunction()
