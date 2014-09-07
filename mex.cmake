@@ -6,14 +6,14 @@ cmake_minimum_required(VERSION 2.8.3)
 
 macro(get_mex_option option_name)
   # usage: get_mex_option(option_name [NAMES names_to_try_in_order REQUIRED])
-  # writes MEX_${option_name} 
+  # writes MEX_${option_name}
   set(ARG_NAMES "")
   set(ARG_REQUIRED "")
   if ( ${ARGC} GREATER 1 )
     cmake_parse_arguments(ARG "REQUIRED" "" "NAMES" ${ARGN})
   endif()
   if ( NOT ARG_NAMES )
-    set(ARG_NAMES ${option_name})     
+    set(ARG_NAMES ${option_name})
   endif()
 
   set(svalue "")
@@ -41,7 +41,7 @@ macro(get_mex_option option_name)
 endmacro()
 
 macro(get_mex_arguments afterstring)
-  # writes MEX_${afterstring}_ARGUMENTS 
+  # writes MEX_${afterstring}_ARGUMENTS
 
   cmake_parse_arguments(ARG "REQUIRED" "" "" ${ARGN})
   set(arguments_name MEX_${afterstring}_ARGUMENTS)
@@ -61,7 +61,7 @@ macro(get_mex_arguments afterstring)
       set(${arguments_name} "" PARENT_SCOPE)
     endif()
   else()
-    if (ARG_REQUIRED) 
+    if (ARG_REQUIRED)
       message(WARNING "Could not find block containing arguments for ${afterstring} using mex -v")
     endif()
     set(${arguments_name} "" PARENT_SCOPE)
@@ -78,8 +78,8 @@ function(mex_setup)
   endif()
   if ( WIN32 )
     # matlab -n is not supported on windows (asked matlab for a work-around)
-    get_filename_component(_matlab_root ${matlab} PATH)  
-    get_filename_component(_matlab_root ${_matlab_root} PATH)  
+    get_filename_component(_matlab_root ${matlab} PATH)
+    get_filename_component(_matlab_root ${_matlab_root} PATH)
   else()
     execute_process(COMMAND ${matlab} -n COMMAND grep -e "MATLAB \\+=" COMMAND cut -d "=" -f2 OUTPUT_VARIABLE _matlab_root)
   endif()
@@ -108,7 +108,7 @@ function(mex_setup)
   if ( WIN32 )
     get_mex_option(CC NAMES COMPILER REQUIRED)
     get_mex_option(CXX NAMES COMPILER REQUIRED)
-    
+
     get_mex_option(CFLAGS NAMES COMPFLAGS)
     get_mex_option(CXXFLAGS NAMES COMPFLAGS)
     get_mex_option(COPTIMFLAGS NAMES OPTIMFLAGS)
@@ -133,7 +133,7 @@ function(mex_setup)
     endif()
   else()
     get_mex_option(CC REQUIRED)
- 
+
 #    get_mex_option(CFLAGS REQUIRED)
     get_mex_option(CXXFLAGS NAMES CXXFLAGS CFLAGS REQUIRED)
     get_mex_option(DEFINES)
@@ -143,7 +143,7 @@ function(mex_setup)
     get_mex_option(COPTIMFLAGS)
     get_mex_option(CLIBS)
     get_mex_arguments(CC)
-  
+
     get_mex_option(CXX NAMES CXX CC REQUIRED)
     get_mex_option(CXXDEBUGFLAGS)
     get_mex_option(CXXOPTIMFLAGS)
@@ -171,9 +171,9 @@ function(mex_setup)
 
   # figure out LDFLAGS for exes and shared libraries
   set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS}) # removed "-ldl") # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
-  string(REPLACE "-bundle" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
+  string(REPLACE "-bundle" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
-  string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}") 
+  string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")
 
 #  string(REGEX MATCH "-L[^ ]*" MEX_RPATH ${MEXLIB_LDFLAGS})
 #  set(MEX_RPATH ${MEX_RPATH} PARENT_SCOPE)
@@ -197,7 +197,7 @@ function(mex_setup)
   if (CMAKE_BUILD_TYPE MATCHES DEBUG)
     set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXDEBUGFLAGS}")
   elseif (CMAKE_BUILD_TYPE MATCHES RELEASE)
-    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")    
+    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")
   endif()
 
   if (${MEX_COMPILE_FLAGS} MATCHES "-ansi")
@@ -215,16 +215,16 @@ function(mex_setup)
 
 
     add_library(liblast STATIC ${dummy_c_file})
-    target_link_libraries(liblast ${MEXLIB_LDFLAGS})  
+    target_link_libraries(liblast ${MEXLIB_LDFLAGS})
   endif()
 
   set (MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}" PARENT_SCOPE)
   # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added C above)
-  
+
 endfunction()
 
 function(add_mex)
-  # useage:  add_mex(target source1 source2 [SHARED,EXECUTABLE]) 
+  # useage:  add_mex(target source1 source2 [SHARED,EXECUTABLE])
   # note: builds the mex file inplace (not into some build directory)
   # if SHARED is passed in, then it doesn't expect a mexFunction symbol to be defined, and compiles it to e.g., libtarget.so, for eventual linking against another mex file
   # if EXECUTABLE is passed in, then it adds an executable target, which is linked against the appropriate matlab libraries.
@@ -243,32 +243,46 @@ function(add_mex)
   if (isexe GREATER -1)
     list(REMOVE_ITEM ARGV EXECUTABLE)
     add_executable(${target} ${ARGV})
-    set_target_properties(${target} PROPERTIES 
+    set_target_properties(${target} PROPERTIES
       COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
 #      INSTALL_RPATH "${CMAKE_INSTALL_PATH};${MEX_RPATH}")
-    target_link_libraries(${target} liblast)
+    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+      target_link_libraries(${target} liblast)
+    else()
+      set_target_properties(${target} PROPERTIES
+        LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
+        LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
+      )
+    endif()
   elseif (isshared GREATER -1)
     add_library(${target} ${ARGV})
-    set_target_properties(${target} PROPERTIES 
+    set_target_properties(${target} PROPERTIES
       COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
-    target_link_libraries(${target} liblast)
+    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+      target_link_libraries(${target} liblast)
+    else()
+      set_target_properties(${target} PROPERTIES
+        LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
+        LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
+      )
+    endif()
   else ()
     add_library(${target} MODULE ${ARGV})
-    set_target_properties(${target} PROPERTIES 
-      COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}" 
+    set_target_properties(${target} PROPERTIES
+      COMPILE_FLAGS "-DMATLAB_MEX_FILE ${MEX_COMPILE_FLAGS}"
       PREFIX ""
       SUFFIX ".${MEX_EXT}"
       LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
       LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
       ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"   
+      LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       )
     if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
         # see comment by the definition of liblast above
         set_target_properties(${target} PROPERTIES
 	  LINK_FLAGS_DEBUG "${MEX_LDDEBUGFLAGS}"
           LINK_FLAGS_RELEASE "${MEX_LDOPTIMFLAGS}")
-        target_link_libraries(${target} liblast) 
+        target_link_libraries(${target} liblast)
     endif()
   endif()
 
@@ -278,18 +292,18 @@ function(get_compiler_version outvar compiler)
   if ( MSVC )
     execute_process(COMMAND ${compiler} ERROR_VARIABLE ver ERROR_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE junk)
   else()
-    separate_arguments(c_args UNIX_COMMAND ${compiler}) 
+    separate_arguments(c_args UNIX_COMMAND ${compiler})
     list(APPEND c_args "-dumpversion")
     execute_process(COMMAND ${c_args} OUTPUT_VARIABLE ver OUTPUT_STRIP_TRAILING_WHITESPACE)
   endif()
-  set(${outvar} ${ver} PARENT_SCOPE) 
-   
+  set(${outvar} ${ver} PARENT_SCOPE)
+
 endfunction()
 
-## calls compilers with --version option and checks the output 
+## calls compilers with --version option and checks the output
 # calls compilers with -dumpversion and checks the output
 # (because it appears that ccache messes with the --version output)
-# returns TRUE if the strings match or FALSE if they don't.  
+# returns TRUE if the strings match or FALSE if they don't.
 #   (note: you can use  if (outvar) to test )
 # this seems to be a more robust and less complex method than trying to call xcrun -find, readlink to follow symlinks, etc.
 function(compare_compilers outvar compiler1 compiler2)
@@ -322,4 +336,3 @@ if (NOT compilers_match)
 endif()
 
 # NOTE:  would like to check LD also, but it appears to be difficult with cmake  (there is not explicit linker executable variable, only the make rule), and  even my mex code assumes that LD==LDCXX for simplicity.
-
