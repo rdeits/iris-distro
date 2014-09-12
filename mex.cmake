@@ -171,6 +171,11 @@ function(mex_setup)
 
   # figure out LDFLAGS for exes and shared libraries
   set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS}) # removed "-ldl") # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
+
+  if (NOT WIN32) # AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
+    set(MEXLIB_LDFLAGS ${MEXLIB_LDFLAGS} "-ldl")
+  endif()
+
   string(REPLACE "-bundle" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")
   string(REGEX REPLACE "[ ;][^ ;]*mexFunction.map\"*" "" MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")  # zap the exports definition file
   string(REPLACE ";" " " MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}")
@@ -208,7 +213,7 @@ function(mex_setup)
   set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}" PARENT_SCOPE)
 
   # note: on ubuntu, gcc did not like the MEX_CLIBS coming along with LINK_FLAGS (it only works if they appear after the  input files).  this is a nasty trick that I found online
-  if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILE_IS_GNUCXX)
+  if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
     set(dummy_c_file ${CMAKE_CURRENT_BINARY_DIR}/dummy.c)
     add_custom_command(COMMAND ${CMAKE_COMMAND} -E touch ${dummy_c_file}
   			OUTPUT ${dummy_c_file})
