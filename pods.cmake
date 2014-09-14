@@ -417,6 +417,7 @@ function(pods_find_pkg_config)
        set(${ARGV0}_FOUND 1 PARENT_SCOPE)
     else()
       message(WARNING "Could not find ${ARGV0} (version >= ${ARGV1}) using pods_find_pkg_config")
+      message("PKG_CONFIG_PATH = $ENV{PKG_CONFIG_PATH}")
       set(${ARGV}_FOUND 0 PARENT_SCOPE)
     endif()
 endfunction()
@@ -592,53 +593,58 @@ endfunction()
 # manually.
 macro(pods_config_search_paths)
     if(NOT DEFINED __pods_setup)
-		#set where files should be output locally
-	    set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
-	    set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-	    set(INCLUDE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/include)
-	    set(PKG_CONFIG_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/pkgconfig)
+      #set where files should be output locally
+      set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
+      set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+      set(INCLUDE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/include)
+      set(PKG_CONFIG_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/pkgconfig)
 
-		#set where files should be installed to
-	    set(LIBRARY_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib)
-	    set(EXECUTABLE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/bin)
-	    set(INCLUDE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/include)
-	    set(PKG_CONFIG_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
-
-
-        # add build/lib/pkgconfig to the pkg-config search path
-	shell_path(PKG_CONFIG_OUTPUT_PATH)
-	shell_path(PKG_CONFIG_INSTALL_PATH)
-
-        set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH})
-        set(ENV{PKG_CONFIG_PATH} ${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH})
-
-        # add build/include to the compiler include path
-        include_directories(BEFORE ${INCLUDE_OUTPUT_PATH})
-        include_directories(${INCLUDE_INSTALL_PATH})
-
-        # add build/lib to the link path
-        link_directories(${LIBRARY_OUTPUT_PATH})
-        link_directories(${LIBRARY_INSTALL_PATH})
+      #set where files should be installed to
+      set(LIBRARY_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib)
+      set(EXECUTABLE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/bin)
+      set(INCLUDE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/include)
+      set(PKG_CONFIG_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 
 
-        # abuse RPATH
-        if(${CMAKE_INSTALL_RPATH})
-            set(CMAKE_INSTALL_RPATH ${LIBRARY_INSTALL_PATH}:${CMAKE_INSTALL_RPATH})
-        else(${CMAKE_INSTALL_RPATH})
-            set(CMAKE_INSTALL_RPATH ${LIBRARY_INSTALL_PATH})
-        endif(${CMAKE_INSTALL_RPATH})
+      # add build/lib/pkgconfig to the pkg-config search path
+      if (WIN32)
+	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
+        set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH};$ENV{PKG_CONFIG_PATH}")
+      else()
+	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH}")
+        set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH}")
+      endif()
 
-        # for osx, which uses "install name" path rather than rpath
-        #set(CMAKE_INSTALL_NAME_DIR ${LIBRARY_OUTPUT_PATH})
-        set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_RPATH})
+      shell_path(PKG_CONFIG_OUTPUT_PATH)
+      shell_path(PKG_CONFIG_INSTALL_PATH)
 
-        # hack to force cmake always create install and clean targets
-        install(FILES DESTINATION)
-        string(RANDOM LENGTH 32 __rand_target__name__)
-        add_custom_target(${__rand_target__name__})
-        unset(__rand_target__name__)
+      # add build/include to the compiler include path
+      include_directories(BEFORE ${INCLUDE_OUTPUT_PATH})
+      include_directories(${INCLUDE_INSTALL_PATH})
 
-        set(__pods_setup true)
+      # add build/lib to the link path
+      link_directories(${LIBRARY_OUTPUT_PATH})
+      link_directories(${LIBRARY_INSTALL_PATH})
+
+
+      # abuse RPATH
+      if(${CMAKE_INSTALL_RPATH})
+        set(CMAKE_INSTALL_RPATH ${LIBRARY_INSTALL_PATH}:${CMAKE_INSTALL_RPATH})
+      else(${CMAKE_INSTALL_RPATH})
+        set(CMAKE_INSTALL_RPATH ${LIBRARY_INSTALL_PATH})
+      endif(${CMAKE_INSTALL_RPATH})
+
+      # for osx, which uses "install name" path rather than rpath
+      #set(CMAKE_INSTALL_NAME_DIR ${LIBRARY_OUTPUT_PATH})
+      set(CMAKE_INSTALL_NAME_DIR ${CMAKE_INSTALL_RPATH})
+
+      # hack to force cmake always create install and clean targets
+      install(FILES DESTINATION)
+      string(RANDOM LENGTH 32 __rand_target__name__)
+      add_custom_target(${__rand_target__name__})
+      unset(__rand_target__name__)
+
+      set(__pods_setup true)
     endif(NOT DEFINED __pods_setup)
 endmacro(pods_config_search_paths)
 
