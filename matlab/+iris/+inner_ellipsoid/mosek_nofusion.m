@@ -203,6 +203,10 @@ prob.a = sparse(prob.a);
 % fprintf('setup: %f s\n', toc);
 % tic
 [r, res] = mosekopt('maximize echo(0)', prob);
+if ~isfield(res, 'sol')
+  res
+  error('IRIS:MosekNoSolution', sprintf('MOSEK was unable to return a solution. %s', res.rmsg));
+end
 % fprintf('solve: %f s\n', toc);
 
 % tic
