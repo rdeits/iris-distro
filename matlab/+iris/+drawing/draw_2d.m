@@ -4,6 +4,7 @@ h = figure(2);
 cla
 hold on
 n_obs = size(obstacles, 3);
+% Draw obstacle interiors
 for j = 1:n_obs
   if size(obstacles, 2) > 1
     if size(obstacles, 2) > 2
@@ -11,9 +12,21 @@ for j = 1:n_obs
     else
       k = [1,2,1];
     end
-    patch(obstacles(1,k,j), obstacles(2,k,j), 'k', 'FaceAlpha', 0.2, 'LineWidth', 2);
+    patch(obstacles(1,k,j), obstacles(2,k,j), 'k', 'FaceColor', [.6,.6,.6], 'LineWidth', 0.1);
   else
     plot(obstacles(1,:,j), obstacles(2,:,j), 'ko');
+  end
+end
+
+% Draw obstacle boundaries on top
+for j = 1:n_obs
+  if size(obstacles, 2) > 1
+    if size(obstacles, 2) > 2
+      k = convhull(obstacles(1,:,j), obstacles(2,:,j));
+    else
+      k = [1,2,1];
+    end
+    plot(obstacles(1,k,j), obstacles(2,k,j), 'k', 'LineWidth', 2);
   end
 end
 for j = 1:size(A,1)-4
@@ -29,7 +42,7 @@ for j = 1:size(A,1)-4
   end
   u = [0,-1;1,0] * ai';
   pts = [x0 - 1000*u, x0 + 1000*u];
-  plot(pts(1,:), pts(2,:), 'm--')
+  plot(pts(1,:), pts(2,:), 'm--', 'LineWidth', 1.5)
 end
 if ~isempty(A)
   V = lcon2vert(A, b);

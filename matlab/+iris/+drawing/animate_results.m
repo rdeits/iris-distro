@@ -65,7 +65,7 @@ for j = 1:length(results.p_history)
     h = gcf;
     movegui(h);
     w.writeVideo(getframe(h));
-    print(gcf, sprintf('%s/%d_b', folder_name, j), '-dpdf');
+    print(gcf, sprintf('%s/%d_b', folder_name, j), '-dpdf', '-painters');
     img = getframe();
     [M, c_map]= rgb2ind(img.cdata,256);
     if j==length(results.p_history)
