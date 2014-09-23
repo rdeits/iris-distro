@@ -243,7 +243,7 @@ function update_handle(h, x, y)
   set(h, 'YData', y);
 end
 
-function v = uav_path(start, goal, safe_regions)
+function v = uav_path(start, goal, safe_regions, contain_line)
   % Solve a mixed-integer quadratic program to find the path for a discrete
   % trajectory of our UAV model, such that each pose in the trajectory is
   % inside one safe region while minimizing total acceleration.
@@ -279,7 +279,11 @@ function v = uav_path(start, goal, safe_regions)
   add_var('x', 'C', [2, n], -1, 1);
   add_var('xd', 'C', [2, n], -.25, 0.25);
   add_var('xdd', 'C', [2, n], -0.1, 0.1);
-  add_var('region', 'B', [nr, n], 0, 1);
+  if contain_line
+    add_var('region', 'B', [nr, n-1], 0, 1);
+  else
+    add_var('region', 'B', [nr, n], 0, 1);
+  end
   v.x.lb(:,1) = start;
   v.x.ub(:,1) = start;
   v.xd.lb(:,1) = [0;0];
@@ -339,7 +343,11 @@ function v = uav_path(start, goal, safe_regions)
 
   % Enforce membership in safe regions
   M = 100;
-  Ar = zeros((n) * sum(cellfun(@(x) size(x, 1), {safe_regions.A})), nv);
+  if contain_line
+    Ar = zeros(v.region.size(2) * sum(cellfun(@(x) 2 * size(x, 1), {safe_regions.A})), nv);
+  else
+    Ar = zeros(v.region.size(2) * sum(cellfun(@(x) size(x, 1), {safe_regions.A})), nv);
+  end
   br = zeros(size(Ar, 1), 1);
   offset = 0;
   expected_offset = size(Ar, 1);
@@ -348,15 +356,27 @@ function v = uav_path(start, goal, safe_regions)
       A_region = safe_regions(r).A;
       b_region = safe_regions(r).b;
 
-      Ai = zeros(size(A_region, 1), nv);
       if size(A_region, 2) == 4
+        Ai = zeros(size(A_region, 1), nv);
+        bi = b_region;
         Ai(:,[v.x.i(:,j);v.xd.i(:,j)]) = A_region;
       else
-        Ai(:,v.x.i(:,j)) = A_region;
+        s = size(A_region, 1);
+        if contain_line
+          Ai = zeros(2*s, nv);
+          bi = [b_region; b_region];
+          Ai(1:s, v.x.i(:,j)) = A_region;
+          Ai(s+(1:s), v.x.i(:,j)) = A_region;
+          Ai(s+(1:s), v.xd.i(:,j)) = A_region * dt;
+        else
+          Ai = zeros(2*s, nv);
+          bi = b_region;
+          Ai(:,v.x.i(:,j)) = A_region;
+        end
       end
         
       Ai(:,v.region.i(r,j)) = M;
-      bi = b_region + M;
+      bi = bi + M;
       Ar(offset + (1:size(Ai, 1)), :) = Ai;
       br(offset + (1:size(Ai, 1)), :) = bi;
       offset = offset + size(Ai, 1);
@@ -371,7 +391,7 @@ function v = uav_path(start, goal, safe_regions)
   Aeq_i = zeros(n, nv);
   beq_i = zeros(size(Aeq_i, 1), 1);
   expected_offset = size(Aeq_i, 1);
-  for j = 1:n
+  for j = 1:v.region.size(2)
     Aeq_i(offset+1, v.region.i(:,j)) = 1;
     beq_i(offset+1) = 1;
     offset = offset + 1;
