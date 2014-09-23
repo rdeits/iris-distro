@@ -7,7 +7,10 @@ for j = 1:length(obstacles)
   l = size(obstacles{j},2);
   if l > max_len
     max_len = l;
-  elseif l < max_len
+  end
+end
+for j = 1:length(obstacles)
+  if size(obstacles{j},2) < max_len
     needs_pad = true;
   end
 end
