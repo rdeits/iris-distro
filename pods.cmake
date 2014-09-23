@@ -77,6 +77,12 @@ macro(cmake_path var)
   endif()
 endmacro()
 
+macro(pkg_config_path var)
+  if (WIN32 AND cygpath AND ${var})
+    call_cygpath(-w ${var})
+  endif()
+endmacro()
+
 macro(shell_path var)
   if (WIN32 AND cygpath AND ${var})
     call_cygpath(-u ${var})
@@ -605,14 +611,16 @@ macro(pods_config_search_paths)
       set(INCLUDE_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/include)
       set(PKG_CONFIG_INSTALL_PATH ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 
+      pkg_config_path(PKG_CONFIG_OUTPUT_PATH)
+      pkg_config_path(PKG_CONFIG_INSTALL_PATH)
 
       # add build/lib/pkgconfig to the pkg-config search path
       if (WIN32)
-	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
-        set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH};$ENV{PKG_CONFIG_PATH}")
+	set(_path "${PKG_CONFIG_OUTPUT_PATH};${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
+	string(REGEX REPLACE ";+$" "" _path "${_path}")
+	set(ENV{PKG_CONFIG_PATH} "${_path}")
       else()
-	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH}")
-        set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH}:$ENV{PKG_CONFIG_PATH}")
+	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH}:${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH}")
       endif()
 
       shell_path(PKG_CONFIG_OUTPUT_PATH)
