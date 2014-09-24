@@ -266,9 +266,11 @@ function(add_mex)
     if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
       target_link_libraries(${target} liblast)
     else()
+      string(REPLACE "/export:mexFunction" "" __ldflags "${MEXLIB_LDFLAGS}")
+      string(REGEX REPLACE "/implib:[^ ]+" "" __ldflags "${__ldflags}")
       set_target_properties(${target} PROPERTIES
-        LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
-        LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
+        LINK_FLAGS_DEBUG	"${__ldflags} ${MEX_LDDEBUGFLAGS}"
+        LINK_FLAGS_RELEASE	"${__ldflags} ${MEX_LDOPTIMFLAGS}"
       )
     endif()
   else ()
