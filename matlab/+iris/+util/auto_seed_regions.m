@@ -19,16 +19,16 @@ b_bounds = [ub; -lb];
 
 step_size = (ub - lb) ./ num_steps;
 
-obs_regions = struct('A', cell(1, size(obstacle_pts, 3)), 'b', cell(1, size(obstacle_pts, 3)));
+obs_regions = struct('A', cell(1, size(obstacle_pts, 3)), 'b', cell(1, size(obstacle_pts, 3)), 'C', cell(1, size(obstacle_pts, 3)), 'd', cell(1, size(obstacle_pts, 3)));
 for j = 1:size(obstacle_pts, 3)
   [obs_regions(j).A, obs_regions(j).b] = iris.thirdParty.polytopes.vert2lcon(obstacle_pts(:,:,j)');
 end
-safe_regions = struct('A', {}, 'b', {});
+safe_regions = struct('A', {}, 'b', {}, 'C', {}, 'd', {});
 
 for j = 1:size(initial_seeds, 2)
   seed = initial_seeds(:,j);
-  [A, b] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeas_start', true));
-  safe_regions(end+1) = struct('A', A, 'b', b);
+  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeas_start', true));
+  safe_regions(end+1) = struct('A', A, 'b', b, 'C', C, 'd', d);
   done = callback(safe_regions(end), seed);
   if done
     return
@@ -42,8 +42,8 @@ while length(safe_regions) < num_regions
   [subs{:}] = ind2sub(size(dists), idx);
   subs = cell2mat(subs)';
   seed = (subs - 1) .* step_size + lb;
-  [A, b] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeas_start', true));
-  safe_regions(end+1) = struct('A', A, 'b', b);
+  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeas_start', true));
+  safe_regions(end+1) = struct('A', A, 'b', b, 'C', C, 'd', d);
   done = callback(safe_regions(end), seed);
   if done
     return
