@@ -603,6 +603,10 @@ macro(pods_config_search_paths)
       set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
       set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
       set(INCLUDE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/include)
+      foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+        string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+        set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${LIBRARY_OUTPUT_PATH} )
+      endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
       set(PKG_CONFIG_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib/pkgconfig)
 
       #set where files should be installed to
