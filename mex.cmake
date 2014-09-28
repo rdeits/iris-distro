@@ -99,9 +99,12 @@ function(mex_setup)
      message(FATAL_ERROR "Failed to extract MEX_EXT")
   endif()
 
+  find_file(simulink_FOUND NAMES simstruc.h HINTS ${MATLAB_ROOT}/simulink/include)
+
   set(MATLAB_ROOT ${MATLAB_ROOT} PARENT_SCOPE)
   set(mex ${mex} PARENT_SCOPE)
   set(MEX_EXT ${MEX_EXT} PARENT_SCOPE)
+  set(simulink_FOUND ${simulink_FOUND} PARENT_SCOPE)
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/dummy.c "")
   execute_process(COMMAND ${mex} -v ${CMAKE_CURRENT_BINARY_DIR}/dummy.c OUTPUT_VARIABLE mexv_output ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
