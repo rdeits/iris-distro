@@ -27,6 +27,7 @@ macro(get_mex_option option_name)
   endforeach()
 
   if ( svalue )
+    string(REGEX REPLACE "^\"(.*)\"$" "\\1" svalue ${svalue})  # starting in matlab 2014b, at least on mac, i needed to remove quotes from around the result
     set(MEX_${option_name} ${svalue})
     set(MEX_${option_name} ${svalue} PARENT_SCOPE)
 #    message(STATUS "MEX_${option_name} = ${svalue}")
@@ -311,6 +312,7 @@ function(get_compiler_version outvar compiler)
   if ( MSVC )
     execute_process(COMMAND ${compiler} ERROR_VARIABLE ver ERROR_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE junk)
   else()
+    string(REPLACE "\"" "" compiler ${compiler}) # remove quotes
     separate_arguments(c_args UNIX_COMMAND ${compiler})
     list(APPEND c_args "-dumpversion")
     execute_process(COMMAND ${c_args} OUTPUT_VARIABLE ver OUTPUT_STRIP_TRAILING_WHITESPACE)
