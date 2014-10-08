@@ -5,6 +5,6 @@
 % applications without prior written permission from Jacob Mattingley.
 
 % Filename: make_csolve.m.
-% Description: Calls mex to generate the csolve mex file.
-%mex -v csolve.c ldl.c matrix_support.c solver.c util.c
-mex csolve.c ldl.c matrix_support.c solver.c util.c
+% Description: Calls mex to generate the cvxgen_ldp_mex mex file.
+%mex -v cvxgen_ldp_mex.c ldl.c matrix_support.c solver.c util.c
+mex cvxgen_ldp_mex.c ldl.c matrix_support.c solver.c util.c

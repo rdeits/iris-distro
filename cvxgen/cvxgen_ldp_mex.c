@@ -4,7 +4,7 @@
 /* CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial */
 /* applications without prior written permission from Jacob Mattingley. */
 
-/* Filename: csolve.c. */
+/* Filename: cvxgen_ldp_mex.c. */
 /* Description: mex-able file for running cvxgen solver. */
 #include "mex.h"
 #include "solver.h"

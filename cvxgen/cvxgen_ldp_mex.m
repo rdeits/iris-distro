@@ -1,6 +1,6 @@
-% csolve  Solves a custom quadratic program very rapidly.
+% cvxgen_ldp_mex  Solves a custom quadratic program very rapidly.
 %
-% [vars, status] = csolve(params, settings)
+% [vars, status] = cvxgen_ldp_mex(params, settings)
 %
 % solves the convex optimization problem
 %
@@ -24,12 +24,12 @@
 %   - You may wish to compare with cvxsolve to check the solver is correct.
 %
 % Specify params.Y, ..., params.Y, then run
-%   [vars, status] = csolve(params, settings)
+%   [vars, status] = cvxgen_ldp_mex(params, settings)
 % Produced by CVXGEN, 2014-05-20 16:06:21 -0400.
 % CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
 % The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
 % CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
 % applications without prior written permission from Jacob Mattingley.
 
-% Filename: csolve.m.
+% Filename: cvxgen_ldp_mex.m.
 % Description: Help file for the Matlab solver interface.

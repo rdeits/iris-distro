@@ -6,7 +6,7 @@ end
 if m < 8
   Y = [Y, repmat(Y(:,1), 1, (8-m))];
 end
-[vars, ~] = csolve(struct('Y', Y), struct('verbose', 0));
+[vars, ~] = cvxgen_ldp_mex(struct('Y', Y), struct('verbose', 0));
 v = vars.v(1:n);
 end
 
