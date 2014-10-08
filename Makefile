@@ -28,7 +28,6 @@ endif
 all: pod-build/Makefile
 	# cp -r $(shell pwd)/matlab/+iris $(BUILD_PREFIX)/matlab/
 	$(MAKE) -C pod-build all install
-	cp $(shell pwd)/python/irispy/cvxgen_ldp.so $(BUILD_PREFIX)/lib/python2.7/dist-packages/irispy/
 
 pod-build/Makefile:
 	$(MAKE) configure

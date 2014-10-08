@@ -1,0 +1,29 @@
+# Produced by CVXGEN, 2014-05-20 16:06:21 -0400.
+# CVXGEN is Copyright (C) 2006-2012 Jacob Mattingley, jem@cvxgen.com.
+# The code in this file is Copyright (C) 2006-2012 Jacob Mattingley.
+# CVXGEN, or solvers produced by CVXGEN, cannot be used for commercial
+# applications without prior written permission from Jacob Mattingley.
+
+# Filename: description.cvxgen.
+# Description: A description of the CVXGEN problem.
+
+dimensions
+  dim = 3
+  nw = 8
+end
+
+parameters
+  Y (dim, nw)
+end
+
+variables
+  w (nw) nonnegative
+  v (dim)
+end
+
+minimize
+  sum(square(v))
+subject to
+  Y * w == v
+  sum(w) == 1
+end

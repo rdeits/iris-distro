@@ -21,7 +21,7 @@ pods_configure_matlab_paths()
 
 get_relative_path("${CMAKE_INSTALL_PREFIX}/matlab" "${CMAKE_CURRENT_SOURCE_DIR}/matlab" relpath)
 
-message(STATUS "Writing addpath_iris.m and rmpath_iris.m to ${CMAKE_INSTALL_PREFIX}/matlab") 
+message(STATUS "Writing addpath_iris.m and rmpath_iris.m to ${CMAKE_INSTALL_PREFIX}/matlab")
 file(WRITE ${CMAKE_INSTALL_PREFIX}/matlab/addpath_iris.m
 	   "function addpath_iris()\n"
 	   "  mfiledir = fileparts(which(mfilename));\n"
@@ -38,3 +38,4 @@ file(WRITE ${CMAKE_INSTALL_PREFIX}/matlab/rmpath_iris.m
 	   "  cd(wd);\n"
     )
 
+add_subdirectory(cvxgen)
