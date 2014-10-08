@@ -248,6 +248,10 @@ function v = uav_path(start, goal, safe_regions, contain_line)
   % trajectory of our UAV model, such that each pose in the trajectory is
   % inside one safe region while minimizing total acceleration.
 
+  if nargin < 4
+    contain_line = false;
+  end
+
   nv = 0;
   v = struct();
 
@@ -369,7 +373,7 @@ function v = uav_path(start, goal, safe_regions, contain_line)
           Ai(s+(1:s), v.x.i(:,j)) = A_region;
           Ai(s+(1:s), v.xd.i(:,j)) = A_region * dt;
         else
-          Ai = zeros(2*s, nv);
+          Ai = zeros(s, nv);
           bi = b_region;
           Ai(:,v.x.i(:,j)) = A_region;
         end
