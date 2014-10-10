@@ -122,6 +122,7 @@ function(mex_setup)
     get_mex_option(LD NAMES LINKER)
     get_mex_option(LDFLAGS NAMES LINKFLAGS)
     get_mex_option(LINKLIBS)
+    get_mex_option(LINKEXPORT)
     get_mex_option(LDDEBUGFLAGS NAMES LINKDEBUGFLAGS)
 
     if (MSVC)
@@ -173,7 +174,7 @@ function(mex_setup)
   endif()
 
   # figure out LDFLAGS for exes and shared libraries
-  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS}) # removed "-ldl") # note: the -ldl here might be overkill?  so far only needed it for drake_debug_mex.  (but it has to come later in the compiler arguments, too, in order to work.
+  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS} ${MEX_LINKEXPORT}) 
 
   if (NOT WIN32) # AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
     set(MEXLIB_LDFLAGS ${MEXLIB_LDFLAGS} "-ldl")
