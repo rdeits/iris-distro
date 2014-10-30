@@ -16,7 +16,7 @@ def minkowski_sum(a, b):
         p = np.zeros((2, a.shape[1] * b.shape[1]))
         idx = 0
         for j in range(a.shape[1]):
-            p[idx:idx+b.shape[1]] = a[:,j] + b
+            p[:,idx:idx+b.shape[1]] = a[:,j].reshape((2,-1)) + b
             idx += b.shape[1]
     hull = ConvexHull(p.T)
     return p[:,hull.vertices]
