@@ -16,6 +16,12 @@ The primary algorithm is distributed as:
 
 	inflate_region.m
 
+You'll need to build a few tools first, and in order to do so, you'll need to make sure that the `matlab` executable is on your system path. The `matlab` executable lives in `/Applications/MATLAB_R2014b.app/bin/` or similar on OSX and `/usr/local/MATLAB/R2014a/bin/` on linux. You can either add that folder to your system PATH variable put a symbolic link to the `matlab` executable somewhere that is already on your path, like `/usr/local/bin`.
+
+To build IRIS, just `cd` into the IRIS folder and run:
+
+	make
+
 The MATLAB implementation requires the Mosek toolbox for MATLAB, and the Python implementation currently requires both Mosek and Gurobi. The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
 
 	>>> import iris.test.*;
