@@ -21,6 +21,7 @@ if exist('gurobi')
 else
   disp('gurobi not found, skipping additional tests')
 end
+iris.test.test_thin_ellipsoid();
 disp('Tests complete');
 end
 
