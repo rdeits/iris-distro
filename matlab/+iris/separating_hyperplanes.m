@@ -6,7 +6,7 @@ function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
   pts_per_obs = size(obstacle_pts, 2);
   Cinv = inv(C);
   Cinv2 = (Cinv * Cinv');
-  if n_obs == 0
+  if n_obs == 0 || isempty(obstacle_pts)
     A = zeros(0, dim);
     b = zeros(0, 1);
     infeas_start = false;

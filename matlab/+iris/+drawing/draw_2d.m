@@ -4,6 +4,9 @@ h = figure(2);
 cla
 hold on
 n_obs = size(obstacles, 3);
+if isempty(obstacles)
+  n_obs = 0;
+end
 % Draw obstacle interiors
 for j = 1:n_obs
   if size(obstacles, 2) > 1
