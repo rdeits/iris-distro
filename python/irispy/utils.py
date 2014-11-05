@@ -18,8 +18,8 @@ def sample_convex_polytope(A, b, nsamples):
     ub = np.max(poly.generators, axis=0)
 
     n = 0
-    samples = np.zeros(len(lb), nsamples)
-    while n < nsamples-1:
+    samples = np.zeros((len(lb), nsamples))
+    while n < nsamples:
         z = np.random.uniform(lb, ub)
         if np.all(poly.A.dot(z) <= poly.b):
             samples[:,n] = z
