@@ -106,7 +106,7 @@ if (LCM_FOUND)
    find_program(LCM_GEN_EXECUTABLE lcm-gen ${EXECUTABLE_OUTPUT_PATH} ${EXECUTABLE_INSTALL_PATH})
      
    if (NOT LCM_GEN_EXECUTABLE)
-     message(WARNING "lcm-gen not found")
+     message(STATUS "lcm-gen not found")
      unset(LCM_FOUND)
    endif()
 endif()
@@ -118,7 +118,7 @@ if (LCM_FOUND)
 
   set(LCMTYPES_SEARCHDIR ${CMAKE_SOURCE_DIR}/lcmtypes)
 else()
-  message(WARNING "disabling LCM.  lcm types will not be built.\n")
+  message(STATUS "disabling LCM.  lcm types will not be built.\n")
 endif()
 
 function(find_lcmtypes msgvar)
