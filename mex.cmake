@@ -272,7 +272,7 @@ function(add_mex)
       target_link_libraries(${target} liblast)
     else()
       string(REPLACE "/export:mexFunction" "" __ldflags "${MEXLIB_LDFLAGS}")
-      string(REPLACE "/EXPORT:mexFunction" "" __ldflags "${MEXLIB_LDFLAGS}")
+      string(REPLACE "/EXPORT:mexFunction" "" __ldflags "${__ldflags}")
       string(REGEX REPLACE "/implib:[^ ]+" "" __ldflags "${__ldflags}")
       set_target_properties(${target} PROPERTIES
         LINK_FLAGS_DEBUG	"${__ldflags} ${MEX_LDDEBUGFLAGS}"
