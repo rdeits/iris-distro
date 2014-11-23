@@ -27,7 +27,7 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
 }
 $cmd .= ' 2>&1 ';
 
-print($cmd);
+#print($cmd);
 
 my $matlab_output = `$cmd`;
 my $retval = $? >> 8;
