@@ -12,6 +12,7 @@
 #use Text::Unidecode;
 
 my $cmd = 'matlab';
+#$cmd = "\"/cygdrive/c/Program Files/MATLAB/R2012a/bin/win32/MATLAB.exe\""; # hard code just for the moment  
 
 foreach my $a(@ARGV) {
   $cmd .= " \"$a\"";
@@ -23,29 +24,23 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $tmpfile = "c:\\tmp\\" . time() . "_" . int(rand(100000));
   $cmd .= " -wait -nosplash -nodesktop -logfile \"$tmpfile\"";    
 } else {
+  $tmpfile = "/tmp/" . time() . "_" . int(rand(100000));  
   $cmd .= " -nosplash -nodisplay";
 }
-$cmd .= ' 2>&1 ';
+$cmd .= " &> /dev/null";
 
 #print($cmd);
 
-my $matlab_output = `$cmd`;
-my $retval = $? >> 8;
+my $retval = system($cmd) >> 8;
 
-if ($osname eq "cygwin" || $osname eq "MSWin32") {
-  # read entire file in (using a trick from http://www.perlmonks.org/?node_id=1952)  
-  local $/=undef;
-  open FILE, "$tmpfile" or die "Couldn't open file: $!";
-  $matlab_output = <FILE>;
-  close FILE;
+# read entire file in (using a trick from http://www.perlmonks.org/?node_id=1952)  
+local $/=undef;
+open FILE, "$tmpfile" or die "Couldn't open file: $!";
+$matlab_output = <FILE>;
+close FILE;
 
-  # rm the temp file
-  unlink $tmpfile;
-} 
-
-$matlab_output =~ s/.*exclude an item from Time Machine.*\n//g;
-#$matlab_output = unidecode($matlab_output);  # didn't seem to help
-$matlab_output =~ s/[^\x{0009}\x{000a}\x{000d}\x{0020}-\x{D7FF}\x{E000}-\x{FFFD}]+//g;
+# rm the temp file
+unlink $tmpfile;
 
 print($matlab_output);
 exit($retval);
