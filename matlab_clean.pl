@@ -25,7 +25,7 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $cmd .= " -wait -nosplash -nodesktop -logfile \"$tmpfile\"";    
 } else {
   $tmpfile = "/tmp/" . time() . "_" . int(rand(100000));  
-  $cmd .= " -nosplash -nodisplay";
+  $cmd .= " -nosplash -nodisplay -logfile \"$tmpfile\"";
 }
 $cmd .= " &> /dev/null";
 
