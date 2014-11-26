@@ -6,9 +6,9 @@ if ($#ARGV>-1) {
   chdir($ARGV[0]);
 }
 
-chomp($CMAKE_INSTALL_PREFIX = `cmake pod-build -L | grep CMAKE_INSTALL_PREFIX | cut -d "=" -f2`);
+chomp($CMAKE_INSTALL_PREFIX = `cmake pod-build -N -L | grep CMAKE_INSTALL_PREFIX | cut -d "=" -f2`);
 chomp($CMAKE_SOURCE_DIR = `pwd`);
-chomp($POD_NAME = `cmake pod-build -L | grep POD_NAME | cut -d "=" -f2`);
+chomp($POD_NAME = `cmake pod-build -N -L | grep POD_NAME | cut -d "=" -f2`);
 
 if ($^O eq 'cygwin') {
   chomp($CMAKE_INSTALL_PREFIX = `cygpath -w $CMAKE_INSTALL_PREFIX`);

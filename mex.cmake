@@ -81,6 +81,10 @@ function(mex_setup)
     # matlab -n is not supported on windows (asked matlab for a work-around)
     get_filename_component(_matlab_root ${matlab} PATH)
     get_filename_component(_matlab_root ${_matlab_root} PATH)
+    find_program(matlab NAMES MATLAB PATHS ${MATLAB_ROOT}/bin/win32 ${MATLAB_ROOT}/bin/win64 NO_DEFAULT_PATH) # replace bin\matlab.exe with bin\win**\MATLAB.exe
+#   todo: consider replacing the line in drake/Makefile with this, but then drake-admin/postProcessCTest would have to run cmake and parse the output
+#    find_program(python NAMES python)
+#    set(python "${python}" CACHE FILEPATH "${python}")
   else()
     execute_process(COMMAND ${matlab} -n COMMAND grep -e "MATLAB \\+=" COMMAND cut -d "=" -f2 OUTPUT_VARIABLE _matlab_root)
   endif()
@@ -89,6 +93,7 @@ function(mex_setup)
   endif()
   string(STRIP ${_matlab_root} MATLAB_ROOT)
 
+  set(matlab "${matlab}" CACHE FILEPATH "${matlab}")
   find_program(mex NAMES mex mex.bat HINTS ${MATLAB_ROOT}/bin)
   if (NOT mex)
      message(FATAL_ERROR "Failed to find mex executable")
@@ -176,7 +181,7 @@ function(mex_setup)
   endif()
 
   # figure out LDFLAGS for exes and shared libraries
-  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS} ${MEX_LINKEXPORT}) 
+  set (MEXLIB_LDFLAGS ${MEX_LDFLAGS} ${MEX_LD_ARGUMENTS} ${MEX_CLIBS} ${MEX_LINKLIBS} ${MEX_LINKEXPORT})
 
   if (NOT WIN32) # AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
     set(MEXLIB_LDFLAGS ${MEXLIB_LDFLAGS} "-ldl")
