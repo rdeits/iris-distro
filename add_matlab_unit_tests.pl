@@ -31,7 +31,8 @@ open(my $ctestfile, '>>', 'pod-build/CTestTestfile.cmake');
 while (<$in>) {
   ($test,$testdir,$props) = split(' ',$_,3);
   $testname = $testdir."/".$test;
-  $testname =~ s/\Q$CMAKE_SOURCE_DIR\///;
+  $testname =~ s/\Q$CMAKE_SOURCE_DIR\E[\/\\]//;
+  $testname =~ s/\\/\//g;
 
 #  $failcondition = "1";   # missing dependency => failure
   $failcondition = "~strncmp(ex.identifier,'Drake:MissingDependency',23)";  # missing dependency => pass
