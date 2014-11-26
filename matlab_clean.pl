@@ -11,19 +11,20 @@
 #use lib "./Text-Unidecode-0.04/lib";
 #use Text::Unidecode;
 
-my $cmd = 'matlab';
+my $osname = $^O;
 
+my $cmd = 'matlab';
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   use File::Basename;
   my $dirname = dirname(__FILE__);
-  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep matlab | cut -d "=" -f2`)
+  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep matlab | cut -d "=" -f2 | cygpath -u -f -`);
+  print "$cmd\n";  # matlab on windows doesn't show the version at startup.
+  $cmd = "\"$cmd\"";
 }
 
 foreach my $a(@ARGV) {
   $cmd .= " \"$a\"";
 }
-
-my $osname = $^O;
 
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $tmpfile = "c:\\tmp\\" . time() . "_" . int(rand(100000));
