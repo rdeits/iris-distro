@@ -33,9 +33,9 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $tmpfile = "/tmp/" . time() . "_" . int(rand(100000));
   $cmd .= " -nosplash -nodisplay -logfile \"$tmpfile\"";
 }
-$cmd .= " &> /dev/null";
+$cmd .= " > /dev/null 2>&1";
 
-#print($cmd);
+print($cmd);
 
 my $retval = system($cmd) >> 8;
 
