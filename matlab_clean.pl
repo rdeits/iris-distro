@@ -28,12 +28,12 @@ foreach my $a(@ARGV) {
 
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $tmpfile = "c:\\tmp\\" . time() . "_" . int(rand(100000));
-  $cmd .= " -wait -nosplash -nodesktop -logfile \"$tmpfile\"";
+  $cmd .= " -nosplash -nodesktop -logfile \"$tmpfile\"";
 } else {
   $tmpfile = "/tmp/" . time() . "_" . int(rand(100000));
   $cmd .= " -nosplash -nodisplay -logfile \"$tmpfile\"";
+  $cmd .= " > /dev/null 2>&1";
 }
-$cmd .= " > /dev/null 2>&1";
 
 print($cmd);
 
