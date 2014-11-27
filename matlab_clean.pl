@@ -16,15 +16,30 @@ my $osname = $^O;
 my $cmd = 'matlab';
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   use File::Basename;
-  my $dirname = dirname(__FILE__);
-  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep winmat | cut -d "=" -f2 | cygpath -u -f -`);
-  print "$cmd\n";  # matlab on windows doesn't show the version at startup.
-  $cmd = "\"$cmd\"";
+  use Cwd 'abs_path';
+  use Cwd;
+  my $dirname = dirname(abs_path(__FILE__));
+  $startdir = cwd();
+  chdir("$dirname/../pod-build");  # use perl cd instead of cmake dir because dirname is in cygwin format (instead of win style)
+  $cmd = `cmake -N -L`;
+  chdir($startdir);
+  my @lines = split(/\n/,$cmd);
+  @lines = grep(/winmat/,@lines);
+  if (!@lines) {
+      print "Warning: Couldn't find matlab windows exe from cmake cache\n";
+      $cmd = 'matlab -wait';
+  } else {
+      $cmd = (split(/=/,$lines[0]))[1];
+      #  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep winmat | cut -d "=" -f2 | cygpath -u -f -`);
+      print "$cmd\n";  # matlab on windows doesn't show the version at startup.
+      $cmd = '"' . substr($cmd,0,length($cmd)-1) . '"';  # for some reason had to zap special character at the end (chomp wasn't getting it)
+  }
 }
 
 foreach my $a(@ARGV) {
   $cmd .= " \"$a\"";
 }
+
 
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $tmpfile = "c:\\tmp\\" . time() . "_" . int(rand(100000));
@@ -32,8 +47,8 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
 } else {
   $tmpfile = "/tmp/" . time() . "_" . int(rand(100000));
   $cmd .= " -nosplash -nodisplay -logfile \"$tmpfile\"";
-  $cmd .= " > /dev/null 2>&1";
 }
+$cmd .= " > /dev/null 2>&1";
 
 #print($cmd);
 
