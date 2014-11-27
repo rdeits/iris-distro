@@ -17,7 +17,7 @@ my $cmd = 'matlab';
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
   use File::Basename;
   my $dirname = dirname(__FILE__);
-  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep matlab | cut -d "=" -f2 | cygpath -u -f -`);
+  chomp($cmd = `cmake $dirname/../pod-build -N -L | grep winmat | cut -d "=" -f2 | cygpath -u -f -`);
   print "$cmd\n";  # matlab on windows doesn't show the version at startup.
   $cmd = "\"$cmd\"";
 }

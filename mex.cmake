@@ -82,7 +82,6 @@ function(mex_setup)
     get_filename_component(_matlab_root ${matlab} PATH)
     get_filename_component(_matlab_root ${_matlab_root} PATH)
     find_program(winmat NAMES MATLAB PATHS ${_matlab_root}/bin/win32 ${_matlab_root}/bin/win64 NO_DEFAULT_PATH) # replace bin\matlab.exe with bin\win**\MATLAB.exe
-    set(matlab "${winmat}" CACHE FILEPATH "${winmat}" FORCE)
 
 #   todo: consider replacing the line in drake/Makefile with this, but then drake-admin/postProcessCTest would have to run cmake and parse the output
 #    find_program(python NAMES python)
