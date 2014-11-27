@@ -35,7 +35,7 @@ if ($osname eq "cygwin" || $osname eq "MSWin32") {
   $cmd .= " > /dev/null 2>&1";
 }
 
-print($cmd);
+#print($cmd);
 
 my $retval = system($cmd) >> 8;
 
