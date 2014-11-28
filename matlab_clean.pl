@@ -15,6 +15,8 @@ my $osname = $^O;
 
 my $cmd = 'matlab';
 if ($osname eq "cygwin" || $osname eq "MSWin32") {
+  use sigtrap qw/handler signal_handler normal-signals/;
+
   use File::Basename;
   use Cwd 'abs_path';
   use Cwd;
@@ -65,3 +67,12 @@ unlink $tmpfile;
 
 print($matlab_output);
 exit($retval);
+
+
+
+sub signal_handler {
+  # from http://stackoverflow.com/questions/4717118/what-happens-to-a-sigint-c-when-sent-to-a-perl-script-containing-children
+    local $SIG{HUP} = "IGNORE";
+    kill HUP => -$$;   # the killpg(getpid(), SIGHUP) syscall
+    die "Caught a signal $!";
+}
