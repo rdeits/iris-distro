@@ -140,6 +140,7 @@ function(mex_setup)
 #    	endif()
         string(REGEX REPLACE "/implib:.*templib.x\"" "" MEX_LDFLAGS "${MEX_LDFLAGS}")
 	string(REGEX REPLACE "/MAP:\"[.a-zA-Z0-9]*\"" "" MEX_LDFLAGS "${MEX_LDFLAGS}")
+	string(REGEX REPLACE "/PDB:\"[.a-xA-Z0-9]*\"" "" MEX_LDDEBUGFLAGS "{MED_LDDEBUGFLAGS}")
 	set(MEX_LDFLAGS "${MEX_LDFLAGS}" PARENT_SCOPE)
 #        message(STATUS MEX_LDFLAGS=${MEX_LDFLAGS})
     endif()
@@ -211,10 +212,14 @@ function(mex_setup)
 
   # todo: handle C separately from CXX?
   set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
-  if (CMAKE_BUILD_TYPE MATCHES DEBUG)
-    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXDEBUGFLAGS}")
-  elseif (CMAKE_BUILD_TYPE MATCHES RELEASE)
-    set(MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS} ${MEX_CXXOPTIMFLAGS}")
+  string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type) 
+  if (_build_type MATCHES DEBUG)
+    set(MEX_COMPILE_FLAGS "${MEX_CXXDEBUGFLAGS} ${MEX_COMPILE_FLAGS}")
+    if (MSVC)
+      string(REPLACE "/MD " "/MDd " MEX_COMPILE_FLAGS "${MEX_COMPILE_FLAGS}")
+    endif()
+  elseif (_build_type MATCHES RELEASE)
+    set(MEX_COMPILE_FLAGS "${MEX_CXXOPTIMFLAGS} ${MEX_COMPILE_FLAGS}")
   endif()
 
   if (${MEX_COMPILE_FLAGS} MATCHES "-ansi")
@@ -267,8 +272,8 @@ function(add_mex)
       target_link_libraries(${target} liblast)
     else()
       set_target_properties(${target} PROPERTIES
-        LINK_FLAGS_DEBUG	"${MEXLIB_LDFLAGS} ${MEX_LDDEBUGFLAGS}"
-        LINK_FLAGS_RELEASE	"${MEXLIB_LDFLAGS} ${MEX_LDOPTIMFLAGS}"
+        LINK_FLAGS_DEBUG	"${MEXLIB_LDDEBUGFLAGS} ${MEX_LDFLAGS}"
+        LINK_FLAGS_RELEASE	"${MEXLIB_LDOPTIMFLAGS} ${MEX_LDFLAGS}"
       )
     endif()
   elseif (isshared GREATER -1)
@@ -281,6 +286,7 @@ function(add_mex)
       string(REPLACE "/export:mexFunction" "" __ldflags "${MEXLIB_LDFLAGS}")
       string(REPLACE "/EXPORT:mexFunction" "" __ldflags "${__ldflags}")
       string(REGEX REPLACE "/implib:[^ ]+" "" __ldflags "${__ldflags}")
+      
       set_target_properties(${target} PROPERTIES
         LINK_FLAGS_DEBUG	"${__ldflags} ${MEX_LDDEBUGFLAGS}"
         LINK_FLAGS_RELEASE	"${__ldflags} ${MEX_LDOPTIMFLAGS}"
