@@ -25,10 +25,13 @@ classdef Polytope
 
     function vertices = getVertices(obj)
       if ~obj.has_vertices
-        H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
-        V = cddmex('extreme', H);
-        obj.vertices = V.V';
-%         obj.vertices = iris.thirdParty.polytopes.lcon2vert(obj.A, obj.b, obj.Aeq, obj.beq)';
+        if exist('cddmex', 'file')
+          H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
+          V = cddmex('extreme', H);
+          obj.vertices = V.V';
+        else
+          obj.vertices = iris.thirdParty.polytopes.lcon2vert(obj.A, obj.b, obj.Aeq, obj.beq)';
+        end
         obj.has_vertices = true;
       end
       vertices = obj.vertices;
@@ -36,6 +39,9 @@ classdef Polytope
     
     function reduced_poly = reduce(obj)
       % Find a minimal representation of the polytope
+      if ~exist('cddmex', 'file')
+        error('IRIS:MissingDependency', 'This function requires the cddmex tool. The easiest way to get it is using tbxmanager: http://www.tbxmanager.com/');
+      end
       H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
       Hred = cddmex('reduce_h', H);
       assert(isempty(Hred.lin), 'as far as I know, Hred.lin should always be empty. That is, the reduced polytope should not contain equality constraints. -rdeits');
