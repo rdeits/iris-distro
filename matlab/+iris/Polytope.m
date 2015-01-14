@@ -24,6 +24,7 @@ classdef Polytope
     end
 
     function vertices = getVertices(obj)
+      obj = obj.normalize();
       if ~obj.has_vertices
         if exist('cddmex', 'file')
           H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
@@ -57,12 +58,30 @@ classdef Polytope
     function drawLCMGL(obj, lcmgl)
       lcmgl.glBegin(lcmgl.LCMGL_LINES);
       vertices = obj.getVertices();
-      k = convhull(vertices(1,:), vertices(2,:));
+      if size(vertices, 2) > 2
+        k = convhull(vertices(1,:), vertices(2,:));
+      else
+        k = [1:size(vertices, 2), 1];
+      end
       for j = 1:length(k)-1
         lcmgl.glVertex3d(vertices(1,k(j)), vertices(2,k(j)), vertices(3,k(j)));
         lcmgl.glVertex3d(vertices(1,k(j+1)), vertices(2,k(j+1)), vertices(3,k(j+1)));
       end
       lcmgl.glEnd();
+    end
+    
+    function obj = normalize(obj)
+      for j = 1:size(obj.A, 1)
+        n = norm(obj.A(j,:));
+        obj.A(j,:) = obj.A(j,:) / n;
+        obj.b(j) = obj.b(j) / n;
+      end
+      
+      for j = 1:size(obj.Aeq, 1)
+        n = norm(obj.Aeq(j,:));
+        obj.Aeq(j,:) = obj.Aeq(j,:) / n;
+        obj.beq(j) = obj.beq(j) / n;
+      end
     end
 
   end

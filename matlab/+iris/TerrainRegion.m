@@ -5,14 +5,18 @@ classdef TerrainRegion
   properties
     A
     b
+    C
+    d
     point
     normal
   end
 
   methods
-    function obj = TerrainRegion(A, b, point, normal)
+    function obj = TerrainRegion(A, b, C, d, point, normal)
       obj.A = A;
       obj.b = b;
+      obj.C = C;
+      obj.d = d;
       obj.point = point;
       obj.normal = normal;
     end
@@ -24,6 +28,13 @@ classdef TerrainRegion
       p = reshape(obj.point, [], 1);
       poly = iris.Polytope(A, b, n, n * p);
     end
+
+    function ell = getXYEllipsoid(obj)
+      C = obj.C(1:2,1:2);
+      d = obj.d(1:2);
+      ell = iris.Ellipsoid(C, d);
+    end
+
   end
 end
 
