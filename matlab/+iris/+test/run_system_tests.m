@@ -9,6 +9,7 @@ iris.test.test_poly_3d();
 iris.test.test_poly_Nd(4);
 iris.test.test_polygon_recovery();
 iris.test.test_simple_poly_2d();
+iris.test.test_boundary();
 if ~exist('gurobi')
   if exist('addpath_gurobi.m')
     addpath_gurobi()
