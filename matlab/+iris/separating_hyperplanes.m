@@ -59,7 +59,7 @@ function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
       if norm(ystar) < 1e-3
         % d is inside the obstacle. So we'll just reverse nhat to try to push the
         % ellipsoid out of the obstacle.
-        disp('Warning: ellipse center is inside an obstacle.');
+        warning('IRIS:EllipseCenterInObstacle', 'ellipse center is inside an obstacle.');
         infeas_start = true;
         A(i,:) = -nhat';
         b(i) = -nhat' * xi;

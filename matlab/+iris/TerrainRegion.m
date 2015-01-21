@@ -21,6 +21,12 @@ classdef TerrainRegion
       obj.normal = normal;
     end
 
+    function obj = reducePolytope(obj)
+      reduced = iris.Polytope(obj.A, obj.b).reduce();
+      obj.A = reduced.A;
+      obj.b = reduced.b;
+    end
+
     function poly = getXYZPolytope(obj)
       A = [obj.A(:,1:2), zeros(size(obj.A, 1), 1)];
       b = obj.b;

@@ -24,7 +24,7 @@ classdef Polytope
     end
 
     function vertices = getVertices(obj)
-      obj = obj.normalize();
+      obj = obj.reduce();
       if ~obj.has_vertices
         if exist('cddmex', 'file')
           H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
@@ -51,8 +51,14 @@ classdef Polytope
 
     function plotVertices(obj, varargin)
       vertices = obj.getVertices();
-      k = convhull(vertices(1,:), vertices(2,:));
-      plot(vertices(1,k), vertices(2,k), varargin{:});
+      if ~isempty(vertices)
+        if size(vertices, 2) > 2
+          k = convhull(vertices(1,:), vertices(2,:));
+        else
+          k = [1:size(vertices, 2), 1];
+        end
+        plot(vertices(1,k), vertices(2,k), varargin{:});
+      end
     end
 
     function drawLCMGL(obj, lcmgl)
@@ -71,17 +77,23 @@ classdef Polytope
     end
     
     function obj = normalize(obj)
+      n = zeros(size(obj.A, 1), 1);
       for j = 1:size(obj.A, 1)
-        n = norm(obj.A(j,:));
-        obj.A(j,:) = obj.A(j,:) / n;
-        obj.b(j) = obj.b(j) / n;
+        n(j) = norm(obj.A(j,:));
+        obj.A(j,:) = obj.A(j,:) / n(j);
+        obj.b(j) = obj.b(j) / n(j);
       end
+      obj.A = obj.A(n > 0, :);
+      obj.b = obj.b(n > 0);
       
+      n = zeros(size(obj.Aeq, 1), 1);
       for j = 1:size(obj.Aeq, 1)
-        n = norm(obj.Aeq(j,:));
-        obj.Aeq(j,:) = obj.Aeq(j,:) / n;
-        obj.beq(j) = obj.beq(j) / n;
+        n(j) = norm(obj.Aeq(j,:));
+        obj.Aeq(j,:) = obj.Aeq(j,:) / n(j);
+        obj.beq(j) = obj.beq(j) / n(j);
       end
+      obj.Aeq = obj.Aeq(n > 0, :);
+      obj.beq = obj.beq(n > 0);
     end
 
   end
@@ -109,6 +121,15 @@ classdef Polytope
       obj.Aeq = reshape(normal, 1, []);
       obj.beq = v;
       obj.A = [obj.A, zeros(size(obj.A, 1), 1)];
+    end
+
+    function obj = fromBounds(lb, ub)
+      % create a polytope representing a bounding box in n dimensions
+      dim = length(lb);
+      assert(length(lb) == length(ub));
+      A = [eye(dim); -eye(dim)];
+      b = [reshape(ub,[],1); reshape(-lb,[],1)];
+      obj = iris.Polytope(A, b);
     end
   end
 end

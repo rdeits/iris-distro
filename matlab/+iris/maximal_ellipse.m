@@ -1,5 +1,10 @@
 function [C, d, volume] = maximal_ellipse(A,b)
 
+% poly = iris.Polytope(A, b).reduce();
+[Ad, ia] = unique(A,'rows');
+A = Ad;
+b = b(ia);
+
 % [C, d] = iris.inner_ellipsoid.mosek_nofusion(A, b);
 [C, d] = iris.inner_ellipsoid.mosek_ellipsoid(A, b);
 
