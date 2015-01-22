@@ -134,6 +134,8 @@ classdef Server < handle
       [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], ...
         struct('require_containment', true, 'error_on_infeas_start', true));
 
+      [A, iA] = unique(A, 'rows');
+      b = b(iA);
       region = iris.TerrainRegion(A, b, C, d, p0, n0);
 
       if options.debug
@@ -197,10 +199,10 @@ classdef Server < handle
           yaw = seed(3);
           seed_ind = seed_ind + 1;
           i0 = obj.xy2ind(map_id, seed(1:2));
-          seed
-          heightmap.X(i0)
-          heightmap.Y(i0)
-          disp('here')
+          % seed
+          % heightmap.X(i0)
+          % heightmap.Y(i0)
+          % disp('here')
         else
           obs_dists = iris.terrain_grid.obs_dist(potential_safe_grid);
           [max_dist, i0] = max(obs_dists(:));
