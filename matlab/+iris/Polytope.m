@@ -106,8 +106,8 @@ classdef Polytope
 
     function obj = from2DVertices(vertices)
       assert(size(vertices, 1) == 2);
-      X = vertices(1,:);
-      Y = vertices(2,:);
+      x = vertices(1,:);
+      y = vertices(2,:);
       k = convhull(x,y, 'simplify', true);
       A = [(y(k(2:end)) - y(k(1:end-1)))', (x(k(1:end-1)) - x(k(2:end)))'];
       b = sum(A' .* [x(k(1:end-1)); y(k(1:end-1))], 1)';
