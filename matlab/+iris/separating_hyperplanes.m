@@ -1,5 +1,7 @@
 function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
 
+  persistent mosek_res
+
   dim = size(C,1);
   infeas_start = false;
   n_obs = size(obstacle_pts, 3);
@@ -16,10 +18,6 @@ function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
   uncovered_obstacles = true(n_obs,1);
   planes_to_use = false(n_obs, 1);
 
-  % image_pts = reshape(Cinv * bsxfun(@minus, reshape(obstacle_pts, dim, []), d), size(obstacle_pts));
-  % image_dists = sum(image_pts.^2, 1);
-  % obs_image_dists = min(reshape(image_dists', pts_per_obs, []), [], 1);
-  % [~, obs_sort_idx] = sort(obs_image_dists);
 
   image_pts = reshape(Cinv * bsxfun(@minus, reshape(obstacle_pts, dim, []), d), size(obstacle_pts));
   image_dists = reshape(sum(image_pts.^2, 1), size(obstacle_pts, 2), size(obstacle_pts, 3));
@@ -49,7 +47,10 @@ function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
         if all(size(ys) <= [3, 8])
           ystar = iris.least_distance.cvxgen_ldp(ys);
         else
-          ystar = iris.least_distance.mosek_ldp(ys);
+          if isempty(mosek_res)
+            [~,mosek_res] = mosekopt('symbcon echo(0)');
+          end
+          ystar = iris.least_distance.mosek_ldp(ys, mosek_res);
         end
 
         if norm(ystar) < 1e-3

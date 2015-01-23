@@ -22,7 +22,7 @@ if exist('gurobi')
 else
   disp('gurobi not found, skipping additional tests')
 end
-iris.test.test_thin_ellipsoid();
+iris.test.test_thin_ellipsoid_simple();
 disp('Tests complete');
 end
 
