@@ -22,7 +22,14 @@ To build IRIS, just `cd` into the IRIS folder and run:
 
 	make
 
-The MATLAB implementation requires the Mosek toolbox for MATLAB, and the Python implementation currently requires both Mosek and Gurobi. The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
+Requirements
+------------
+
+The MATLAB implementation requires the Mosek toolbox for MATLAB <http://docs.mosek.com/7.0/toolbox/>, and the Python implementation currently requires both Mosek and Gurobi <http://www.gurobi.com/>. Both have free licenses available for academic use.
+
+Optionally, you can install the `cddmex` package to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/).
+
+ The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
 
 	>>> import iris.test.*;
 	>>> test_poly_2d;
