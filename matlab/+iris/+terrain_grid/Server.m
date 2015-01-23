@@ -21,6 +21,7 @@ classdef Server < handle
       p.addParameter('plane_angle_tolerance', 10 * pi/180, @isnumeric);
       p.addParameter('excluded_grid', []);
       p.addParameter('debug', false);
+      p.addParameter('error_on_infeas_start', true);
       p.parse(i0, yaw, collision_model, varargin{:});
       options = p.Results;
 
@@ -125,14 +126,17 @@ classdef Server < handle
       %% Add a bounding polytope
       bounds = iris.Polytope.from2DVertices([heightmap.X(end,1), heightmap.X(end,end), heightmap.X(1,end), heightmap.X(1,1); 
                                              heightmap.Y(end,1), heightmap.Y(end,end), heightmap.Y(1,end), heightmap.Y(1,1)]);
-      bounds.A = [bounds.A; options.xy_bounds.A];
-      bounds.b = [bounds.b; options.xy_bounds.b];
       % Add bounds on yaw angle
       bounds.A = [bounds.A, zeros(size(bounds.A, 1), 1); 
                   zeros(2, size(bounds.A, 2)), [-1; 1]];
+      if size(options.xy_bounds.A, 2) == 2
+        options.xy_bounds.A(:,end+1:3) = 0;
+      end
+      bounds.A = [bounds.A; options.xy_bounds.A];
+      bounds.b = [bounds.b; options.xy_bounds.b];
       bounds.b = [bounds.b; -theta_steps(1); theta_steps(end)];
       [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], ...
-        struct('require_containment', true, 'error_on_infeas_start', true));
+        struct('require_containment', true, 'error_on_infeas_start', options.error_on_infeas_start));
 
       [A, iA] = unique(A, 'rows');
       b = b(iA);
@@ -213,7 +217,7 @@ classdef Server < handle
         end
 
         try
-          region = obj.getCSpaceRegionAtIndex(i0, yaw, collision_model, region_options, 'excluded_grid', excluded_grid);
+          region = obj.getCSpaceRegionAtIndex(i0, yaw, collision_model, region_options, 'excluded_grid', excluded_grid, 'error_on_infeas_start', true);
         catch e
           if strcmp(e.identifier, 'IRIS:InfeasibleStart')
             excluded_grid(i0) = false;
@@ -254,6 +258,10 @@ classdef Server < handle
       obj.map_id_last_added(end+1) = id;
       obj.cleanup();
     end
+
+    function b = hasHeightmap(obj, id)
+       b = obj.heightmaps.isKey(id);
+     end
 
     function heightmap = getHeightmap(obj, id)
       heightmap = obj.heightmaps(id);

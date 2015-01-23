@@ -17,11 +17,11 @@ classdef Heightmap
       obj.Y = Y;
       obj.Z = Z;
       obj.normals = normals;
-      assert(all(all(diff(X, 1, 1) == 0)));
-      assert(all(all(abs(diff(X, 1, 2) - (X(1,2) - X(1,1))) <= 1e-6)));
-      assert(all(all(diff(Y, 1, 2) == 0)));
-      assert(all(all(abs(diff(Y, 1, 1) - (Y(2,1) - Y(1,1))) <= 1e-6)));
-      obj.resolution = [X(1,2) - X(1,1); Y(2,1) - Y(1,1)];
+      if ~isempty(X)
+        obj.resolution = norm(X(1,2) - X(1,1));
+      else
+        obj.resolution = nan;
+      end
     end
 
     function slope_angles = getSlopeAngles(obj)
