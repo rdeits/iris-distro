@@ -15,13 +15,13 @@ classdef Server < handle
       p.addRequired('i0', @isnumeric);
       p.addRequired('yaw', @isnumeric);
       p.addRequired('collision_model', @(x) isa(x, 'iris.terrain_grid.CollisionModel'));
-      p.addParameter('map_id', -1, @isnumeric);
-      p.addParameter('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
-      p.addParameter('plane_distance_tolerance', 0.05, @isnumeric);
-      p.addParameter('plane_angle_tolerance', 10 * pi/180, @isnumeric);
-      p.addParameter('excluded_grid', []);
-      p.addParameter('debug', false);
-      p.addParameter('error_on_infeas_start', true);
+      p.addParamValue('map_id', -1, @isnumeric);
+      p.addParamValue('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
+      p.addParamValue('plane_distance_tolerance', 0.05, @isnumeric);
+      p.addParamValue('plane_angle_tolerance', 10 * pi/180, @isnumeric);
+      p.addParamValue('excluded_grid', []);
+      p.addParamValue('debug', false);
+      p.addParamValue('error_on_infeas_start', true);
       p.parse(i0, yaw, collision_model, varargin{:});
       options = p.Results;
 
@@ -129,12 +129,12 @@ classdef Server < handle
       % Add bounds on yaw angle
       bounds.A = [bounds.A, zeros(size(bounds.A, 1), 1); 
                   zeros(2, size(bounds.A, 2)), [-1; 1]];
+      bounds.b = [bounds.b; -theta_steps(1); theta_steps(end)];
       if size(options.xy_bounds.A, 2) == 2
         options.xy_bounds.A(:,end+1:3) = 0;
       end
       bounds.A = [bounds.A; options.xy_bounds.A];
       bounds.b = [bounds.b; options.xy_bounds.b];
-      bounds.b = [bounds.b; -theta_steps(1); theta_steps(end)];
       [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], ...
         struct('require_containment', true, 'error_on_infeas_start', options.error_on_infeas_start));
 
@@ -155,12 +155,12 @@ classdef Server < handle
       p.KeepUnmatched = true;
       p.addRequired('map_id', @isnumeric);
       p.addRequired('collision_model', @(x) isa(x, 'iris.terrain_grid.CollisionModel'));
-      p.addParameter('seeds', []);
-      p.addParameter('default_yaw', 0, @isnumeric);
-      p.addParameter('max_slope_angle', 40 * pi/180, @isnumeric);
-      p.addParameter('max_height_variation', 0.05, @isnumeric);
-      p.addParameter('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
-      p.addParameter('debug', false);
+      p.addParamValue('seeds', []);
+      p.addParamValue('default_yaw', 0, @isnumeric);
+      p.addParamValue('max_slope_angle', 40 * pi/180, @isnumeric);
+      p.addParamValue('max_height_variation', 0.05, @isnumeric);
+      p.addParamValue('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
+      p.addParamValue('debug', false);
       p.parse(map_id, collision_model, varargin{:});
       options = p.Results;
 
