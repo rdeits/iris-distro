@@ -14,7 +14,7 @@ if(APPLE)
 endif()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cvxgen_ldp_mex.${mex_suffix}
-  COMMAND matlab -nosplash -nodesktop -r \"make_csolve\; quit\(\)\;\"
+  COMMAND matlab -nodisplay -r \"make_csolve\; quit\(\)\;\"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_custom_target(cvxgen_mex ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cvxgen_ldp_mex.${mex_suffix})
