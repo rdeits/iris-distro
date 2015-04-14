@@ -70,12 +70,19 @@ macro(get_mex_arguments afterstring)
 endmacro()
 
 function(mex_setup)
+  # usage: mex_setup([REQUIRED])
   # sets the variables: MATLAB_ROOT, MEX, MEX_EXT
   #    as well as all of the mexopts
 
+  list(FIND ARGV REQUIRED isrequired)
+
   find_program(matlab matlab)
   if ( NOT matlab )
-     message(FATAL_ERROR "Could not find matlab executable")
+    if (isrequired GREATER -1)
+      message(FATAL_ERROR "matlab is REQUIRED, but I could not find the matlab executable.")
+    endif()
+    message(STATUS "Could not find matlab executable.  mex support will be disabled")
+    return()
   endif()
   if ( WIN32 )
     # matlab -n is not supported on windows (asked matlab for a work-around)
@@ -212,7 +219,7 @@ function(mex_setup)
 
   # todo: handle C separately from CXX?
   set (MEX_COMPILE_FLAGS "${MEX_INCLUDE} ${MEX_CXXFLAGS} ${MEX_DEFINES} ${MEX_MATLABMEX} ${MEX_CXX_ARGUMENTS}")
-  string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type) 
+  string(TOUPPER "${CMAKE_BUILD_TYPE}" _build_type)
   if (_build_type MATCHES DEBUG)
     set(MEX_COMPILE_FLAGS "${MEX_CXXDEBUGFLAGS} ${MEX_COMPILE_FLAGS}")
     if (MSVC)
@@ -243,6 +250,23 @@ function(mex_setup)
   set (MEXLIB_LDFLAGS "${MEXLIB_LDFLAGS}" PARENT_SCOPE)
   # todo: add CLIBS or CXXLIBS to LINK_FLAGS selectively based in if it's a c or cxx target (always added C above)
 
+  if (MATLAB_ROOT AND MEX_EXT)
+     set (MATLAB_FOUND true PARENT_SCOPE)
+     message(STATUS "Found matlab")
+  endif()
+
+  compare_compilers(compilers_match "${CMAKE_C_COMPILER}" "${MEX_CC}")
+  if (NOT compilers_match)
+     message(FATAL_ERROR "Your cmake C compiler is: \"${CMAKE_C_COMPILER}\" but your mex options use: \"${MEX_CC}\" (the compiler version strings are printed above).  You must use the same compilers.  You can either:\n  a) reconfigure the mex compiler by running 'mex -setup' in  MATLAB, or\n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.\n")
+  endif()
+
+  compare_compilers(compilers_match "${CMAKE_CXX_COMPILER}" "${MEX_CXX}")
+  if (NOT compilers_match)
+     message(FATAL_ERROR "Your cmake CXX compiler is: \"${CMAKE_CXX_COMPILER}\" but your mex options end up pointing to: \"${MEX_CXX}\".  You must use the same compilers.  You can either:\n  a) Configure the mex compiler by running 'mex -setup' in  MATLAB, or \n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.")
+  endif()
+
+  # NOTE:  would like to check LD also, but it appears to be difficult with cmake  (there is not explicit linker executable variable, only the make rule), and  even my mex code assumes that LD==LDCXX for simplicity.
+
 endfunction()
 
 function(add_mex)
@@ -254,8 +278,9 @@ function(add_mex)
   list(GET ARGV 0 target)
   list(REMOVE_AT ARGV 0)
 
-  if (NOT MATLAB_ROOT OR NOT MEX_EXT)
-     message(FATAL_ERROR "MATLAB not found (or MATLAB_ROOT not properly parsed)")
+  if (NOT MATLAB_FOUND)
+    message(STATUS "${target} will be skipped because matlab was not found")
+    return() # return quietly if matlab is not found.  (note: if matlab/mex is REQUIRED, then it will have been found before getting here)
   endif()
 
   include_directories( ${MATLAB_ROOT}/extern/include ${MATLAB_ROOT}/simulink/include )
@@ -286,7 +311,7 @@ function(add_mex)
       string(REPLACE "/export:mexFunction" "" __ldflags "${MEXLIB_LDFLAGS}")
       string(REPLACE "/EXPORT:mexFunction" "" __ldflags "${__ldflags}")
       string(REGEX REPLACE "/implib:[^ ]+" "" __ldflags "${__ldflags}")
-      
+
       set_target_properties(${target} PROPERTIES
         LINK_FLAGS_DEBUG	"${__ldflags} ${MEX_LDDEBUGFLAGS}"
         LINK_FLAGS_RELEASE	"${__ldflags} ${MEX_LDOPTIMFLAGS}"
@@ -358,16 +383,3 @@ endfunction()
 
 
 include(CMakeParseArguments)
-mex_setup()
-
-compare_compilers(compilers_match "${CMAKE_C_COMPILER}" "${MEX_CC}")
-if (NOT compilers_match)
-   message(FATAL_ERROR "Your cmake C compiler is: \"${CMAKE_C_COMPILER}\" but your mex options use: \"${MEX_CC}\" (the compiler version strings are printed above).  You must use the same compilers.  You can either:\n  a) reconfigure the mex compiler by running 'mex -setup' in  MATLAB, or\n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.\n")
-endif()
-
-compare_compilers(compilers_match "${CMAKE_CXX_COMPILER}" "${MEX_CXX}")
-if (NOT compilers_match)
-   message(FATAL_ERROR "Your cmake CXX compiler is: \"${CMAKE_CXX_COMPILER}\" but your mex options end up pointing to: \"${MEX_CXX}\".  You must use the same compilers.  You can either:\n  a) Configure the mex compiler by running 'mex -setup' in  MATLAB, or \n  b) Set the default compiler for cmake by setting the CC environment variable in your terminal.")
-endif()
-
-# NOTE:  would like to check LD also, but it appears to be difficult with cmake  (there is not explicit linker executable variable, only the make rule), and  even my mex code assumes that LD==LDCXX for simplicity.
