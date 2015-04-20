@@ -102,7 +102,7 @@ function(mex_setup)
   string(STRIP ${_matlab_root} MATLAB_ROOT)
 
   set(matlab "${matlab}" CACHE FILEPATH "${matlab}")
-  find_program(mex NAMES mex mex.bat HINTS ${MATLAB_ROOT}/bin)
+  find_program(mex NAMES mex mex.bat HINTS ${MATLAB_ROOT}/bin NO_DEFAULT_PATH)
   if (NOT mex)
      message(FATAL_ERROR "Failed to find mex executable")
   endif()
