@@ -60,14 +60,21 @@ if ($child_pid = fork()) { # parent process
   # this is a perl version of doing:  system("tail -f $tmpfile");
   # http://docstore.mik.ua/orelly/perl4/cook/ch08_06.htm
   open FILE, "$tmpfile" or die "Couldn't open file: $!";
+  my $segfault = 0;
   for (;;) {
-    while (<FILE>) { print }
+    while (<FILE>) {
+      print;
+      if (/Segmentation violation|malloc_error_break/) {
+        $segfault = 1;
+      }
+    }
+    if ($segfault) { exit(1); }
     sleep 1;
     if (waitpid($child_pid,WNOHANG) != 0) {
       # then the child is done: http://perlmaven.com/how-to-check-if-a-child-process-is-still-running
-      my $retval = $? >> 8;
+      my $child_retval = $? >> 8;
       unlink $tmpfile;   # rm the temp file
-      exit($retval);
+      exit($child_retval);
     }
 
     seek(FILE, 0, 1);
