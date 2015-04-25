@@ -10,6 +10,7 @@
 
 #use lib "./Text-Unidecode-0.04/lib";
 #use Text::Unidecode;
+use POSIX ":sys_wait_h";
 
 my $osname = $^O;
 
@@ -54,36 +55,28 @@ $cmd .= " > /dev/null 2>&1";
 
 #print($cmd);
 
-$pid = fork();
 system("touch $tmpfile");
-if ($pid == 0) { # this is the forked child process
-  #  this is a perl version of doing:  system("tail -f $tmpfile");
+if ($child_pid = fork()) { # parent process
+  # this is a perl version of doing:  system("tail -f $tmpfile");
   # http://docstore.mik.ua/orelly/perl4/cook/ch08_06.htm
   open FILE, "$tmpfile" or die "Couldn't open file: $!";
   for (;;) {
     while (<FILE>) { print }
     sleep 1;
+    if (waitpid($child_pid,WNOHANG) != 0) {
+      # then the child is done: http://perlmaven.com/how-to-check-if-a-child-process-is-still-running
+      my $retval = $? >> 8;
+      unlink $tmpfile;   # rm the temp file
+      exit($retval);
+    }
+
     seek(FILE, 0, 1);
   }
-
-  # this won't return
+} else { # child process
+  my $retval = system($cmd) >> 8;
+  exit($retval);
 }
-# below here is the parent process
 
-my $retval = system($cmd) >> 8;
-kill(9,$pid);  # kill the forked printout
-
-# read entire file in (using a trick from http://www.perlmonks.org/?node_id=1952)
-#local $/=undef;
-#open FILE, "$tmpfile" or die "Couldn't open file: $!";
-#$matlab_output = <FILE>;
-#close FILE;
-#print($matlab_output);
-
-# rm the temp file
-unlink $tmpfile;
-
-exit($retval);
 
 
 
