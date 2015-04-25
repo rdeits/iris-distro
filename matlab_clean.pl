@@ -54,18 +54,35 @@ $cmd .= " > /dev/null 2>&1";
 
 #print($cmd);
 
+$pid = fork();
+system("touch $tmpfile");
+if ($pid == 0) { # this is the forked child process
+  #  this is a perl version of doing:  system("tail -f $tmpfile");
+  # http://docstore.mik.ua/orelly/perl4/cook/ch08_06.htm
+  open FILE, "$tmpfile" or die "Couldn't open file: $!";
+  for (;;) {
+    while (<FILE>) { print }
+    sleep 1;
+    seek(FILE, 0, 1);
+  }
+
+  # this won't return
+}
+# below here is the parent process
+
 my $retval = system($cmd) >> 8;
+kill(9,$pid);  # kill the forked printout
 
 # read entire file in (using a trick from http://www.perlmonks.org/?node_id=1952)
-local $/=undef;
-open FILE, "$tmpfile" or die "Couldn't open file: $!";
-$matlab_output = <FILE>;
-close FILE;
+#local $/=undef;
+#open FILE, "$tmpfile" or die "Couldn't open file: $!";
+#$matlab_output = <FILE>;
+#close FILE;
+#print($matlab_output);
 
 # rm the temp file
 unlink $tmpfile;
 
-print($matlab_output);
 exit($retval);
 
 
