@@ -72,6 +72,8 @@ if ($child_pid = fork()) { # parent process
     sleep 1;
     if (waitpid($child_pid,WNOHANG) != 0) {
       # then the child is done: http://perlmaven.com/how-to-check-if-a-child-process-is-still-running
+      while (<FILE>) { print; } # output the rest
+
       my $child_retval = $? >> 8;
       unlink $tmpfile;   # rm the temp file
       exit($child_retval);
