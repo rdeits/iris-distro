@@ -80,6 +80,9 @@ if ($child_pid = fork()) { # parent process
 
       my $child_retval = $? >> 8;
       unlink $tmpfile;   # rm the temp file
+      if ($child_retval != 0) {
+	  print "matlab exit code: $child_retval\n";
+      }
       exit($child_retval);
     }
 
