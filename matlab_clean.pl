@@ -55,7 +55,11 @@ $cmd .= " > /dev/null 2>&1";
 
 #print($cmd);
 
-system("touch $tmpfile");
+# create the tmp file (in case the child gets there first)
+open FILE, ">$tmpfile";
+print FILE "";
+close FILE;
+
 if ($child_pid = fork()) { # parent process
   # this is a perl version of doing:  system("tail -f $tmpfile");
   # http://docstore.mik.ua/orelly/perl4/cook/ch08_06.htm
