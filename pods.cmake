@@ -130,7 +130,7 @@ endfunction(pods_install_executables)
 #
 # Install a (list) of libraries to lib/
 function(pods_install_libraries)
-    install(TARGETS ${ARGV} LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+    install(TARGETS ${ARGV} RUNTIME DESTINATION lib LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 endfunction(pods_install_libraries)
 
 function(pods_install_jars)
