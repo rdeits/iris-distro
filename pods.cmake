@@ -458,7 +458,7 @@ macro(pods_use_pkg_config_packages target)
 
 	pkg_check_modules(PODS_PKG ${ARGN})
         if (NOT PODS_PKG_FOUND)
-           message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find packages ${ARGN}")
+           message(FATAL_ERROR "ERROR: pods_use_pkg_config_packages FAILED.  could not find packages ${ARGN}.  PKG_CONFIG_PATH = $ENV{PKG_CONFIG_PATH}")
         endif()
 #	message(STATUS "using pkg ${ARGN}")
 #	message(STATUS "  LIBRARIES = ${PODS_PKG_LIBRARIES}")
@@ -617,7 +617,7 @@ macro(pods_config_search_paths)
       pkg_config_path(PKG_CONFIG_INSTALL_PATH)
 
       # add build/lib/pkgconfig to the pkg-config search path
-      if (WIN32)
+      if (0) #WIN32)
 	set(_path "${PKG_CONFIG_OUTPUT_PATH};${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
 	string(REGEX REPLACE ";+$" "" _path "${_path}")
 	set(ENV{PKG_CONFIG_PATH} "${_path}")
