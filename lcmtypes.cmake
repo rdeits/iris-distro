@@ -174,7 +174,6 @@ function(lcmtypes_build_c)
     endforeach()
     file(APPEND "${__agg_h_fname}" "\n#endif\n")
 
-    message(STATUS "c sourcefiles: ${LCMTYPES_C_SOURCEFILES}")
     add_library(${LCMTYPES_C_LIBNAME} ${LCMTYPES_C_SOURCEFILES})
 
     if (WIN32)  # only for MSVC?
