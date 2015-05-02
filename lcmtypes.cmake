@@ -103,9 +103,10 @@ pkg_check_modules(LCM lcm)
     
 if (LCM_FOUND)
    #find lcm-gen (it may be in the install path)
-   find_program(LCM_GEN_EXECUTABLE lcm-gen ${EXECUTABLE_OUTPUT_PATH} ${EXECUTABLE_INSTALL_PATH})
-     
+   find_program(LCM_GEN_EXECUTABLE NAMES lcm-gen lcm-gen.exe HINTS ${EXECUTABLE_OUTPUT_PATH} ${EXECUTABLE_INSTALL_PATH})
+
    if (NOT LCM_GEN_EXECUTABLE)
+     message(STATUS "${EXECUTABLE_OUTPUT_PATH} ${EXECUTABLE_INSTALL_PATH}")
      message(STATUS "lcm-gen not found")
      unset(LCM_FOUND)
    endif()
@@ -183,6 +184,14 @@ function(lcmtypes_build_c)
 
     install(FILES ${__agg_h_fname} DESTINATION lcmtypes)
 
+    # create a pkg-config file
+    pods_install_pkg_config_file(${libname}
+		CFLAGS
+		DESCRIPTION "LCM types for ${PROJECT_NAME}"
+		LIBS -l${libname}
+		REQUIRES lcm
+		VERSION 0.0.0)
+						      
     unset(__agg_h_fname)
   endif()
 
@@ -457,3 +466,5 @@ macro(add_lcmtype)
   add_python_lcmtype(${ARGV})
 endmacro()
 
+
+include_directories(${CMAKE_BINARY_DIR}/lcmgen/lcmtypes )
