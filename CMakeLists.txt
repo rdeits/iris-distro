@@ -5,39 +5,15 @@ set(POD_NAME iris)
 include(cmake/pods.cmake)
 
 if (CMAKE_COMPILER_IS_GNUCC)
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
 
    execute_process(COMMAND ${CMAKE_C_COMPILER} -dumpversion
                 OUTPUT_VARIABLE GCC_VERSION)
-   if (NOT (GCC_VERSION VERSION_GREATER 4.3 OR GCC_VERSION VERSION_EQUAL 4.3))
-        message(FATAL_ERROR "requires gcc version >= 4.3")  # to support the c++0x flag below
-   elseif(GCC_VERSION VERSION_LESS 4.7)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-   else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-   endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
- if (APPLE)  # this was a step towards getting things to work with
-#   clang on mac, but ultimately we didn't get there...   (but I would
-#   be worried about sharing pointers between objects compiled against
-#   different c++ libs, so removing it)
-#    # http://stackoverflow.com/questions/13445742/apple-and-shared-ptr
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
-  endif()
-elseif (MSVC)
-#  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:SSE2 /openmp")
-#  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2 /openmp")
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
-    # disable warning C4251: e.g.'RigidBody::linkname' : class 'std::basic_string<_Elem,_Traits,_Ax>' needs to have dll-interface to be used by clients of class 'RigidBody'
-    # followed by template linking errors.  After reading, e.g.:
-    #   https://connect.microsoft.com/VisualStudio/feedback/details/696593/vc-10-vs-2010-basic-string-exports
-    # I think we're not being sufficiently careful with our library interfaces (on other platforms as well) - Russ
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 endif()
 
 # require python
@@ -73,6 +49,8 @@ file(WRITE ${CMAKE_INSTALL_PREFIX}/matlab/rmpath_iris.m
 	   "  rmpath_iris();\n"
 	   "  cd(wd);\n"
     )
+
+set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
 
 pods_find_pkg_config(eigen3 3.2)
 

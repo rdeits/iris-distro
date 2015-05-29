@@ -34,6 +34,7 @@ Optionally, you can install the `cddmex` package to speed up some functions (spe
 	>>> import iris.test.*;
 	>>> test_poly_2d;
 
+You'll also need `liboimp-dev`
 
 Pods Compatibility
 ------------------
