@@ -200,12 +200,9 @@ end
 
 prob.a = sparse(prob.a);
 
-% Divide all off-diagonal entries of bara by 2. I don't know why this is
-% necessary, but if we don't do it, then all of the off-diagonal terms in Y
-% come out wrong by a factor of two. This is easy to see by comparing the
-% diagonal of Y21 to Y22--they are constrained to be the same, but the 
-% values in Y21 are precisely half those of Y22. This may be a bug in 
-% Mosek, but I'm not sure yet. 
+% Divide all off-diagonal entries of Abar by 2. This is necessary because Abar
+% is assumed by the solver to be a symmetric matrix, but we're only setting
+% its lower triangular part.
 mask = prob.bara.subk ~= prob.bara.subl;
 prob.bara.val(mask) = prob.bara.val(mask) / 2;
 

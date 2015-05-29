@@ -7,10 +7,12 @@ end
 inputs = {};
 for j = 1:n
   dim = randi([2,5],1);
-  lb = rand(dim,1) * 2 - 1;
-  ub = lb + rand(1) + 1;
-  A = [-diag(ones(dim,1)); diag(ones(dim,1))];
-  b = [-lb; ub];
+  pts = rand(dim, 10);
+  [A, b] = iris.thirdParty.polytopes.vert2lcon(pts');
+  % lb = rand(dim,1) * 2 - 1;
+  % ub = lb + rand(1) + 1;
+  % A = [-diag(ones(dim,1)); diag(ones(dim,1))];
+  % b = [-lb; ub];
   inputs{end+1} = struct('A', A,...
                          'b', b);
 end
@@ -21,9 +23,9 @@ for j = 1:n
   b = inputs{j}.b;
   [C, d] = iris.inner_ellipsoid.mosek_ellipsoid(A, b);
   
-  [C_cvx, d_cvx] = iris.inner_ellipsoid.cvx_ellipsoid(A, b);
-  valuecheck(C_cvx, C, 1e-3);
-  valuecheck(d_cvx, d, 1e-3);
+  % [C_cvx, d_cvx] = iris.inner_ellipsoid.cvx_ellipsoid(A, b);
+  % valuecheck(C_cvx, C, 1e-3);
+  % valuecheck(d_cvx, d, 1e-3);
   
 %   [C_pym, d_pym] = iris.inner_ellipsoid.py_mosek_ellipsoid(A, b);
 %   valuecheck(C_pym, C, 1e-3);
@@ -44,11 +46,11 @@ for j = 1:n
 end
 fprintf('mosek: %f s\n', toc/n);
 
-tic
-for j = 1:n
-  [C, d] = iris.inner_ellipsoid.cvx_ellipsoid(A,b);
-end
-fprintf('cvx: %f s\n', toc/n);
+% tic
+% for j = 1:n
+%   [C, d] = iris.inner_ellipsoid.cvx_ellipsoid(A,b);
+% end
+% fprintf('cvx: %f s\n', toc/n);
 
 % tic
 % for j = 1:n
