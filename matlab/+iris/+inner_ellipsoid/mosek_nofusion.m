@@ -200,6 +200,12 @@ end
 
 prob.a = sparse(prob.a);
 
+% Divide all off-diagonal entries of Abar by 2. This is necessary because Abar
+% is assumed by the solver to be a symmetric matrix, but we're only setting
+% its lower triangular part.
+mask = prob.bara.subk ~= prob.bara.subl;
+prob.bara.val(mask) = prob.bara.val(mask) / 2;
+
 % fprintf('setup: %f s\n', toc);
 % tic
 [r, res] = mosekopt('maximize echo(0)', prob);
@@ -218,13 +224,6 @@ for k = 1:2*n
     flat_ndx = flat_ndx + 1;
   end
 end
-
-% This seems to be a bug in Mosek, as far as I can tell. Even in very
-% simple cases, the off-diagonal terms in Y always come out to be exactly
-% half of their expecte value. This is easy to see by comparing the
-% diagonal of Y21 to Y22--they are constrained to be the same, but the 
-% values in Y21 are precisely half those of Y22. Sadness.
-Y = Y + tril(Y,-1);
 
 % Reflect Y to turn the lower-triangular form into a full matrix
 Y = Y + tril(Y,-1)';
@@ -259,4 +258,5 @@ if DEBUG
   assert(all(all(abs(Y22 - diag(diag(Y22))) < 1e-4)));
 
   assert(all(abs(s - sprime) < 1e-4));
+
 end
