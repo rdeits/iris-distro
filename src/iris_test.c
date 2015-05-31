@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "iris.h"
+#include "iris_mosek.h"
 
 void test_append_polytope() {
   Polytope* polytope = construct_polytope(3, 2);
@@ -66,8 +68,27 @@ void test_mosek_ellipsoid() {
   printf("test_mosek_ellipsoid passed\n");
 }
 
+void test_inverse() {
+  double M[3][3] = {{8, 1, 6},
+                    {3, 5, 7},
+                    {4, 9, 2}};
+  double Minv_expected[3][3] = {{0.1472, -0.1444, 0.0639},
+                                {-0.0611, 0.0222, 0.1056},
+                                {-0.0194, 0.1889, -0.1028}};
+  double Minv[3][3];
+  invert_matrix(3, M, Minv);
+  for (int i=0; i < 3; i++) {
+    for (int j=0; j < 3; j++) {
+      assert(abs(Minv[i][j] - Minv_expected[i][j]) < 1e-3);
+    }
+  } 
+  printf("test_inverse passed\n");
+
+}
+
 int main() {
   test_append_polytope();
   test_mosek_ellipsoid();
+  test_inverse();
   return 0;
 }
