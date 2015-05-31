@@ -23,7 +23,7 @@ static void MSKAPI printstr(void *handle,
 
 int inner_ellipsoid(Polytope* polytope, Ellipsoid* ellipsoid, double* volume) {
 
-  const int m = polytope->m;
+  const int m = polytope->num_faces;
   const int n = polytope->dim;
   const int l = ceil(log2(n));
 
@@ -105,7 +105,7 @@ int inner_ellipsoid(Polytope* polytope, Ellipsoid* ellipsoid, double* volume) {
           bara_k[abar_ndx + k] = k;
           bara_l[abar_ndx + k] = j;
         }
-        bara_v[abar_ndx + k] = polytope->A[i][k];
+        bara_v[abar_ndx + k] = *index(polytope->A, i, k);
       }
       abar_ndx += n;
       MSKint32t subi[] = {ndx_f[i + m * j]};
@@ -119,14 +119,14 @@ int inner_ellipsoid(Polytope* polytope, Ellipsoid* ellipsoid, double* volume) {
     }
     for (int j=0; j < num_d; j++) {
       subi_A_row[j] = ndx_d[j];
-      vali_A_row[j] = polytope->A[i][j];
+      vali_A_row[j] = *index(polytope->A, i, j);
     }
     subi_A_row[num_d] = ndx_g[i];
     vali_A_row[num_d] = 1;
     if (res == MSK_RES_OK)
       res = MSK_putarow(task, con_ndx, num_d + 1, subi_A_row, vali_A_row);
     if (res == MSK_RES_OK)
-      res = MSK_putconbound(task, con_ndx, MSK_BK_FX, polytope->b[i], polytope->b[i]);
+      res = MSK_putconbound(task, con_ndx, MSK_BK_FX, *index(polytope->b, i, 0), *index(polytope->b, i, 0));
     con_ndx++;
   }
   free(subi_A_row);
@@ -369,15 +369,15 @@ int inner_ellipsoid(Polytope* polytope, Ellipsoid* ellipsoid, double* volume) {
   for (int j=0; j < 2*n; j++) {
     for (int i=j; i < 2*n; i++) {
       if (j < n && i < n) {
-        ellipsoid->C[i][j] = barx[bar_ndx];
-        ellipsoid->C[j][i] = barx[bar_ndx]; // since barx is just the lower triangle
+        *index(ellipsoid->C, i, j) = barx[bar_ndx];
+        *index(ellipsoid->C, j, i) = barx[bar_ndx]; // since barx is just the lower triangle
       }
       bar_ndx++;
     }
   }
 
   for (int i=0; i < num_d; i++) {
-    ellipsoid->d[i] = xx[ndx_d[i]];
+    *index(ellipsoid->d, i, 0) = xx[ndx_d[i]];
   }
 
   if (volume) {
