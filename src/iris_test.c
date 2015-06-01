@@ -5,6 +5,7 @@
 #include <string.h>
 #include "iris.h"
 #include "iris_mosek.h"
+#include "dbg.h"
 
 void test_append_polytope() {
   Polytope* polytope = construct_polytope(3, 2);
@@ -58,10 +59,34 @@ void test_mosek_ellipsoid() {
   assert(abs(*index(ellipsoid->d, 0, 0) - 0.358029) < 1e-5);
   assert(abs(*index(ellipsoid->d, 1, 0) - 0.358029) < 1e-5);
 
-  printf("did assert\n");
   free_ellipsoid(ellipsoid);
   free_polytope(polytope);
   printf("test_mosek_ellipsoid passed\n");
+}
+
+void test_infeasible_ellipsoid() {
+  int nrows = 3;
+  int dim = 2;
+  Polytope* polytope = construct_polytope(nrows, dim);
+  Ellipsoid* ellipsoid = construct_ellipsoid(dim);
+
+  double A[3][2] = {{-1, 0},
+                    {0, -1},
+                    {1, 1}};
+  set_matrix_data(polytope->A, 2, A);
+  double b[3][1] = {0, 0, -1};
+  set_matrix_data(polytope->b, 1, b);
+
+  double volume;
+  int err = inner_ellipsoid(polytope, ellipsoid, &volume);
+  check(err, "expected an error code");
+
+  printf("test_infeasble_ellipsoid passed\n");
+  return;
+
+error:
+  return;
+
 }
 
 void test_inverse() {
@@ -86,6 +111,7 @@ void test_inverse() {
 int main() {
   test_append_polytope();
   test_mosek_ellipsoid();
+  test_infeasible_ellipsoid();
   test_inverse();
   return 0;
 }
