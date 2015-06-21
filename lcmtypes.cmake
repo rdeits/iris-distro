@@ -379,11 +379,11 @@ function(add_c_lcmtype lcmtype)
   endif()
   set(lcmtype_w_package "${package_prefix}${lcmtype_we}")
 
-  add_custom_command(OUTPUT "${LCMTYPES_DIR}/${lcmtype_we}.c" "${LCMTYPES_DIR}/${lcmtype_w_package}.h" 
+  add_custom_command(OUTPUT "${LCMTYPES_DIR}/${lcmtype_w_package}.c" "${LCMTYPES_DIR}/${lcmtype_w_package}.h" 
   		     COMMAND "${LCM_GEN_EXECUTABLE}" --c "${lcmtype}"
 		     DEPENDS ${lcmtype}
 		     WORKING_DIRECTORY ${LCMTYPES_DIR})
-  set(LCMTYPES_C_SOURCEFILES ${LCMTYPES_C_SOURCEFILES} "${LCMTYPES_DIR}/${lcmtype_we}.c" PARENT_SCOPE)
+  set(LCMTYPES_C_SOURCEFILES ${LCMTYPES_C_SOURCEFILES} "${LCMTYPES_DIR}/${lcmtype_w_package}.c" PARENT_SCOPE)
 
 endfunction()
 
