@@ -621,12 +621,12 @@ macro(pods_config_search_paths)
       pkg_config_path(PKG_CONFIG_INSTALL_PATH)
 
       # add build/lib/pkgconfig to the pkg-config search path
-      if (0) #WIN32)
-	set(_path "${PKG_CONFIG_OUTPUT_PATH};${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
-	string(REGEX REPLACE ";+$" "" _path "${_path}")
-	set(ENV{PKG_CONFIG_PATH} "${_path}")
+      if (WIN32)
+      	set(_path "${PKG_CONFIG_OUTPUT_PATH};${PKG_CONFIG_INSTALL_PATH};$ENV{PKG_CONFIG_PATH}")
+      	string(REGEX REPLACE ";+$" "" _path "${_path}")
+      	set(ENV{PKG_CONFIG_PATH} "${_path}")
       else()
-	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH}:${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH}")
+      	set(ENV{PKG_CONFIG_PATH} "${PKG_CONFIG_OUTPUT_PATH}:${PKG_CONFIG_INSTALL_PATH}:$ENV{PKG_CONFIG_PATH}")
       endif()
 
       shell_path(PKG_CONFIG_OUTPUT_PATH)
