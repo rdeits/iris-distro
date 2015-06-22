@@ -56,12 +56,27 @@ Matrix* invert_matrix(Matrix* matrix) {
 
   int ipiv[matrix->rows];
   int lwork = matrix->rows * matrix->rows;
-  double work[matrix->rows * matrix->rows];
+  double *work = malloc(matrix->rows * matrix->rows * sizeof(double));
   int info;
   int dim = matrix->rows;
   dgetrf_(&dim, &dim, inv->data, &dim, ipiv, &info);
-  dgetri_(&dim, inv->data, &dim, ipiv, &work, &lwork, &info);
+  dgetri_(&dim, inv->data, &dim, ipiv, work, &lwork, &info);
+  free(work);
   return inv;
+}
+
+void matrix_product(Matrix* A, Matrix* B, Matrix* result) {
+  assert(A->cols == B->rows);
+  assert(result->rows == A->rows);
+  assert(result->cols == B->cols);
+  for (int i=0; i < A->rows; i++) {
+    for (int j=0; j < B->cols; j++) {
+      *index(result, i, j) = 0;
+      for (int k=0; k < A->cols; k++) {
+        *index(result, i, j) += *index(A, i, k) * *index(B, k, j);
+      }
+    }
+  }
 }
 
 Polytope* construct_polytope(int m, int n) {

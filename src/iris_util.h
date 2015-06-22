@@ -48,7 +48,7 @@ typedef struct IRISDebugData_t {
 typedef struct IRISProblem_t {
   int num_obstacles;
   int dim;
-  Matrix* obstacle_pts; // dim x num_obstacles
+  Matrix** obstacle_pts; // num_obstacles x dim x pts_per_obstacle
   Polytope* bounds;
   Matrix* start; // dim x 1
 } IRISProblem;
@@ -59,6 +59,7 @@ void free_matrix(Matrix* matrix);
 Matrix* invert_matrix(Matrix* matrix);
 double* index(Matrix* matrix, size_t row, size_t col);
 void copy_matrix(Matrix* source, Matrix* destination);
+void matrix_product(Matrix* A, Matrix* B, Matrix* result);
 
 Polytope* construct_polytope(int m, int n);
 void append_polytope(Polytope* this, Polytope *other);

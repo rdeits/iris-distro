@@ -105,7 +105,34 @@ void test_inverse() {
     }
   } 
   printf("test_inverse passed\n");
+}
 
+void test_product() {
+  double A_data[2][2] = {{1, 0},
+                         {0, 1}};
+  Matrix *A = construct_matrix(2, 2);
+  set_matrix_data(A, 2, A_data);
+
+  double B_data[2][2] = {{3, 2},
+                         {7, 9}};
+  Matrix *B = construct_matrix(2, 2);
+  set_matrix_data(B, 2, B_data);
+
+  Matrix *C = construct_matrix(2, 2);
+  matrix_product(A, B, C);
+
+  double C_expected_data[2][2] = {{3, 2},
+                                  {7, 9}};
+  Matrix *C_expected = construct_matrix(2, 2);
+  set_matrix_data(C_expected, 2, C_expected_data);
+
+  for (int i=0; i < 2; i++) {
+    for (int j=0; j < 2; j++) {
+      printf("got: %f, expected: %f\n", *index(C, i, j), *index(C_expected, i, j));
+      assert(abs(*index(C, i, j) - *index(C_expected, i, j)) < 1e-12);
+    }
+  }
+  printf("test_product passed");
 }
 
 int main() {
@@ -113,5 +140,6 @@ int main() {
   test_mosek_ellipsoid();
   test_infeasible_ellipsoid();
   test_inverse();
+  test_product();
   return 0;
 }

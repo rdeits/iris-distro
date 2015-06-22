@@ -58,7 +58,7 @@ void initialize_small_sphere(Ellipsoid* ellipsoid, Matrix* start) {
   }
 }
 
-int separating_hyperplanes(double** obstacle_pts, Ellipsoid* ellipsoid, Polytope* polytope) {
+int separating_hyperplanes(Matrix** obstacle_pts, Ellipsoid* ellipsoid, Polytope* polytope) {
 
   return 0;
 }
