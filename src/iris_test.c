@@ -1,11 +1,22 @@
 #include <assert.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+// #include <math.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
 #include "iris.h"
 #include "iris_mosek.h"
 #include "dbg.h"
+
+template <typename T>
+void valuecheck(const T& a, const T& b)
+{
+  if (a != b) {
+    std::ostringstream stream;
+    stream << "Expected:\n" << a << "\nbut got:" << b << "\n";
+    throw std::runtime_error(stream.str());
+  }
+}
+
 
 void test_append_polytope() {
   Polytope* polytope = construct_polytope(3, 2);
