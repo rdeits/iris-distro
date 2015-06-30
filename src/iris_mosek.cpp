@@ -394,6 +394,7 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
         vali[j + 1] = Points(i, j);
       }
       check_res(MSK_putarow(task, i, 1 + nw, subi.data(), vali.data()));
+      check_res(MSK_putconbound(task, i, MSK_BK_FX, 0.0, 0.0));
     }
   }
   {
@@ -403,15 +404,8 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
       subi[i] = dim + i;
     }
     check_res(MSK_putarow(task, ncon - 1, nw, subi.data(), vali.data()));
+    check_res(MSK_putconbound(task, ncon - 1, MSK_BK_FX, 1.0, 1.0));
   }
-
-
-  // prob.blc = [zeros(dim,1);1];
-  // prob.buc = [zeros(dim,1);1];
-  for (int i=0; i < ncon; i++) {
-    check_res(MSK_putconbound(task, i, MSK_BK_FX, 0.0, 0.0));
-  }
-
 
   // prob.cones.type   = res.symbcon.MSK_CT_QUAD;
   // prob.cones.sub    = [nvar, 1:dim];
@@ -419,20 +413,44 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
   MSKint32t csub[dim + 1];
   csub[0] = nvar - 1;
   for (int i=0; i < dim; i++) {
-    csub[i] = i;
+    csub[i+1] = i;
   }
   check_res(MSK_appendcone(task, MSK_CT_QUAD, 0.0, dim + 1, csub));
 
   MSKrescodee trmcode;
   check_res(MSK_optimizetrm(task, &trmcode));
-  double *xx;
-  xx = (double *) MSK_calloctask(task, nvar, sizeof(MSKrealt));
-  if (xx) {
-    for (int i=0; i < dim; i++) {
-      result[i] = xx[i];
-    }
-  } else {
-    throw(IRISMosekError(MSK_RES_ERR_SPACE));
+
+  MSKsolstae solsta;
+  MSK_getsolsta(task, MSK_SOL_ITR, &solsta);
+  switch(solsta) {
+    case MSK_SOL_STA_OPTIMAL:
+    case MSK_SOL_STA_NEAR_OPTIMAL:
+      MSK_getxxslice(task, MSK_SOL_ITR, 0, dim, result.data());
+      break;
+    case MSK_SOL_STA_DUAL_INFEAS_CER: 
+    case MSK_SOL_STA_PRIM_INFEAS_CER: 
+    case MSK_SOL_STA_NEAR_DUAL_INFEAS_CER: 
+    case MSK_SOL_STA_NEAR_PRIM_INFEAS_CER:   
+      std::cout << "Primal or dual infeasibility certificate found." << std::endl;
+      if (!existing_env) {
+        MSK_deleteenv(env);
+        free(env);
+      }
+      throw(InnerEllipsoidInfeasibleError());
+    case MSK_SOL_STA_UNKNOWN: 
+      std::cout << "The status of the solution could not be determined." << std::endl;
+      if (!existing_env) {
+        MSK_deleteenv(env);
+        free(env);
+      }
+      throw(InnerEllipsoidInfeasibleError());
+    default: 
+      printf("other solution status: %d\n", solsta);
+      if (!existing_env) {
+        MSK_deleteenv(env);
+        free(env);
+      }
+      throw(InnerEllipsoidInfeasibleError());
   }
 
   if (!existing_env) {

@@ -133,9 +133,29 @@ void test_infeasible_ellipsoid() {
   throw(std::runtime_error("expected an infeasible ellipsoid error"));
 }
 
+void test_closest_point() {
+  MatrixXd points(2, 4);
+  points << 0, 0, 1, 1,
+            0, 1, 0, 1;
+  VectorXd result(2);
+  VectorXd expected(2);
+  expected << 0, 0;
+  closest_point_in_convex_hull(points, result);
+  valuecheckMatrix(result, expected, 1e-6);
+
+  points << -2, -1, -1, 0,
+            -1, -2, 0,  -1;
+  expected << -0.5, -0.5;
+  closest_point_in_convex_hull(points, result);
+  valuecheckMatrix(result, expected, 1e-6);
+
+  printf("test closest point passed\n");
+}
+
 int main() {
   test_append_polytope();
   test_mosek_ellipsoid();
   test_infeasible_ellipsoid();
+  test_closest_point();
   return 0;
 }

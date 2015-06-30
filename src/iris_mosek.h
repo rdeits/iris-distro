@@ -29,4 +29,4 @@ class InnerEllipsoidInfeasibleError: public std::exception {
 
 double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t *existing_env=NULL);
 
-void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, const Eigen::VectorXd &goal, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);
+void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);
