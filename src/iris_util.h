@@ -23,11 +23,15 @@ public:
     A(0, dim),
     b(0, 1) {}
 
-  double getDimension() const {
+  Polytope(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> A, Eigen::Matrix<double, Eigen::Dynamic, 1> b):
+    A(A),
+    b(b) {}
+
+  int getDimension() const {
     return A.cols();
   }
 
-  double getNumberOfConstraints() const {
+  int getNumberOfConstraints() const {
     return A.rows();
   }
 

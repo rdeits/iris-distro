@@ -1,3 +1,4 @@
+#define NDEBUG
 #include "iris_mosek.h"
 #include "mosek.h"
 
@@ -209,7 +210,7 @@ int inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, double *volu
       }
     }
 
-    #ifdef DEBUG
+    #ifndef NDEBUG
       assert(abar_ndx == nabar);
     #endif
 
