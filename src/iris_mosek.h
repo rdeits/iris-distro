@@ -1,4 +1,32 @@
+#include <exception>
+#include "mosek.h"
 #include "iris_util.h"
 
-int inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, double *volume);
+class IRISMosekError : public std::exception {
+private:
+  std::string message;
+public:
+  explicit IRISMosekError(MSKrescodee res) {
+    /* In case of an error print error code and description. */       
+    char symname[MSK_MAX_STR_LEN]; 
+    char desc[MSK_MAX_STR_LEN]; 
+    MSK_getcodedesc (res, 
+                     symname, 
+                     desc); 
+    message = std::string(symname) + ": " + std::string(desc);
+  }
 
+  const char * what () const throw () {
+    return message.c_str();
+  }
+};
+
+class InnerEllipsoidInfeasibleError: public std::exception {
+  const char * what () const throw () {
+    return "Inner ellipsoid problem is infeasible (this likely means that the polytope has no interior)";
+  }
+};
+
+double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t *existing_env=NULL);
+
+void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, const Eigen::VectorXd &goal, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);

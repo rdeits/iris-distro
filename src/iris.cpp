@@ -36,7 +36,7 @@ IRISRegion* inflate_region(const IRISProblem &problem, const IRISOptions &option
 
     region->polytope.appendConstraints(problem.bounds);
 
-    inner_ellipsoid(region->polytope, region->ellipsoid, &volume);
+    volume = inner_ellipsoid(region->polytope, region->ellipsoid);
 
     if ((abs(volume - best_vol) / best_vol) < 2e-2)
       break;

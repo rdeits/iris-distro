@@ -99,8 +99,7 @@ void test_mosek_ellipsoid() {
 
   Ellipsoid ellipsoid(2);
 
-  double volume;
-  inner_ellipsoid(polytope, ellipsoid, &volume);
+  inner_ellipsoid(polytope, ellipsoid);
 
   MatrixXd C_expected(2,2);
   C_expected << 0.332799, -0.132021,
@@ -124,11 +123,14 @@ void test_infeasible_ellipsoid() {
 
   Ellipsoid ellipsoid(2);
 
-  double volume;
-  int err = inner_ellipsoid(polytope, ellipsoid, &volume);
-  valuecheck(err != 0, true);
-
-  printf("test_infeasble_ellipsoid passed\n");
+  
+  try {
+    inner_ellipsoid(polytope, ellipsoid);
+  } catch (InnerEllipsoidInfeasibleError &e) {
+    printf("test_infeasble_ellipsoid passed\n");
+    return;
+  }
+  throw(std::runtime_error("expected an infeasible ellipsoid error"));
 }
 
 int main() {
