@@ -1,6 +1,6 @@
 #include <exception>
 #include "mosek.h"
-#include "iris_util.h"
+#include "iris_types.h"
 
 class IRISMosekError : public std::exception {
 private:

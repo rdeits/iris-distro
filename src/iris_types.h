@@ -1,17 +1,12 @@
-#ifndef _IRIS_UTIL_H
-#define _IRIS_UTIL_H
+#ifndef _IRIS_TYPES_H
+#define _IRIS_TYPES_H
 
 #include <Eigen/Core>
 
 class IRISOptions {
 public:
-  bool require_containment;
-  bool error_on_infeas_start;
-
-  IRISOptions():
-    require_containment(false),
-    error_on_infeas_start(false)
-    {}
+  bool require_containment=false;
+  bool error_on_infeas_start=false;
 };
 
 class Polytope {
@@ -94,6 +89,5 @@ struct IRISProblem {
   int dim;
   Eigen::Matrix<double, Eigen::Dynamic, 1> start;
 };
-
 
 #endif
