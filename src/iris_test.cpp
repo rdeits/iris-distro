@@ -143,11 +143,17 @@ void test_closest_point() {
   closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-6);
 
+  closest_point_in_convex_hull_cvxgen(points, result);
+  valuecheckMatrix(result, expected, 1e-2);
+
   points << -2, -1, -1, 0,
             -1, -2, 0,  -1;
   expected << -0.5, -0.5;
   closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-6);
+  
+  closest_point_in_convex_hull_cvxgen(points, result);
+  valuecheckMatrix(result, expected, 1e-2);
 
   printf("test closest point passed\n");
 }

@@ -13,9 +13,10 @@ if(APPLE)
   set(mex_suffix mexmaci64)
 endif()
 
-add_library(iris_ldp SHARED solver.c matrix_support.c ldl.c util.c)
+add_library(iris_ldp SHARED cvxgen_ldp.c solver.c matrix_support.c ldl.c util.c)
 pods_install_libraries(iris_ldp)
 pods_install_headers(solver.h DESTINATION iris_ldp)
+pods_install_headers(cvxgen_ldp.h DESTINATION iris_ldp)
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cvxgen_ldp_mex.${mex_suffix}
   COMMAND matlab -nodisplay -r \"make_csolve\; quit\(\)\;\"

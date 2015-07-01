@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "cvxgen_ldp.h"
 Vars vars;
 Params params;
 Workspace work;
@@ -16,7 +17,7 @@ void cvxgen_ldp(double *Y, double *v) {
   for (i = 0; i < 24; i++) {
   	*dest++ = *src++;
   }
-  int num_iters = solve();
+  solve();
   dest = v;
   src = vars.v;
   for (i = 0; i < 3; i++) {
