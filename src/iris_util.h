@@ -52,6 +52,10 @@ public:
     C(Eigen::MatrixXd(dim, dim)),
     d(Eigen::VectorXd(dim)) {}
 
+  Ellipsoid(Eigen::MatrixXd C, Eigen::VectorXd d):
+    C(C),
+    d(d) {}
+
   double getDimension() const {
     return C.cols();
   }

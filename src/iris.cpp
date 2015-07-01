@@ -26,6 +26,27 @@ std::vector<size_t> arg_sort(const std::vector<T> &vec) {
   return idx;
 }
 
+void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKenv_t &env) {
+  if (Points.rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && Points.cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
+    closest_point_in_convex_hull_cvxgen(Points, result);
+  } else {
+    if (!env) {
+      std::cout << "making env" << std::endl;
+      check_res(MSK_makeenv(&env, NULL));
+    }
+    closest_point_in_convex_hull(Points, result, &env);
+  }
+}
+
+typedef std::pair<VectorXd, double> hyperplane;
+
+hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixXd &Cinv2, const VectorXd &x) {
+  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.d)).normalized();
+  std::pair<VectorXd, double> plane(nhat,
+                                    nhat.transpose() * x);
+  return plane;
+}
+
 void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start) {
 
   int dim = ellipsoid.getDimension();
@@ -69,32 +90,22 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     }
     DenseIndex idx;
     image_squared_dists[i].minCoeff(&idx);
-    VectorXd nhat = (2 * Cinv2 * (obstacle_pts[i].col(idx) - ellipsoid.d)).normalized();
-    double b0 = nhat.transpose() * obstacle_pts[i].col(idx);
-    if ((((nhat.transpose() * obstacle_pts[i]).array() - b0) >= 0).all()) {
+    hyperplane plane = tangent_plane_through_point(ellipsoid, Cinv2, obstacle_pts[i].col(idx));
+    if ((((plane.first.transpose() * obstacle_pts[i]).array() - plane.second) >= 0).all()) {
       // nhat already separates the ellipsoid from obstacle i, so we can skip the optimization
-      planes.emplace_back(nhat, b0);
+      planes.push_back(plane);
     } else {
       VectorXd ystar(dim);
-      if (image_pts[i].rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && image_pts[i].cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
-        closest_point_in_convex_hull_cvxgen(image_pts[i], ystar);
-      } else {
-        if (!env) {
-          std::cout << "making env" << std::endl;
-          check_res(MSK_makeenv(&env, NULL));
-        }
-        closest_point_in_convex_hull(image_pts[i], ystar, &env);
-      }
+      choose_closest_point_solver(image_pts[i], ystar, env);
 
       if (ystar.squaredNorm() < 1e-6) {
         // d is inside the obstacle. So we'll just reverse nhat to try to push the
         // ellipsoid out of the obstacle.
         infeasible_start = true;
-        planes.emplace_back(-nhat, -nhat.transpose() * obstacle_pts[i].col(idx));
+        planes.emplace_back(-plane.first, -plane.first.transpose() * obstacle_pts[i].col(idx));
       } else {
         VectorXd xstar = ellipsoid.C * ystar + ellipsoid.d;
-        nhat = (2 * Cinv2 * (xstar - ellipsoid.d)).normalized();
-        planes.emplace_back(nhat, nhat.transpose() * xstar);
+        planes.push_back(tangent_plane_through_point(ellipsoid, Cinv2, xstar));
       }
     }
 
