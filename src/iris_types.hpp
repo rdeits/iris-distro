@@ -3,10 +3,13 @@
 
 #include <Eigen/Core>
 
+#define ELLIPSOID_C_EPSILON 1e-4
+
 class IRISOptions {
 public:
-  bool require_containment=false;
-  bool error_on_infeas_start=false;
+  bool require_containment = false;
+  bool error_on_infeas_start = false;
+  double termination_threshold = 2e-2;
 };
 
 class Polytope {
@@ -38,6 +41,8 @@ public:
   }
 };
 
+
+
 class Ellipsoid {
 public:
   Eigen::MatrixXd C;
@@ -54,6 +59,17 @@ public:
   double getDimension() const {
     return C.cols();
   }
+
+  static Ellipsoid constructHypersphere(Eigen::VectorXd center, double radius=ELLIPSOID_C_EPSILON) {
+    int dim = center.size();
+    Ellipsoid ellipsoid(dim);
+    ellipsoid.C.setZero();
+    ellipsoid.C.diagonal().setConstant(radius);
+    ellipsoid.d = center;
+    return ellipsoid;
+  }
+
+
 };
 
 class IRISRegion {
@@ -70,7 +86,6 @@ public:
 struct IRISDebugData {
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polytope> polytope_history;
-  Eigen::VectorXd start;
   std::vector<Eigen::MatrixXd> obstacles;
   Eigen::VectorXd ellipsoid_times;
   Eigen::VectorXd polytope_times;
@@ -78,16 +93,63 @@ struct IRISDebugData {
   int iters;
 };
 
-struct IRISProblem {
-  IRISProblem(int dim):
-    bounds(dim),
-    dim(dim),
-    start(dim) {}
-
+class IRISProblem {
+private:
   std::vector<Eigen::MatrixXd> obstacle_pts; // each obstacle is a matrix of size (_dim, pts_per_obstacle)
   Polytope bounds;
   int dim;
-  Eigen::VectorXd start;
+  Ellipsoid seed;
+
+public:
+  IRISProblem(int dim):
+    bounds(dim),
+    dim(dim),
+    seed(dim) {}
+
+  void setSeedPoint(Eigen::VectorXd point) {
+    if (point.size() != this->getDimension()) {
+      throw(std::runtime_error("seed point must match dimension dim"));
+    }
+    this->seed = Ellipsoid::constructHypersphere(point);
+  }
+
+  void setSeedEllipsoid(Ellipsoid ellipsoid){
+    if (ellipsoid.getDimension() != this->getDimension()) {
+      throw std::runtime_error("seed ellipsoid must match dimension dim");
+    }
+    this->seed = ellipsoid;
+  }
+
+  int getDimension() const {
+    return this->dim;
+  }
+
+  Ellipsoid getSeed() const {
+    return this->seed;
+  }
+
+  void setBounds(Polytope new_bounds) {
+    if (new_bounds.getDimension() != this->getDimension()) {
+      throw std::runtime_error("bounds must match dimension dim");
+    }
+    this->bounds = new_bounds;
+  }
+
+  void addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
+    if (new_obstacle_vertices.rows() != this->getDimension()) {
+      throw std::runtime_error("new_obstacle_vertices must have dim rows");
+    }
+    this->obstacle_pts.push_back(new_obstacle_vertices);
+  }
+
+  std::vector<Eigen::MatrixXd> getObstacles() const {
+    return this->obstacle_pts;
+  }
+
+  Polytope getBounds() const {
+    return this->bounds;
+  }
+
 };
 
 #endif

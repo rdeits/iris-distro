@@ -4,8 +4,6 @@
 #include "iris_mosek.hpp"
 #include "iris/cvxgen_ldp.hpp"
 
-#define ELLIPSOID_C_EPSILON 1e-4
-
 using namespace Eigen;
 
 void initialize_small_sphere(const VectorXd &start, Ellipsoid &ellipsoid) {
@@ -136,16 +134,22 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
 
 IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
 
-  IRISRegion region(problem.dim);
-  initialize_small_sphere(problem.start, region.ellipsoid);
+  IRISRegion region(problem.getDimension());
+  region.ellipsoid = problem.getSeed();
 
-  double best_vol = pow(ELLIPSOID_C_EPSILON, problem.dim);
+  double best_vol = pow(ELLIPSOID_C_EPSILON, problem.getDimension());
   double volume;
   long int iter = 0;
   bool infeasible_start;
 
+  if (debug) {
+    debug->ellipsoid_history.push_back(region.ellipsoid);
+    debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
+  }
+
+
   while (1) {
-    separating_hyperplanes(problem.obstacle_pts, region.ellipsoid, region.polytope, infeasible_start);
+    separating_hyperplanes(problem.getObstacles(), region.ellipsoid, region.polytope, infeasible_start);
 
     // std::cout << "A: " << std::endl << region.polytope.A << std::endl;
     // std::cout << "b: " << region.polytope.b.transpose() << std::endl;
@@ -154,11 +158,11 @@ IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options
       throw(std::runtime_error("Error: initial point is infeasible\n"));
     }
 
-    region.polytope.appendConstraints(problem.bounds);
+    region.polytope.appendConstraints(problem.getBounds());
 
     volume = iris_mosek::inner_ellipsoid(region.polytope, region.ellipsoid);
 
-    if ((abs(volume - best_vol) / best_vol) < 2e-2)
+    if ((abs(volume - best_vol) / best_vol) < options.termination_threshold)
       break;
 
     best_vol = volume; // always true because ellipsoid volume is guaranteed to be non-decreasing (see Deits14). 

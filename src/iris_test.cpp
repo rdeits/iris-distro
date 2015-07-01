@@ -197,26 +197,23 @@ void test_separating_hyperplanes() {
 }
 
 void test_iris() {
-  MatrixXd obs(2,2);
-  std::vector<MatrixXd> obstacles;
+  IRISProblem problem(2);
+  problem.setSeedPoint(Vector2d(0.1, 0.1));
 
+  MatrixXd obs(2,2);
   // Inflate a region inside a 1x1 box
   obs << 0, 1,
          0, 0;
-  obstacles.push_back(obs);
+  problem.addObstacle(obs);
   obs << 1, 1,
          0, 1;
-  obstacles.push_back(obs);
+  problem.addObstacle(obs);
   obs << 1, 0,
          1, 1;
-  obstacles.push_back(obs);
+  problem.addObstacle(obs);
   obs << 0, 0,
          1, 0;
-  obstacles.push_back(obs);
-
-  IRISProblem problem(2);
-  problem.start << 0.1, 0.1;
-  problem.obstacle_pts = obstacles;
+  problem.addObstacle(obs);
 
   IRISOptions options;
 
