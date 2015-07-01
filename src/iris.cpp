@@ -38,13 +38,10 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     return;
   }
 
-  // FullPivLU<MatrixXd>lu(dim, dim);
-
   MatrixXd Cinv = ellipsoid.C.inverse();
   MatrixXd Cinv2 = Cinv * Cinv.transpose();
 
   Matrix<bool, Dynamic, 1> uncovered_obstacles = Matrix<bool, Dynamic, 1>::Constant(n_obs, true);
-  Matrix<bool, Dynamic, 1> planes_to_use = Matrix<bool, Dynamic, 1>::Zero(n_obs);
 
   std::vector<MatrixXd> image_pts(n_obs);
   for (int i=0; i < n_obs; i++) {
@@ -67,29 +64,58 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   MSKenv_t env = NULL;
   for (auto it = obs_sort_idx.begin(); it != obs_sort_idx.end(); ++it) {
     size_t i = *it;
-    if (uncovered_obstacles[i]) {
-      DenseIndex idx;
-      image_squared_dists[i].minCoeff(&idx);
-      VectorXd nhat = (2 * Cinv2 * (obstacle_pts[i].col(idx) - ellipsoid.d)).normalized();
-      double b0 = nhat.transpose() * obstacle_pts[i].col(idx);
-      if ((((nhat.transpose() * obstacle_pts[i]).array() - b0) >= 0).all()) {
-        // nhat already separates the ellipsoid from obstacle i, so we can skip the optimization
-        planes.emplace_back(nhat, b0);
+    if (!uncovered_obstacles(i)) {
+      continue;
+    }
+    DenseIndex idx;
+    image_squared_dists[i].minCoeff(&idx);
+    VectorXd nhat = (2 * Cinv2 * (obstacle_pts[i].col(idx) - ellipsoid.d)).normalized();
+    double b0 = nhat.transpose() * obstacle_pts[i].col(idx);
+    if ((((nhat.transpose() * obstacle_pts[i]).array() - b0) >= 0).all()) {
+      // nhat already separates the ellipsoid from obstacle i, so we can skip the optimization
+      planes.emplace_back(nhat, b0);
+    } else {
+      VectorXd ystar(dim);
+      if (image_pts[i].rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && image_pts[i].cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
+        closest_point_in_convex_hull_cvxgen(image_pts[i], ystar);
       } else {
-        VectorXd ystar(dim);
-        if (image_pts[i].rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && image_pts[i].cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
-          closest_point_in_convex_hull_cvxgen(image_pts[i], ystar);
-        } else {
-          if (!env) {
-            std::cout << "making env" << std::endl;
-            check_res(MSK_makeenv(&env, NULL));
-          }
-          closest_point_in_convex_hull(image_pts[i], ystar, &env);
+        if (!env) {
+          std::cout << "making env" << std::endl;
+          check_res(MSK_makeenv(&env, NULL));
         }
+        closest_point_in_convex_hull(image_pts[i], ystar, &env);
+      }
 
-        throw(std::runtime_error("stopped after line 55 in matlab version"));
+      if (ystar.squaredNorm() < 1e-6) {
+        // d is inside the obstacle. So we'll just reverse nhat to try to push the
+        // ellipsoid out of the obstacle.
+        infeasible_start = true;
+        planes.emplace_back(-nhat, -nhat.transpose() * obstacle_pts[i].col(idx));
+      } else {
+        VectorXd xstar = ellipsoid.C * ystar + ellipsoid.d;
+        nhat = (2 * Cinv2 * (xstar - ellipsoid.d)).normalized();
+        planes.emplace_back(nhat, nhat.transpose() * xstar);
       }
     }
+
+    for (size_t j=0; j < n_obs; j++) {
+      if (((planes.back().first.transpose() * obstacle_pts[j]).array() >= planes.back().second).all()) {
+        uncovered_obstacles(j) = false;
+      }
+    }
+    uncovered_obstacles(i) = false; // even if it doesn't pass the strict check, we're done with this obstacle
+
+    if (!uncovered_obstacles.any()) {
+      break;
+    }
+  }
+
+  polytope.A.resize(planes.size(), dim);
+  polytope.b.resize(planes.size(), 1);
+
+  for (auto it = planes.begin(); it != planes.end(); ++it) {
+    polytope.A.row(it - planes.begin()) = it->first.transpose();
+    polytope.b(it - planes.begin()) = it->second;
   }
 
   return;
