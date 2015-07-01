@@ -11,14 +11,14 @@ public:
 
 class Polytope {
 public:
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> A;
-  Eigen::Matrix<double, Eigen::Dynamic, 1> b;
+  Eigen::MatrixXd A;
+  Eigen::VectorXd b;
 
   Polytope(int dim):
     A(0, dim),
     b(0, 1) {}
 
-  Polytope(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> A, Eigen::Matrix<double, Eigen::Dynamic, 1> b):
+  Polytope(Eigen::MatrixXd A, Eigen::VectorXd b):
     A(A),
     b(b) {}
 
@@ -40,8 +40,8 @@ public:
 
 class Ellipsoid {
 public:
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> C;
-  Eigen::Matrix<double, Eigen::Dynamic, 1> d;
+  Eigen::MatrixXd C;
+  Eigen::VectorXd d;
 
   Ellipsoid(int dim):
     C(Eigen::MatrixXd(dim, dim)),
@@ -70,8 +70,8 @@ public:
 struct IRISDebugData {
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polytope> polytope_history;
-  Eigen::Matrix<double, Eigen::Dynamic, 1> start;
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> obstacles;
+  Eigen::VectorXd start;
+  std::vector<Eigen::MatrixXd> obstacles;
   Eigen::VectorXd ellipsoid_times;
   Eigen::VectorXd polytope_times;
   double total_time;
@@ -84,10 +84,10 @@ struct IRISProblem {
     dim(dim),
     start(dim) {}
 
-  std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> obstacle_pts; // each obstacle is a matrix of size (_dim, pts_per_obstacle)
+  std::vector<Eigen::MatrixXd> obstacle_pts; // each obstacle is a matrix of size (_dim, pts_per_obstacle)
   Polytope bounds;
   int dim;
-  Eigen::Matrix<double, Eigen::Dynamic, 1> start;
+  Eigen::VectorXd start;
 };
 
 #endif

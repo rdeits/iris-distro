@@ -1,6 +1,11 @@
+#ifndef _IRIS_MOSEK_H
+#define _IRIS_MOSEK_H
+
 #include <exception>
 #include "mosek.h"
-#include "iris_types.h"
+#include "iris_types.hpp"
+
+namespace iris_mosek {
 
 class IRISMosekError : public std::exception {
 private:
@@ -32,3 +37,7 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
 void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);
 
 void check_res(MSKrescodee res);
+
+}
+
+#endif

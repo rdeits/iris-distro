@@ -1,6 +1,7 @@
 #include <iostream>
-#include "iris.h"
-#include "iris_mosek.h"
+#include "iris.hpp"
+#include "iris_mosek.hpp"
+#include "iris/cvxgen_ldp.hpp"
 
 using namespace Eigen;
 
@@ -100,7 +101,7 @@ void test_mosek_ellipsoid() {
 
   Ellipsoid ellipsoid(2);
 
-  inner_ellipsoid(polytope, ellipsoid);
+  iris_mosek::inner_ellipsoid(polytope, ellipsoid);
 
   MatrixXd C_expected(2,2);
   C_expected << 0.332799, -0.132021,
@@ -126,8 +127,8 @@ void test_infeasible_ellipsoid() {
 
   
   try {
-    inner_ellipsoid(polytope, ellipsoid);
-  } catch (InnerEllipsoidInfeasibleError &e) {
+    iris_mosek::inner_ellipsoid(polytope, ellipsoid);
+  } catch (iris_mosek::InnerEllipsoidInfeasibleError &e) {
     printf("test_infeasble_ellipsoid passed\n");
     return;
   }
@@ -141,25 +142,25 @@ void test_closest_point() {
   VectorXd result(2);
   VectorXd expected(2);
   expected << 0, 0;
-  closest_point_in_convex_hull(points, result);
+  iris_mosek::closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-6);
 
-  closest_point_in_convex_hull_cvxgen(points, result);
+  iris_cvxgen::closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-2);
 
   points << -2, -1, -1, 0,
             -1, -2, 0,  -1;
   expected << -0.5, -0.5;
-  closest_point_in_convex_hull(points, result);
+  iris_mosek::closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-6);
 
-  closest_point_in_convex_hull_cvxgen(points, result);
+  iris_cvxgen::closest_point_in_convex_hull(points, result);
   valuecheckMatrix(result, expected, 1e-2);
 
   MatrixXd line(2,2);
   line << 9000, 9000,
           -1000, 9000;
-  closest_point_in_convex_hull_cvxgen(line, result);
+  iris_cvxgen::closest_point_in_convex_hull(line, result);
   expected << 9000, 0;
   valuecheckMatrix(result, expected, 1);
 

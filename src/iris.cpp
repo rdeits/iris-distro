@@ -1,10 +1,8 @@
 #include <iostream>
 #include <Eigen/LU>
-#include "iris.h"
-#include "iris_mosek.h"
-extern "C" {
-  #include "iris_ldp/cvxgen_ldp.h"
-}
+#include "iris.hpp"
+#include "iris_mosek.hpp"
+#include "iris/cvxgen_ldp.hpp"
 
 #define ELLIPSOID_C_EPSILON 1e-4
 
@@ -40,40 +38,15 @@ hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixX
 void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKenv_t &env) {
   // std::cout << "points: " << std::endl << Points << std::endl;
   if (Points.rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && Points.cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
-    closest_point_in_convex_hull_cvxgen(Points, result);
+    iris_cvxgen::closest_point_in_convex_hull(Points, result);
   } else {
     if (!env) {
       std::cout << "making env" << std::endl;
-      check_res(MSK_makeenv(&env, NULL));
+      iris_mosek::check_res(MSK_makeenv(&env, NULL));
     }
-    closest_point_in_convex_hull(Points, result, &env);
+    iris_mosek::closest_point_in_convex_hull(Points, result, &env);
   }
   // std::cout << "closest point: " << result.transpose() << std::endl;
-}
-
-void closest_point_in_convex_hull_cvxgen(MatrixXd Points, VectorXd &result) {
-  int m = Points.rows();
-  int n = Points.cols();
-  if (m < IRIS_CVXGEN_LDP_MAX_ROWS || n < IRIS_CVXGEN_LDP_MAX_COLS) {
-    Points.conservativeResize(IRIS_CVXGEN_LDP_MAX_ROWS, IRIS_CVXGEN_LDP_MAX_COLS);
-  } else if (m > IRIS_CVXGEN_LDP_MAX_ROWS) {
-    throw(std::runtime_error("Too many rows for CVXGEN solver"));
-  } else if (n > IRIS_CVXGEN_LDP_MAX_COLS) {
-    throw(std::runtime_error("Too many cols for CVXGEN solver"));
-  }
-
-  if (m < IRIS_CVXGEN_LDP_MAX_ROWS) {
-    Points.bottomRows(IRIS_CVXGEN_LDP_MAX_ROWS - m).setZero();
-  }
-  for (int i=n; i < IRIS_CVXGEN_LDP_MAX_COLS; i++) {
-    Points.col(i) = Points.col(n - 1);
-  }
-
-  // std::cout << "resized points: " << std::endl << Points << std::endl;
-  VectorXd resized_result(IRIS_CVXGEN_LDP_MAX_ROWS);
-  cvxgen_ldp(Points.data(), resized_result.data());
-  result = resized_result.head(m);
-  return;
 }
 
 void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start) {
@@ -183,7 +156,7 @@ IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options
 
     region.polytope.appendConstraints(problem.bounds);
 
-    volume = inner_ellipsoid(region.polytope, region.ellipsoid);
+    volume = iris_mosek::inner_ellipsoid(region.polytope, region.ellipsoid);
 
     if ((abs(volume - best_vol) / best_vol) < 2e-2)
       break;

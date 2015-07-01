@@ -1,10 +1,12 @@
 #define NDEBUG
-#include "iris_mosek.h"
+#include "iris_mosek.hpp"
 
 #include <cstdio>
 #include <iostream>
 
 using namespace Eigen;
+
+namespace iris_mosek {
 
 #define ADD_VAR(x) std::vector<int> ndx_##x (num_##x); for (int i=0; i < num_##x; i++) ndx_##x[i] = nvar++;
 
@@ -457,4 +459,6 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
     MSK_deleteenv(env);
     free(env);
   }
+}
+
 }

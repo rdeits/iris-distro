@@ -1,11 +1,12 @@
-#include "solver.h"
 #include "cvxgen_ldp.h"
+#include "solver.h"
+
 Vars vars;
 Params params;
 Workspace work;
 Settings settings;
 
-void cvxgen_ldp(double *Y, double *v) {
+void iris_cvxgen_closest_point_in_convex_hull(double *Y, double *v) {
   set_defaults();
   setup_indexing();
   settings.verbose = 0;
@@ -25,5 +26,3 @@ void cvxgen_ldp(double *Y, double *v) {
   	*dest++ = *src++;
   }
 }
-
-
