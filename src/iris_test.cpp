@@ -1,3 +1,4 @@
+#include <iostream>
 #include "iris.h"
 #include "iris_mosek.h"
 
@@ -155,6 +156,13 @@ void test_closest_point() {
   closest_point_in_convex_hull_cvxgen(points, result);
   valuecheckMatrix(result, expected, 1e-2);
 
+  MatrixXd line(2,2);
+  line << 9000, 9000,
+          -1000, 9000;
+  closest_point_in_convex_hull_cvxgen(line, result);
+  expected << 9000, 0;
+  valuecheckMatrix(result, expected, 1);
+
   printf("test closest point passed\n");
 }
 
@@ -187,11 +195,48 @@ void test_separating_hyperplanes() {
   printf("test_separating_hyperplanes passed\n");
 }
 
+void test_iris() {
+  MatrixXd obs(2,2);
+  std::vector<MatrixXd> obstacles;
+
+  // Inflate a region inside a 1x1 box
+  obs << 0, 1,
+         0, 0;
+  obstacles.push_back(obs);
+  obs << 1, 1,
+         0, 1;
+  obstacles.push_back(obs);
+  obs << 1, 0,
+         1, 1;
+  obstacles.push_back(obs);
+  obs << 0, 0,
+         1, 0;
+  obstacles.push_back(obs);
+
+  IRISProblem problem(2);
+  problem.start << 0.1, 0.1;
+  problem.obstacle_pts = obstacles;
+
+  IRISOptions options;
+
+  IRISRegion region = inflate_region(problem, options);
+  MatrixXd C_expected(2,2);
+  VectorXd d_expected(2);
+  C_expected << 0.5, 0, 
+                0, 0.5;
+  d_expected << 0.5, 0.5;
+  valuecheckMatrix(region.ellipsoid.C, C_expected, 1e-3);
+  valuecheckMatrix(region.ellipsoid.d, d_expected, 1e-3);
+
+  printf("test_iris passed\n");
+}
+
 int main() {
   test_append_polytope();
   test_mosek_ellipsoid();
   test_infeasible_ellipsoid();
   test_closest_point();
   test_separating_hyperplanes();
+  test_iris();
   return 0;
 }

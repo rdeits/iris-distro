@@ -26,7 +26,19 @@ std::vector<size_t> arg_sort(const std::vector<T> &vec) {
   return idx;
 }
 
+typedef std::pair<VectorXd, double> hyperplane;
+
+hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixXd &Cinv2, const VectorXd &x) {
+  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.d)).normalized();
+  std::pair<VectorXd, double> plane(nhat,
+                                    nhat.transpose() * x);
+  // std::cout << "tangent plane through point: " << x.transpose() << std::endl;
+  // std::cout << plane.first.transpose() << " | " << plane.second << std::endl;
+  return plane;
+}
+
 void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKenv_t &env) {
+  // std::cout << "points: " << std::endl << Points << std::endl;
   if (Points.rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && Points.cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
     closest_point_in_convex_hull_cvxgen(Points, result);
   } else {
@@ -36,15 +48,32 @@ void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKen
     }
     closest_point_in_convex_hull(Points, result, &env);
   }
+  // std::cout << "closest point: " << result.transpose() << std::endl;
 }
 
-typedef std::pair<VectorXd, double> hyperplane;
+void closest_point_in_convex_hull_cvxgen(MatrixXd Points, VectorXd &result) {
+  int m = Points.rows();
+  int n = Points.cols();
+  if (m < IRIS_CVXGEN_LDP_MAX_ROWS || n < IRIS_CVXGEN_LDP_MAX_COLS) {
+    Points.conservativeResize(IRIS_CVXGEN_LDP_MAX_ROWS, IRIS_CVXGEN_LDP_MAX_COLS);
+  } else if (m > IRIS_CVXGEN_LDP_MAX_ROWS) {
+    throw(std::runtime_error("Too many rows for CVXGEN solver"));
+  } else if (n > IRIS_CVXGEN_LDP_MAX_COLS) {
+    throw(std::runtime_error("Too many cols for CVXGEN solver"));
+  }
 
-hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixXd &Cinv2, const VectorXd &x) {
-  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.d)).normalized();
-  std::pair<VectorXd, double> plane(nhat,
-                                    nhat.transpose() * x);
-  return plane;
+  if (m < IRIS_CVXGEN_LDP_MAX_ROWS) {
+    Points.bottomRows(IRIS_CVXGEN_LDP_MAX_ROWS - m).setZero();
+  }
+  for (int i=n; i < IRIS_CVXGEN_LDP_MAX_COLS; i++) {
+    Points.col(i) = Points.col(n - 1);
+  }
+
+  // std::cout << "resized points: " << std::endl << Points << std::endl;
+  VectorXd resized_result(IRIS_CVXGEN_LDP_MAX_ROWS);
+  cvxgen_ldp(Points.data(), resized_result.data());
+  result = resized_result.head(m);
+  return;
 }
 
 void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start) {
@@ -132,10 +161,10 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   return;
 }
 
-IRISRegion* inflate_region(const IRISProblem &problem, const IRISOptions &options=IRISOptions(), IRISDebugData *debug=NULL) {
+IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
 
-  IRISRegion* region = new IRISRegion(problem.dim);
-  initialize_small_sphere(problem.start, region->ellipsoid);
+  IRISRegion region(problem.dim);
+  initialize_small_sphere(problem.start, region.ellipsoid);
 
   double best_vol = pow(ELLIPSOID_C_EPSILON, problem.dim);
   double volume;
@@ -143,14 +172,18 @@ IRISRegion* inflate_region(const IRISProblem &problem, const IRISOptions &option
   bool infeasible_start;
 
   while (1) {
-    separating_hyperplanes(problem.obstacle_pts, region->ellipsoid, region->polytope, infeasible_start);
+    separating_hyperplanes(problem.obstacle_pts, region.ellipsoid, region.polytope, infeasible_start);
+
+    // std::cout << "A: " << std::endl << region.polytope.A << std::endl;
+    // std::cout << "b: " << region.polytope.b.transpose() << std::endl;
+
     if (options.error_on_infeas_start && infeasible_start) {
       throw(std::runtime_error("Error: initial point is infeasible\n"));
     }
 
-    region->polytope.appendConstraints(problem.bounds);
+    region.polytope.appendConstraints(problem.bounds);
 
-    volume = inner_ellipsoid(region->polytope, region->ellipsoid);
+    volume = inner_ellipsoid(region.polytope, region.ellipsoid);
 
     if ((abs(volume - best_vol) / best_vol) < 2e-2)
       break;
@@ -160,28 +193,4 @@ IRISRegion* inflate_region(const IRISProblem &problem, const IRISOptions &option
   }
 
   return region;
-}
-
-void closest_point_in_convex_hull_cvxgen(MatrixXd Points, VectorXd &result) {
-  int m = Points.rows();
-  int n = Points.cols();
-  if (m < IRIS_CVXGEN_LDP_MAX_ROWS || n < IRIS_CVXGEN_LDP_MAX_COLS) {
-    Points.conservativeResize(IRIS_CVXGEN_LDP_MAX_ROWS, IRIS_CVXGEN_LDP_MAX_COLS);
-  } else if (m > IRIS_CVXGEN_LDP_MAX_ROWS) {
-    throw(std::runtime_error("Too many rows for CVXGEN solver"));
-  } else if (n > IRIS_CVXGEN_LDP_MAX_COLS) {
-    throw(std::runtime_error("Too many cols for CVXGEN solver"));
-  }
-
-  if (m < IRIS_CVXGEN_LDP_MAX_ROWS) {
-    Points.bottomRows(IRIS_CVXGEN_LDP_MAX_ROWS - m).setZero();
-  }
-  for (int i=n; i < IRIS_CVXGEN_LDP_MAX_COLS; i++) {
-    Points.col(i) = Points.col(n - 1);
-  }
-
-  VectorXd resized_result(IRIS_CVXGEN_LDP_MAX_ROWS);
-  cvxgen_ldp(Points.data(), resized_result.data());
-  result = resized_result.head(m);
-  return;
 }

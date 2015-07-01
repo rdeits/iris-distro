@@ -84,6 +84,11 @@ struct IRISDebugData {
 };
 
 struct IRISProblem {
+  IRISProblem(int dim):
+    bounds(dim),
+    dim(dim),
+    start(dim) {}
+
   std::vector<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>> obstacle_pts; // each obstacle is a matrix of size (_dim, pts_per_obstacle)
   Polytope bounds;
   int dim;

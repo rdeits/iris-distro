@@ -9,6 +9,7 @@ void cvxgen_ldp(double *Y, double *v) {
   set_defaults();
   setup_indexing();
   settings.verbose = 0;
+  settings.kkt_reg = 1e-8;
   double *src;
   double *dest;
   int i;
