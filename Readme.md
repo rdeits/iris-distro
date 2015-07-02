@@ -22,12 +22,6 @@ To build IRIS, just `cd` into the IRIS folder and run:
 
 	make
 
-The MATLAB implementation requires the Mosek toolbox for MATLAB, and the Python implementation currently requires both Mosek and Gurobi. The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
-
-	>>> import iris.test.*;
-	>>> test_poly_2d;
-
-
 Pods Compatibility
 ------------------
 
@@ -35,6 +29,20 @@ This software is designed to be compatible with the Pods guidelines: <http://sou
 
 * Gurobi: <https://github.com/RobotLocomotion/gurobi>
 * Mosek: <https://github.com/RobotLocomotion/mosek>
+
+External Requirements
+---------------------
+
+The MATLAB implementation requires the Mosek toolbox for MATLAB, and the Python implementation currently requires both Mosek and Gurobi. You can either download those tools manually or use our wrapper pods mentioned above. If you manually install Mosek, please make sure to also set up the Mosek Fusion tool for MATLAB. Fusion provides a Java API, so you'll need to add `mosekmatlab.jar` to MATLAB's Java path. Instructions for that are here: <http://docs.mosek.com/7.1/matlabfusion/Introduction.html#sec:tut:basic_ex>
+
+Installing and Running IRIS in MATLAB
+-------------------------------------
+
+The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
+
+	>>> import iris.test.*;
+	>>> test_poly_2d;
+
 
 Python Implementation
 ---------------------
