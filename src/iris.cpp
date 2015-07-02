@@ -1,4 +1,5 @@
 #include <iostream>
+#include <numeric>
 #include <Eigen/LU>
 #include "iris.hpp"
 #include "iris_mosek.hpp"

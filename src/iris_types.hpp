@@ -2,6 +2,7 @@
 #define _IRIS_TYPES_H
 
 #include <Eigen/Core>
+#include <vector>
 
 #define ELLIPSOID_C_EPSILON 1e-4
 

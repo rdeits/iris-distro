@@ -1,4 +1,3 @@
-#define NDEBUG
 #include "iris_mosek.hpp"
 
 #include <cstdio>
