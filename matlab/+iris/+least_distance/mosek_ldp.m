@@ -1,12 +1,12 @@
 function ystar = mosek_ldp(ys, res)
 % Use Mosek to find the closest point in the convex hull of the ys to the
 % origin.
+
 if nargin < 2
   [~, res] = mosekopt('symbcon echo(0)');
 end
 
 dim = size(ys, 1);
-nw = size(ys, 2);
 
 nw = size(ys,2);
 nvar= 1 + dim+nw;
@@ -18,9 +18,9 @@ prob.blx = [-inf*ones(dim,1);zeros(nw+1,1)];
 prob.bux = inf*ones(nvar,1);
 
 % Specify the cones.
-prob.cones.type   = [res.symbcon.MSK_CT_QUAD];
+prob.cones.type   = res.symbcon.MSK_CT_QUAD;
 prob.cones.sub    = [nvar, 1:dim];
-prob.cones.subptr = [1];
+prob.cones.subptr = 1;
 
 % Optimize the problem.
 [~,solution]=mosekopt('minimize echo(0)',prob);

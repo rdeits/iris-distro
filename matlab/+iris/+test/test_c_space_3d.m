@@ -22,8 +22,7 @@ A_bounds = [-1,0,0;
             0,0,1];
 base_obstacles = iris.test.random_obstacles(2, n_obs, lb(1:2), ub(1:2));
 base_obstacles = mat2cell(reshape(base_obstacles(:,1,:), 2, []), 2, ones(1, n_obs));
-obstacles = cspace3(base_obstacles, bot, 10);
-obstacle_pts = reshape(cell2mat(obstacles), [dim, 8, length(obstacles)]);
+obstacle_pts = cspace3(base_obstacles, bot, 10);
 b_bounds = [-lb;ub];
 start = 0.5 * (lb + ub);
 

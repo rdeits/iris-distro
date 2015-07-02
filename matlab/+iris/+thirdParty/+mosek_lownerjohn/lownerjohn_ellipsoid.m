@@ -35,14 +35,14 @@
 %
 %  minimizes the volume of the enclosing ellipsoid,
 %
-%    { x | || P*(x-c) ||_2 <= 1 }
+%    { x | || P*x-c ||_2 <= 1 }
 %
 %  The volume is proportional to det(P)^{-1/n}, so the problem can
 %  be solved as
 %
 %    minimize         t
 %    subject to       t       >= det(P)^(-1/n)
-%                || P*xi + c ||_2 <= 1,  i=1,...,m
+%                || P*xi - c ||_2 <= 1,  i=1,...,m
 %                  P is PSD.
 %
 %  References:
@@ -101,15 +101,15 @@ classdef lownerjohn_ellipsoid
             P = M.variable('P', NDSet(n,n), Domain.unbounded());
             c = M.variable('c', n, Domain.unbounded());
 
-            % (1, P(*xi+c)) \in Q
+            % (1, P*xi-c) \in Q
             M.constraint('qc', ...
                          Expr.hstack(Expr.constTerm(m,1.0), ...
                                      Expr.sub(Expr.mul(DenseMatrix(x),P.transpose()), ...
-                                              Variable.reshape(Variable.repeat(c,m),NDSet(m,2)))), ...
+                                              Variable.reshape(Variable.repeat(c,m),NDSet(m,n)))), ...
                          Domain.inQCone());
 
             % t <= det(P)^{1/n}
-            model_utils.det_rootn(M, P, t);
+            det_rootn(M, P, t);
 
             % Objective: Maximize t
             M.objective(ObjectiveSense.Maximize, t);

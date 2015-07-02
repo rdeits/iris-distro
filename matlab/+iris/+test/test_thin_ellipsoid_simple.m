@@ -9,10 +9,6 @@ ub = [1;1;1];
 
 iris.drawing.draw_3d(A_bounds, b_bounds, C, d, [], lb, ub);
 
-try
-  assert(all(all(abs(C - C1) <= 1e-3)))
-  assert(all(all(abs(d - d1) <= 1e-3)))
-catch
-  disp('Fail: this is a known bug in mosek_nofusion() for this particular input set.');
-end
+assert(all(all(abs(C - C1) <= 1e-3)))
+assert(all(all(abs(d - d1) <= 1e-3)))
 
