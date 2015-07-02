@@ -2,7 +2,7 @@
 #define _IRIS_MOSEK_H
 
 #include <exception>
-#include "mosek.h"
+#include "mosek/mosek.h"
 #include "iris_types.hpp"
 
 namespace iris_mosek {
