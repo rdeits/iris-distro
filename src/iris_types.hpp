@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include <stdexcept>
 
 #define ELLIPSOID_C_EPSILON 1e-4
 

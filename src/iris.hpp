@@ -1,7 +1,7 @@
 #ifndef _IRIS_H
 #define _IRIS_H
 
-#include "iris_types.hpp"
+#include "iris/iris_types.hpp"
 
 IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
 
