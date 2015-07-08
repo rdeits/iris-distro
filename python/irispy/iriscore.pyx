@@ -3,49 +3,44 @@ import numpy as np
 cimport numpy as np
 from cython.view cimport array as cvarray
 from cython.operator cimport dereference as deref
+from iriscore cimport CPolytope, CEllipsoid
 
-cdef extern from "Eigen/Core" namespace "Eigen":
-	cdef cppclass VectorXd:
-		double* data()
-	cdef cppclass MatrixXd:
-		double* data()
-	cdef cppclass Map[T]:
-		Map(double *ptr, int rows, int cols)
+cdef eigenMatrixToNumpy(const MatrixXd &M):
+    cdef cvarray = <double[:M.rows(),:M.cols()]> <double*> M.data()
+    return np.asarray(cvarray)
 
-cdef extern from "iris/iris.hpp":
-	cdef cppclass CPolytope "Polytope":
-		CPolytope() except +
-		int getDimension()
-		int getNumberOfConstraints()
-		void setA(double *A_, int rows, int cols)
-		void setB(double *b_, int rows)
-		void setB(VectorXd b)
-		const MatrixXd& getA()
-		const VectorXd& getB()
-		void appendConstraints(const CPolytope &other)
-
-
-	cdef cppclass CEllipsoid "Ellipsoid":
-		CEllipsoid() except +
-		int getDimension()
+cdef eigenVectorToNumpy(const VectorXd &v):
+    cdef cvarray = <double[:v.size()]> <double*> v.data()
+    return np.asarray(cvarray)
 
 cdef class Polytope:
-	cdef CPolytope cpolytope 
-	def getDimension(self):
-		return self.cpolytope.getDimension()
-	def setA(self, np.ndarray[double, ndim=2, mode="c"] A not None):
-		# cdef Map[MatrixXd] *A_map = new Map[MatrixXd](&A[0,0], A.shape[0], A.shape[1])
-		# self.cpolytope.setA(deref(A_map))
-		# del A_map
-		self.cpolytope.setA(&A[0,0], A.shape[0], A.shape[1])
-	def getA(self):
-		cdef cvarray = <double[:self.cpolytope.getNumberOfConstraints(),:self.cpolytope.getDimension()]> <double*> self.cpolytope.getA().data()
-		return np.asarray(cvarray).copy()
-	def setB(self, np.ndarray[double, ndim=1, mode="c"] b not None):
-		self.cpolytope.setB(&b[0], b.shape[0])
-	def getB(self):
-		cdef cvarray = <double[:self.cpolytope.getNumberOfConstraints()]> <double*> self.cpolytope.getB().data()
-		return np.asarray(cvarray).copy()
-	def appendConstraints(self, Polytope other):
-		self.cpolytope.appendConstraints(other.cpolytope)
+    cdef CPolytope cpolytope 
+    def getDimension(self):
+        return self.cpolytope.getDimension()
+    def setA(self, np.ndarray[double, ndim=2, mode="c"] A not None):
+        cdef MatrixXd A_mat = copyToMatrix(&A[0,0], A.shape[0], A.shape[1])
+        self.cpolytope.setA(A_mat)
+    def getA(self):
+        return eigenMatrixToNumpy(self.cpolytope.getA()).copy()
+    def setB(self, np.ndarray[double, ndim=1, mode="c"] b not None):
+        cdef VectorXd b_vec = copyToVector(&b[0], b.shape[0])
+        self.cpolytope.setB(b_vec)
+    def getB(self):
+        return eigenVectorToNumpy(self.cpolytope.getB()).copy()
+    def appendConstraints(self, Polytope other):
+        self.cpolytope.appendConstraints(other.cpolytope)
 
+cdef class Ellipsoid:
+    cdef CEllipsoid cellipsoid
+    def getDimension(self):
+        return self.cellipsoid.getDimension()
+    def setC(self, np.ndarray[double, ndim=2, mode="c"] C not None):
+        cdef MatrixXd C_mat = copyToMatrix(&C[0,0], C.shape[0], C.shape[1])
+        self.cellipsoid.setC(C_mat)
+    def getC(self):
+        return eigenMatrixToNumpy(self.cellipsoid.getC()).copy()
+    def setD(self, np.ndarray[double, ndim=1, mode="c"] d not None):
+        cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
+        self.cellipsoid.setD(d_vec)
+    def getD(self):
+        return eigenVectorToNumpy(self.cellipsoid.getD()).copy()

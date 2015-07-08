@@ -32,22 +32,12 @@ public:
     A = A_;
   }
 
-  void setA(double *A_, int rows, int cols) {
-    Eigen::Map<Eigen::MatrixXd>A_map(A_, rows, cols);
-    A = A_map;
-  }
-
   const Eigen::MatrixXd& getA() const {
     return A;
   }
 
   void setB(const Eigen::VectorXd &b_) {
     b = b_;
-  }
-
-  void setB(double *b_, int rows) {
-    Eigen::Map<Eigen::VectorXd>b_map(b_, rows);
-    b = b_map;
   }
 
   const Eigen::VectorXd& getB() const {
@@ -97,25 +87,15 @@ public:
     C = C_;
   }
 
-  void setC(double *C_, int dim) {
-    Eigen::Map<Eigen::MatrixXd>C_map(C_, dim, dim);
-    C = C_map;
-  }
-
   void setD(const Eigen::VectorXd &d_) {
     d = d_;
-  }
-
-  void setD(double *d_, int dim) {
-    Eigen::Map<Eigen::VectorXd>d_map(d_, dim);
-    d = d_map;
   }
 
   double getDimension() const {
     return C.cols();
   }
 
-  static Ellipsoid constructHypersphere(Eigen::VectorXd center, double radius=ELLIPSOID_C_EPSILON) {
+  static Ellipsoid fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON) {
     int dim = center.size();
     Ellipsoid ellipsoid(dim);
     ellipsoid.C.setZero();
@@ -165,7 +145,7 @@ public:
     if (point.size() != this->getDimension()) {
       throw(std::runtime_error("seed point must match dimension dim"));
     }
-    this->seed = Ellipsoid::constructHypersphere(point);
+    this->seed = Ellipsoid::fromNSphere(point);
   }
 
   void setSeedEllipsoid(Ellipsoid ellipsoid){
