@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 #define ELLIPSOID_C_EPSILON 1e-4
 
@@ -19,13 +20,39 @@ public:
   Eigen::MatrixXd A;
   Eigen::VectorXd b;
 
-  Polytope(int dim):
+  Polytope(int dim=0):
     A(0, dim),
     b(0, 1) {}
 
   Polytope(Eigen::MatrixXd A, Eigen::VectorXd b):
     A(A),
     b(b) {}
+
+  void setA(Eigen::MatrixXd &A_) {
+    A = A_;
+  }
+
+  void setA(double *A_, int rows, int cols) {
+    Eigen::Map<Eigen::MatrixXd>A_map(A_, rows, cols);
+    A = A_map;
+  }
+
+  const Eigen::MatrixXd& getA() const {
+    return A;
+  }
+
+  void setB(const Eigen::VectorXd &b_) {
+    b = b_;
+  }
+
+  void setB(double *b_, int rows) {
+    Eigen::Map<Eigen::VectorXd>b_map(b_, rows);
+    b = b_map;
+  }
+
+  const Eigen::VectorXd& getB() const {
+    return b;
+  }
 
   int getDimension() const {
     return A.cols();
@@ -50,13 +77,39 @@ public:
   Eigen::MatrixXd C;
   Eigen::VectorXd d;
 
-  Ellipsoid(int dim):
+  Ellipsoid(int dim=0):
     C(Eigen::MatrixXd(dim, dim)),
     d(Eigen::VectorXd(dim)) {}
 
   Ellipsoid(Eigen::MatrixXd C, Eigen::VectorXd d):
     C(C),
     d(d) {}
+
+  const Eigen::MatrixXd& getC() const {
+    return C;
+  }
+
+  const Eigen::VectorXd& getD() const {
+    return d;
+  }
+
+  void setC(const Eigen::MatrixXd &C_) {
+    C = C_;
+  }
+
+  void setC(double *C_, int dim) {
+    Eigen::Map<Eigen::MatrixXd>C_map(C_, dim, dim);
+    C = C_map;
+  }
+
+  void setD(const Eigen::VectorXd &d_) {
+    d = d_;
+  }
+
+  void setD(double *d_, int dim) {
+    Eigen::Map<Eigen::VectorXd>d_map(d_, dim);
+    d = d_map;
+  }
 
   double getDimension() const {
     return C.cols();

@@ -1,9 +1,11 @@
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
 
+import numpy
+
 setup(ext_modules = cythonize(Extension(
-    "iris",
-    sources=["iris.pyx"],
+    "iriscore",
+    sources=["iriscore.pyx"],
     language="c++",
-    extra_compile_args=["-I/Users/rdeits/locomotion/iris/build/include/eigen3"],
+    include_dirs=[numpy.get_include(), "."],
         )))

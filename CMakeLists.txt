@@ -70,4 +70,4 @@ endif()
 
 add_subdirectory(cvxgen)
 add_subdirectory(src)
-add_subdirectory(cython)
+add_subdirectory(python)
