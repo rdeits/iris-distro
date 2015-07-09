@@ -7,12 +7,111 @@
 
 using namespace Eigen;
 
-void initialize_small_sphere(const VectorXd &start, Ellipsoid &ellipsoid) {
-  assert(ellipsoid.getDimension() == start.size());
-  ellipsoid.d = start;
-  for (int i=0; i < ellipsoid.getDimension(); i++) {
-    ellipsoid.C(i,i) = ELLIPSOID_C_EPSILON;
+
+Polytope::Polytope(int dim):
+  A_(0, dim),
+  b_(0, 1) {}
+Polytope::Polytope(Eigen::MatrixXd A, Eigen::VectorXd b):
+    A_(A),
+    b_(b) {}
+void Polytope::setA(const Eigen::MatrixXd &A) {
+  A_ = A;
+}
+const Eigen::MatrixXd& Polytope::getA() const {
+  return A_;
+}
+void Polytope::setB(const Eigen::VectorXd &b) {
+  b_ = b;
+}
+const Eigen::VectorXd& Polytope::getB() const {
+  return b_;
+}
+int Polytope::getDimension() const {
+  return A_.cols();
+}
+int Polytope::getNumberOfConstraints() const {
+  return A_.rows();
+}
+void Polytope::appendConstraints(const Polytope &other) {
+  A_.conservativeResize(A_.rows() + other.getA().rows(), A_.cols());
+  A_.bottomRows(other.getA().rows()) = other.getA();
+  b_.conservativeResize(b_.rows() + other.getB().rows());
+  b_.tail(other.getB().rows()) = other.getB();
+}
+
+Ellipsoid::Ellipsoid(int dim) :
+  C_(Eigen::MatrixXd(dim, dim)),
+  d_(Eigen::VectorXd(dim)) {}
+Ellipsoid::Ellipsoid(Eigen::MatrixXd C, Eigen::VectorXd d):
+  C_(C),
+  d_(d) {}
+const MatrixXd& Ellipsoid::getC() const {
+  return C_;
+}
+const VectorXd& Ellipsoid::getD() const {
+  return d_;
+}
+void Ellipsoid::setC(const Eigen::MatrixXd &C) {
+  C_ = C;
+}
+void Ellipsoid::setCEntry(Eigen::DenseIndex row, 
+                          Eigen::DenseIndex col, double value) {
+  C_(row, col) = value;
+}
+void Ellipsoid::setD(const Eigen::VectorXd &d) {
+  d_ = d;
+}
+void Ellipsoid::setDEntry(Eigen::DenseIndex index, double value) {
+  d_(index) = value;
+}
+int Ellipsoid::getDimension() const {
+  return C_.cols();
+}
+Ellipsoid Ellipsoid::fromNSphere(Eigen::VectorXd &center, double radius) {
+  int dim = center.size();
+  MatrixXd C(dim, dim);
+  C.setZero();
+  C.diagonal().setConstant(radius);
+  VectorXd d = center;
+  Ellipsoid ellipsoid(C, d);
+  return ellipsoid;
+}
+
+void IRISProblem::setSeedPoint(Eigen::VectorXd point) {
+  if (point.size() != this->getDimension()) {
+    throw(std::runtime_error("seed point must match dimension dim"));
   }
+  this->seed = Ellipsoid::fromNSphere(point);
+}
+void IRISProblem::setSeedEllipsoid(Ellipsoid ellipsoid){
+  if (ellipsoid.getDimension() != this->getDimension()) {
+    throw std::runtime_error("seed ellipsoid must match dimension dim");
+  }
+  this->seed = ellipsoid;
+}
+int IRISProblem::getDimension() const {
+  return this->dim;
+}
+Ellipsoid IRISProblem::getSeed() const {
+  return this->seed;
+}
+void IRISProblem::setBounds(Polytope new_bounds) {
+  if (new_bounds.getDimension() != this->getDimension()) {
+    throw std::runtime_error("bounds must match dimension dim");
+  }
+  this->bounds = new_bounds;
+}
+void IRISProblem::addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
+  if (new_obstacle_vertices.rows() != this->getDimension()) {
+    throw std::runtime_error("new_obstacle_vertices must have dim rows");
+  }
+  this->obstacle_pts.push_back(new_obstacle_vertices);
+}
+std::vector<Eigen::MatrixXd> IRISProblem::getObstacles() const {
+  return this->obstacle_pts;
+}
+Polytope IRISProblem::getBounds() const {
+  return this->bounds;
 }
 
 template <typename T>
@@ -26,7 +125,7 @@ std::vector<size_t> arg_sort(const std::vector<T> &vec) {
 typedef std::pair<VectorXd, double> hyperplane;
 
 hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixXd &Cinv2, const VectorXd &x) {
-  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.d)).normalized();
+  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.getD())).normalized();
   std::pair<VectorXd, double> plane(nhat,
                                     nhat.transpose() * x);
   // std::cout << "tangent plane through point: " << x.transpose() << std::endl;
@@ -55,19 +154,19 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   int n_obs = obstacle_pts.size();
 
   if (n_obs == 0) {
-    polytope.A = MatrixXd::Zero(0, dim);
-    polytope.b = VectorXd::Zero(0);
+    polytope.setA(MatrixXd::Zero(0, dim));
+    polytope.setB(VectorXd::Zero(0));
     return;
   }
 
-  MatrixXd Cinv = ellipsoid.C.inverse();
+  MatrixXd Cinv = ellipsoid.getC().inverse();
   MatrixXd Cinv2 = Cinv * Cinv.transpose();
 
   Matrix<bool, Dynamic, 1> uncovered_obstacles = Matrix<bool, Dynamic, 1>::Constant(n_obs, true);
 
   std::vector<MatrixXd> image_pts(n_obs);
   for (int i=0; i < n_obs; i++) {
-    image_pts[i] = Cinv * (obstacle_pts[i].colwise() - ellipsoid.d);
+    image_pts[i] = Cinv * (obstacle_pts[i].colwise() - ellipsoid.getD());
   }
 
   std::vector<VectorXd> image_squared_dists(n_obs);
@@ -105,7 +204,7 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
         infeasible_start = true;
         planes.emplace_back(-plane.first, -plane.first.transpose() * obstacle_pts[i].col(idx));
       } else {
-        VectorXd xstar = ellipsoid.C * ystar + ellipsoid.d;
+        VectorXd xstar = ellipsoid.getC() * ystar + ellipsoid.getD();
         planes.push_back(tangent_plane_through_point(ellipsoid, Cinv2, xstar));
       }
     }
@@ -122,21 +221,27 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     }
   }
 
-  polytope.A.resize(planes.size(), dim);
-  polytope.b.resize(planes.size(), 1);
+  MatrixXd A = polytope.getA();
+  VectorXd b = polytope.getB();
+  A.resize(planes.size(), dim);
+  b.resize(planes.size(), 1);
 
   for (auto it = planes.begin(); it != planes.end(); ++it) {
-    polytope.A.row(it - planes.begin()) = it->first.transpose();
-    polytope.b(it - planes.begin()) = it->second;
+    A.row(it - planes.begin()) = it->first.transpose();
+    b(it - planes.begin()) = it->second;
   }
+  polytope.setA(A);
+  polytope.setB(b);
 
   return;
 }
 
-IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
+void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISRegion *result, IRISDebugData *debug) {
 
-  IRISRegion region(problem.getDimension());
-  region.ellipsoid = problem.getSeed();
+  assert(result);
+  assert(result.getDimension() == problem.getDimension());
+
+  result->ellipsoid = problem.getSeed();
 
   double best_vol = pow(ELLIPSOID_C_EPSILON, problem.getDimension());
   double volume;
@@ -144,24 +249,28 @@ IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options
   bool infeasible_start;
 
   if (debug) {
-    debug->ellipsoid_history.push_back(region.ellipsoid);
+    debug->ellipsoid_history.push_back(result->ellipsoid);
     debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
   }
 
 
   while (1) {
-    separating_hyperplanes(problem.getObstacles(), region.ellipsoid, region.polytope, infeasible_start);
+    separating_hyperplanes(problem.getObstacles(), result->ellipsoid, result->polytope, infeasible_start);
 
-    // std::cout << "A: " << std::endl << region.polytope.A << std::endl;
-    // std::cout << "b: " << region.polytope.b.transpose() << std::endl;
+    // std::cout << "A: " << std::endl << result->polytope.A << std::endl;
+    // std::cout << "b: " << result->polytope.b.transpose() << std::endl;
 
     if (options.error_on_infeas_start && infeasible_start) {
       throw(std::runtime_error("Error: initial point is infeasible\n"));
     }
 
-    region.polytope.appendConstraints(problem.getBounds());
+    if (options.require_containment && !(iter == 0 || infeasible_start)) {
+      throw(std::runtime_error("Not implemented yet"));
+    }
 
-    volume = iris_mosek::inner_ellipsoid(region.polytope, region.ellipsoid);
+    result->polytope.appendConstraints(problem.getBounds());
+
+    volume = iris_mosek::inner_ellipsoid(result->polytope, result->ellipsoid);
 
     if ((abs(volume - best_vol) / best_vol) < options.termination_threshold)
       break;
@@ -170,5 +279,5 @@ IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options
     iter++;
   }
 
-  return region;
+  return;
 }

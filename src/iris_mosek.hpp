@@ -3,7 +3,7 @@
 
 #include <exception>
 #include "mosek/mosek.h"
-#include "iris_types.hpp"
+#include "iris.hpp"
 
 namespace iris_mosek {
 

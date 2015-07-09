@@ -27,15 +27,15 @@ void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, E
   for (int j=0; j < 2*n; j++) {
     for (int i=j; i < 2*n; i++) {
       if (j < ellipsoid.getDimension() && i < ellipsoid.getDimension()) {
-        ellipsoid.C(i,j) = barx[bar_ndx];
-        ellipsoid.C(j, i) = barx[bar_ndx]; // since barx is just the lower triangle
+        ellipsoid.setCEntry(i,j, barx[bar_ndx]);
+        ellipsoid.setCEntry(j, i, barx[bar_ndx]);  // since barx is just the lower triangle
       }
       bar_ndx++;
     }
   }
 
   for (int i=0; i < ellipsoid.getDimension(); i++) {
-    ellipsoid.d(i) = xx[ndx_d[i]];
+    ellipsoid.setDEntry(i, xx[ndx_d[i]]);
   }
 }
 
@@ -122,7 +122,7 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
           bara_k[abar_ndx + k] = k;
           bara_l[abar_ndx + k] = j;
         }
-        bara_v[abar_ndx + k] = polytope.A(i, k);
+        bara_v[abar_ndx + k] = polytope.getA()(i, k);
       }
       abar_ndx += n;
       MSKint32t subi[] = {ndx_f[i + m * j]};
@@ -134,12 +134,12 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
     }
     for (int j=0; j < num_d; j++) {
       subi_A_row[j] = ndx_d[j];
-      vali_A_row[j] = polytope.A(i, j);
+      vali_A_row[j] = polytope.getA()(i, j);
     }
     subi_A_row[num_d] = ndx_g[i];
     vali_A_row[num_d] = 1;
     check_res(MSK_putarow(task, con_ndx, num_d + 1, subi_A_row.data(), vali_A_row.data()));
-    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, polytope.b(i, 0), polytope.b(i, 0)));
+    check_res(MSK_putconbound(task, con_ndx, MSK_BK_FX, polytope.getB()(i, 0), polytope.getB()(i, 0)));
     con_ndx++;
   }
 

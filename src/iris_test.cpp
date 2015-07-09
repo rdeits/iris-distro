@@ -86,7 +86,7 @@ void test_append_polytope() {
                  1, 1,
                  2, 3,
                  4, 5;
-  valuecheckMatrix(p.A, A_expected, 1e-12);
+  valuecheckMatrix(p.getA(), A_expected, 1e-12);
   printf("test_append_polytope passed\n");
 }
 
@@ -108,8 +108,8 @@ void test_mosek_ellipsoid() {
                 -0.132021, 0.332799;
   VectorXd d_expected(2);
   d_expected << 0.358029, 0.358029;
-  valuecheckMatrix(ellipsoid.C, C_expected, 1e-5);
-  valuecheckMatrix(ellipsoid.d, d_expected, 1e-5);
+  valuecheckMatrix(ellipsoid.getC(), C_expected, 1e-5);
+  valuecheckMatrix(ellipsoid.getD(), d_expected, 1e-5);
 
   printf("test_mosek_ellipsoid passed\n");
 }
@@ -190,8 +190,8 @@ void test_separating_hyperplanes() {
   A_expected << 1/std::sqrt(2), 1/std::sqrt(2);
   VectorXd b_expected(1);
   b_expected << 2.0 * 2.0 * 1.0/std::sqrt(2);
-  valuecheckMatrix(result.A, A_expected, 1e-6);
-  valuecheckMatrix(result.b, b_expected, 1e-6);
+  valuecheckMatrix(result.getA(), A_expected, 1e-6);
+  valuecheckMatrix(result.getB(), b_expected, 1e-6);
 
   printf("test_separating_hyperplanes passed\n");
 }
@@ -216,15 +216,15 @@ void test_iris() {
   problem.addObstacle(obs);
 
   IRISOptions options;
-
-  IRISRegion region = inflate_region(problem, options);
+  IRISRegion region;
+  inflate_region(problem, options, &region);
   MatrixXd C_expected(2,2);
   VectorXd d_expected(2);
   C_expected << 0.5, 0, 
                 0, 0.5;
   d_expected << 0.5, 0.5;
-  valuecheckMatrix(region.ellipsoid.C, C_expected, 1e-3);
-  valuecheckMatrix(region.ellipsoid.d, d_expected, 1e-3);
+  valuecheckMatrix(region.ellipsoid.getC(), C_expected, 1e-3);
+  valuecheckMatrix(region.ellipsoid.getD(), d_expected, 1e-3);
 
   printf("test_iris passed\n");
 }
