@@ -8,4 +8,5 @@ setup(ext_modules = cythonize(Extension(
     sources=["iriscore.pyx"],
     language="c++",
     include_dirs=[numpy.get_include(), "."],
+    libraries=["iris_core", "iris_mosek", "mosek64", "iris_cvxgen_ldp_cpp"],
         )))

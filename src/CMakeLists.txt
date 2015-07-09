@@ -11,4 +11,4 @@ add_executable(testIris iris_test.cpp)
 target_link_libraries(testIris iris_core)
 add_test(testIris ${CMAKE_BINARY_DIR}/bin/testIris)
 
-pods_install_headers(iris.hpp iris_types.hpp iris_utils.hpp DESTINATION iris)
+pods_install_headers(iris.hpp iris_utils.hpp DESTINATION iris)

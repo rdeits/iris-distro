@@ -1,7 +1,7 @@
 import irispy
 import numpy as np
 
-p = irispy.Polytope(2)
+p = irispy.Polytope()
 A = np.zeros((2,2))
 
 print A
