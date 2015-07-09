@@ -8,8 +8,9 @@ const double ELLIPSOID_C_EPSILON = 1e-4;
 
 struct IRISOptions {
   bool require_containment = false; // if true: if the IRIS polytope no longer contains the seed point
-  bool error_on_infeas_start = false;
+  bool error_on_infeasible_start = false;
   double termination_threshold = 2e-2;
+  int iter_limit = 100;
 };
 
 class Polytope {
@@ -42,7 +43,7 @@ public:
   void setD(const Eigen::VectorXd &d_);
   void setDEntry(Eigen::DenseIndex idx, double value);
   int getDimension() const;
-  static Ellipsoid fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
+  void initNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
 
 private:
   Eigen::MatrixXd C_;

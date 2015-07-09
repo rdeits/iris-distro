@@ -13,15 +13,13 @@ cdef eigenVectorToNumpy(const VectorXd &v):
     cdef cvarray = <double[:v.size()]> <double*> v.data()
     return np.asarray(cvarray)
 
-cdef class CPPDestructor:
-    cdef bint owns_thisptr
-    child_wrappers = []
-
-cdef class Polytope(CPPDestructor):
+cdef class Polytope:
     cdef CPolytope *thisptr
-    def __cinit__(self, construct_new_cpp_object=True):
+    cdef public bint owns_thisptr
+    child_wrappers = []
+    def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = new CPolytope()
+            self.thisptr = new CPolytope(dim)
             self.owns_thisptr = True
         else:
             self.owns_thisptr = False
@@ -29,6 +27,8 @@ cdef class Polytope(CPPDestructor):
     cdef wrap(CPolytope *cpolytope):
         pypolytope = Polytope(construct_new_cpp_object=False)
         pypolytope.thisptr = cpolytope
+        return pypolytope
+
     def getDimension(self):
         return self.thisptr.getDimension()
     def setA(self, np.ndarray[double, ndim=2, mode="c"] A not None):
@@ -49,18 +49,31 @@ cdef class Polytope(CPPDestructor):
         if self.owns_thisptr:
             del self.thisptr
 
-cdef class Ellipsoid(CPPDestructor):
+cdef class Ellipsoid:
     cdef CEllipsoid *thisptr
-    def __cinit__(self, construct_new_cpp_object=True):
+    cdef public bint owns_thisptr
+    child_wrappers = []
+    def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = new CEllipsoid()
+            self.thisptr = new CEllipsoid(dim)
             self.owns_thisptr = True
         else:
             self.owns_thisptr = False
     @staticmethod
-    cdef wrap(CEllipsoid *cellipsoid):
-        pypolytope = Ellipsoid(construct_new_cpp_object=False)
-        pypolytope.thisptr = cellipsoid
+    cdef wrap(CEllipsoid *cellipsoid, is_owner=False):
+        wrapper = Ellipsoid(construct_new_cpp_object=False)
+        wrapper.thisptr = cellipsoid
+        wrapper.owns_thisptr = is_owner
+        return wrapper
+
+    @staticmethod
+    def fromNSphere(np.ndarray[double, ndim=1, mode="c"] d not None, double radius=ELLIPSOID_C_EPSILON):
+        cdef int dim = d.shape[0]
+        cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
+        ell = Ellipsoid(dim=dim)
+        ell.thisptr.initNSphere(d_vec, radius)
+        return ell
+
     def getDimension(self):
         return self.thisptr.getDimension()
     def setC(self, np.ndarray[double, ndim=2, mode="c"] C not None):
@@ -81,6 +94,10 @@ cdef class Ellipsoid(CPPDestructor):
 
 cdef class IRISRegion:
     cdef CIRISRegion *thisptr
+    cdef public bint owns_thisptr
+    child_wrappers = []
+    cdef public Polytope polytope
+    cdef public Ellipsoid ellipsoid
     def __cinit__(self, construct_new_cpp_object=True, dim=0):
         if construct_new_cpp_object:
             self.thisptr = new CIRISRegion(dim)
@@ -97,9 +114,41 @@ cdef class IRISRegion:
         pyregion.polytope = Polytope.wrap(&pyregion.thisptr.polytope)
         pyregion.ellipsoid = Ellipsoid.wrap(&pyregion.thisptr.ellipsoid)
         pyregion.child_wrappers.extend([pyregion.polytope, pyregion.ellipsoid])
+        return pyregion
+
     def __dealloc__(self):
         for child in self.child_wrappers:
             child.owns_thisptr = True
         if self.owns_thisptr:
             del self.thisptr
 
+def run_iris(obstacles, Ellipsoid start, Polytope bounds=None,  
+                  require_containment=False,
+                  error_on_infeasible_start=False, 
+                  termination_threshold=2e-2, 
+                  iter_limit = 100):
+    cdef int dim = start.getDimension()
+    cdef CIRISProblem *problem = new CIRISProblem(dim)
+
+    if bounds is None:
+        bounds = Polytope(dim)
+    problem.setBounds(deref(bounds.thisptr))
+    problem.setSeedEllipsoid(deref(start.thisptr))
+
+    cdef CIRISOptions options
+    options.require_containment = require_containment
+    options.error_on_infeasible_start = error_on_infeasible_start
+    options.termination_threshold = termination_threshold
+    options.iter_limit = iter_limit
+    cdef MatrixXd obs_mat
+    cdef np.ndarray[double, ndim=2, mode="c"] obs
+    try:
+        for obs in obstacles:
+            assert(obs.shape[0] == dim, "Obstacle points should be size dim x num_points")
+            obs_mat = copyToMatrix(&obs[0,0], obs.shape[0], obs.shape[1])
+            problem.addObstacle(obs_mat)
+        region = IRISRegion(dim=dim)
+        inflate_region(deref(problem), options, region.thisptr)
+    finally:
+        del problem
+    return region
