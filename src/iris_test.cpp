@@ -216,15 +216,14 @@ void test_iris() {
   problem.addObstacle(obs);
 
   IRISOptions options;
-  IRISRegion region;
-  inflate_region(problem, options, &region);
+  auto region = inflate_region(problem, options);
   MatrixXd C_expected(2,2);
   VectorXd d_expected(2);
   C_expected << 0.5, 0, 
                 0, 0.5;
   d_expected << 0.5, 0.5;
-  valuecheckMatrix(region.ellipsoid.getC(), C_expected, 1e-3);
-  valuecheckMatrix(region.ellipsoid.getD(), d_expected, 1e-3);
+  valuecheckMatrix(region->ellipsoid->getC(), C_expected, 1e-3);
+  valuecheckMatrix(region->ellipsoid->getD(), d_expected, 1e-3);
 
   printf("test_iris passed\n");
 }

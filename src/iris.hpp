@@ -3,6 +3,7 @@
 
 #include <Eigen/Core>
 #include <vector>
+#include <memory>
 
 const double ELLIPSOID_C_EPSILON = 1e-4;
 
@@ -43,7 +44,8 @@ public:
   void setD(const Eigen::VectorXd &d_);
   void setDEntry(Eigen::DenseIndex idx, double value);
   int getDimension() const;
-  void initNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
+  static std::shared_ptr<Ellipsoid> fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
+  double getVolume() const;
 
 private:
   Eigen::MatrixXd C_;
@@ -52,13 +54,13 @@ private:
 
 class IRISRegion {
 public:
-  Polytope polytope;
-  Ellipsoid ellipsoid;
+  std::shared_ptr<Polytope> polytope;
+  std::shared_ptr<Ellipsoid> ellipsoid;
 
-  IRISRegion(int dim=0):
-    polytope(dim),
-    ellipsoid(dim)
-    {}
+  IRISRegion(int dim=0) {
+    polytope.reset(new Polytope(dim));
+    ellipsoid.reset(new Ellipsoid(dim));
+  }
 };
 
 struct IRISDebugData {
@@ -95,7 +97,7 @@ public:
 };
 
 
-void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISRegion *result, IRISDebugData *debug=NULL);
+std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
 
 void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start);
 

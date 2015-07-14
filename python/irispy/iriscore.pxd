@@ -1,5 +1,15 @@
 from eigen cimport VectorXd, MatrixXd
+# from libcpp.memory cimport shared_ptr
 from libcpp.vector cimport vector
+
+cdef extern from "<memory>" namespace "std":
+	cdef cppclass shared_ptr[T]:
+		shared_ptr()
+		shared_ptr(T *p)
+		shared_ptr(const shared_ptr&)
+		reset(T *p)
+		T operator*()
+		T *get()
 
 cdef extern from "iris/iris.hpp":
 	cdef cppclass CPolytope "Polytope":
@@ -23,13 +33,15 @@ cdef extern from "iris/iris.hpp":
 		void setD(VectorXd &d)
 		const MatrixXd& getC()
 		const VectorXd& getD()
-		void initNSphere(VectorXd &point)
-		void initNSphere(VectorXd &point, double radius)
+		@staticmethod
+		shared_ptr[CEllipsoid] fromNSphere(VectorXd &point)
+		@staticmethod
+		shared_ptr[CEllipsoid] fromNSphere(VectorXd &point, double radius)
 
 	cdef cppclass CIRISRegion "IRISRegion":
 		CIRISRegion(int dim) except +
-		CPolytope polytope
-		CEllipsoid ellipsoid
+		shared_ptr[CPolytope] polytope
+		shared_ptr[CEllipsoid] ellipsoid
 
 	cdef cppclass CIRISProblem "IRISProblem":
 		CIRISProblem(int dim) except +
@@ -47,7 +59,7 @@ cdef extern from "iris/iris.hpp":
 		double termination_threshold
 		int iter_limit
 
-	cdef void inflate_region(const CIRISProblem &problem, const CIRISOptions &options, CIRISRegion *result)
+	cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options)
 
 	cdef const double ELLIPSOID_C_EPSILON
 

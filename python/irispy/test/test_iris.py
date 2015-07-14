@@ -16,5 +16,5 @@ print start, start.getDimension(), start.getC()
 
 region = irispy.run_iris(obstacles, start)
 
-print region.ellipsoid.getC()
-print region.ellipsoid.getD()
+print region.getEllipsoid().getC()
+print region.getEllipsoid().getD()

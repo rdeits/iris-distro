@@ -14,113 +14,78 @@ cdef eigenVectorToNumpy(const VectorXd &v):
     return np.asarray(cvarray)
 
 cdef class Polytope:
-    cdef CPolytope *thisptr
-    cdef public bint owns_thisptr
-    child_wrappers = []
+    cdef shared_ptr[CPolytope] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = new CPolytope(dim)
-            self.owns_thisptr = True
-        else:
-            self.owns_thisptr = False
+            self.thisptr = shared_ptr[CPolytope](new CPolytope(dim))
     @staticmethod
-    cdef wrap(CPolytope *cpolytope):
-        pypolytope = Polytope(construct_new_cpp_object=False)
-        pypolytope.thisptr = cpolytope
-        return pypolytope
+    cdef wrap(shared_ptr[CPolytope] ptr):
+        pyobj = Polytope(construct_new_cpp_object=False)
+        pyobj.thisptr = ptr
+        return pyobj
 
     def getDimension(self):
-        return self.thisptr.getDimension()
+        return self.thisptr.get().getDimension()
     def setA(self, np.ndarray[double, ndim=2, mode="c"] A not None):
         cdef MatrixXd A_mat = copyToMatrix(&A[0,0], A.shape[0], A.shape[1])
-        self.thisptr.setA(A_mat)
+        self.thisptr.get().setA(A_mat)
     def getA(self):
-        return eigenMatrixToNumpy(self.thisptr.getA()).copy()
+        return eigenMatrixToNumpy(self.thisptr.get().getA()).copy()
     def setB(self, np.ndarray[double, ndim=1, mode="c"] b not None):
         cdef VectorXd b_vec = copyToVector(&b[0], b.shape[0])
-        self.thisptr.setB(b_vec)
+        self.thisptr.get().setB(b_vec)
     def getB(self):
-        return eigenVectorToNumpy(self.thisptr.getB()).copy()
+        return eigenVectorToNumpy(self.thisptr.get().getB()).copy()
     def appendConstraints(self, Polytope other):
-        self.thisptr.appendConstraints(deref(other.thisptr))
-    def __dealloc__(self):
-        for child in self.child_wrappers:
-            child.owns_thisptr = True
-        if self.owns_thisptr:
-            del self.thisptr
+        self.thisptr.get().appendConstraints(deref(other.thisptr))
 
 cdef class Ellipsoid:
-    cdef CEllipsoid *thisptr
-    cdef public bint owns_thisptr
-    child_wrappers = []
+    cdef shared_ptr[CEllipsoid] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = new CEllipsoid(dim)
-            self.owns_thisptr = True
-        else:
-            self.owns_thisptr = False
+            pass #TODO: don't pass
+            self.thisptr = shared_ptr[CEllipsoid](new CEllipsoid(dim))
     @staticmethod
-    cdef wrap(CEllipsoid *cellipsoid, is_owner=False):
-        wrapper = Ellipsoid(construct_new_cpp_object=False)
-        wrapper.thisptr = cellipsoid
-        wrapper.owns_thisptr = is_owner
-        return wrapper
+    cdef wrap(shared_ptr[CEllipsoid] ptr):
+        pyobj = Ellipsoid(construct_new_cpp_object=False)
+        pyobj.thisptr = ptr 
+        return pyobj
 
     @staticmethod
-    def fromNSphere(np.ndarray[double, ndim=1, mode="c"] d not None, double radius=ELLIPSOID_C_EPSILON):
-        cdef int dim = d.shape[0]
-        cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
-        ell = Ellipsoid(dim=dim)
-        ell.thisptr.initNSphere(d_vec, radius)
-        return ell
+    def fromNSphere(np.ndarray[double, ndim=1, mode="c"] center not None, double radius=ELLIPSOID_C_EPSILON):
+        cdef int dim = center.shape[0]
+        cdef VectorXd d_vec = copyToVector(&center[0], center.shape[0])
+        return Ellipsoid.wrap(CEllipsoid.fromNSphere(d_vec, radius))
 
     def getDimension(self):
-        return self.thisptr.getDimension()
+        return self.thisptr.get().getDimension()
     def setC(self, np.ndarray[double, ndim=2, mode="c"] C not None):
         cdef MatrixXd C_mat = copyToMatrix(&C[0,0], C.shape[0], C.shape[1])
-        self.thisptr.setC(C_mat)
+        self.thisptr.get().setC(C_mat)
     def getC(self):
-        return eigenMatrixToNumpy(self.thisptr.getC()).copy()
+        return eigenMatrixToNumpy(self.thisptr.get().getC()).copy()
     def setD(self, np.ndarray[double, ndim=1, mode="c"] d not None):
         cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
-        self.thisptr.setD(d_vec)
+        self.thisptr.get().setD(d_vec)
     def getD(self):
-        return eigenVectorToNumpy(self.thisptr.getD()).copy()
-    def __dealloc__(self):
-        for child in self.child_wrappers:
-            child.owns_thisptr = True
-        if self.owns_thisptr:
-            del self.thisptr
+        return eigenVectorToNumpy(self.thisptr.get().getD()).copy()
 
 cdef class IRISRegion:
-    cdef CIRISRegion *thisptr
-    cdef public bint owns_thisptr
-    child_wrappers = []
-    cdef public Polytope polytope
-    cdef public Ellipsoid ellipsoid
-    def __cinit__(self, construct_new_cpp_object=True, dim=0):
+    cdef shared_ptr[CIRISRegion] thisptr
+    def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = new CIRISRegion(dim)
-            self.owns_thisptr = True
-            self.polytope = Polytope.wrap(&self.thisptr.polytope)
-            self.ellipsoid = Ellipsoid.wrap(&self.thisptr.ellipsoid)
-            self.child_wrappers.extend([self.polytope, self.ellipsoid])
-        else:
-            self.owns_thisptr = False
+            self.thisptr = shared_ptr[CIRISRegion](new CIRISRegion(dim))
     @staticmethod
-    cdef wrap(CIRISRegion *cregion):
-        pyregion = IRISRegion(construct_new_cpp_object=False, dim=cregion.polytope.getDimension())
-        pyregion.thisptr = cregion
-        pyregion.polytope = Polytope.wrap(&pyregion.thisptr.polytope)
-        pyregion.ellipsoid = Ellipsoid.wrap(&pyregion.thisptr.ellipsoid)
-        pyregion.child_wrappers.extend([pyregion.polytope, pyregion.ellipsoid])
-        return pyregion
+    cdef wrap(shared_ptr[CIRISRegion] ptr):
+        pyobj = IRISRegion(dim=ptr.get().polytope.get().getDimension(), construct_new_cpp_object=False)
+        pyobj.thisptr = ptr
+        return pyobj
 
-    def __dealloc__(self):
-        for child in self.child_wrappers:
-            child.owns_thisptr = True
-        if self.owns_thisptr:
-            del self.thisptr
+    def getPolytope(self):
+        return Polytope.wrap(self.thisptr.get().polytope)
+
+    def getEllipsoid(self):
+        return Ellipsoid.wrap(self.thisptr.get().ellipsoid)
 
 def run_iris(obstacles, Ellipsoid start, Polytope bounds=None,  
                   require_containment=False,
@@ -147,8 +112,7 @@ def run_iris(obstacles, Ellipsoid start, Polytope bounds=None,
             assert(obs.shape[0] == dim, "Obstacle points should be size dim x num_points")
             obs_mat = copyToMatrix(&obs[0,0], obs.shape[0], obs.shape[1])
             problem.addObstacle(obs_mat)
-        region = IRISRegion(dim=dim)
-        inflate_region(deref(problem), options, region.thisptr)
+        region = IRISRegion.wrap(inflate_region(deref(problem), options))
     finally:
         del problem
     return region

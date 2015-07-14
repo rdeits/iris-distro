@@ -67,23 +67,19 @@ void Ellipsoid::setDEntry(Eigen::DenseIndex index, double value) {
 int Ellipsoid::getDimension() const {
   return C_.cols();
 }
-void Ellipsoid::initNSphere(Eigen::VectorXd &center, double radius) {
-  int dim = center.size();
-  C_.resize(dim, dim);
-  d_.resize(dim);
-  C_.setZero();
-  C_.diagonal().setConstant(radius);
-  d_ = center;
-  std::cout << "did initNSphere" << std::endl;
-  std::cout << "C: " << C_ << std::endl;
-  std::cout << "d: " << d_ << std::endl;
+std::shared_ptr<Ellipsoid> Ellipsoid::fromNSphere(Eigen::VectorXd &center, double radius) {
+  const int dim = center.size();
+  MatrixXd C = MatrixXd::Zero(dim, dim);
+  C.diagonal().setConstant(radius);
+  std::shared_ptr<Ellipsoid> ellipsoid(new Ellipsoid(C, center));
+  return ellipsoid;
 }
 
 void IRISProblem::setSeedPoint(Eigen::VectorXd point) {
   if (point.size() != this->getDimension()) {
     throw(std::runtime_error("seed point must match dimension dim"));
   }
-  this->seed.initNSphere(point);
+  this->seed = *Ellipsoid::fromNSphere(point);
 }
 void IRISProblem::setSeedEllipsoid(Ellipsoid ellipsoid){
   if (ellipsoid.getDimension() != this->getDimension()) {
@@ -240,12 +236,14 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   return;
 }
 
-void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISRegion *result, IRISDebugData *debug) {
+std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
 
-  assert(result);
-  assert(result.getDimension() == problem.getDimension());
+  assert(region.polytope->getDimension() == problem.getDimension());
+  assert(region.ellipsoid->getDimension() == problem.getDimension());
 
-  result->ellipsoid = problem.getSeed();
+  std::shared_ptr<IRISRegion> region(new IRISRegion(problem.getDimension()));
+  region->ellipsoid->setC(problem.getSeed().getC());
+  region->ellipsoid->setD(problem.getSeed().getD());
 
   double best_vol = pow(ELLIPSOID_C_EPSILON, problem.getDimension());
   double volume;
@@ -253,19 +251,19 @@ void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRIS
   bool infeasible_start;
 
   if (debug) {
-    debug->ellipsoid_history.push_back(result->ellipsoid);
+    debug->ellipsoid_history.push_back(*(region->ellipsoid));
     debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
   }
 
 
   while (1) {
     std::cout << "calling hyperplanes with: " << std::endl;
-    std::cout << "C: " << result->ellipsoid.getC() << std::endl;
-    std::cout << "d: " << result->ellipsoid.getD() << std::endl;
-    separating_hyperplanes(problem.getObstacles(), result->ellipsoid, result->polytope, infeasible_start);
+    std::cout << "C: " << region->ellipsoid->getC() << std::endl;
+    std::cout << "d: " << region->ellipsoid->getD() << std::endl;
+    separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, *region->polytope, infeasible_start);
 
-    // std::cout << "A: " << std::endl << result->polytope.A << std::endl;
-    // std::cout << "b: " << result->polytope.b.transpose() << std::endl;
+    // std::cout << "A: " << std::endl << region->polytope.A << std::endl;
+    // std::cout << "b: " << region->polytope.b.transpose() << std::endl;
 
     if (options.error_on_infeasible_start && infeasible_start) {
       throw(std::runtime_error("Error: initial point is infeasible\n"));
@@ -275,12 +273,12 @@ void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRIS
       throw(std::runtime_error("Not implemented yet"));
     }
 
-    result->polytope.appendConstraints(problem.getBounds());
+    region->polytope->appendConstraints(problem.getBounds());
 
     std::cout << "calling inner_ellipsoid with: " << std::endl;
-    std::cout << "A: " << result->polytope.getA() << std::endl;
-    std::cout << "b: " << result->polytope.getB() << std::endl;
-    volume = iris_mosek::inner_ellipsoid(result->polytope, result->ellipsoid);
+    std::cout << "A: " << region->polytope->getA() << std::endl;
+    std::cout << "b: " << region->polytope->getB() << std::endl;
+    volume = iris_mosek::inner_ellipsoid(*region->polytope, *region->ellipsoid);
 
     if (iter + 1 >= options.iter_limit || ((abs(volume - best_vol) / best_vol) < options.termination_threshold))
       break;
@@ -289,5 +287,5 @@ void inflate_region(const IRISProblem &problem, const IRISOptions &options, IRIS
     iter++;
   }
 
-  return;
+  return region;
 }
