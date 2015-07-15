@@ -33,6 +33,7 @@ cdef extern from "iris/iris.hpp":
 		void setD(VectorXd &d)
 		const MatrixXd& getC()
 		const VectorXd& getD()
+		double getVolume()
 		@staticmethod
 		shared_ptr[CEllipsoid] fromNSphere(VectorXd &point)
 		@staticmethod

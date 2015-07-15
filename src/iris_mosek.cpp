@@ -200,9 +200,7 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
     }
   }
 
-  #ifndef NDEBUG
-    assert(abar_ndx == nabar);
-  #endif
+  assert(abar_ndx == nabar);
 
   // 2^(l/2)t == s_{2l - 1}
   MSKint32t subi[] = {ndx_t[0], ndx_s[num_s - 1]};
@@ -245,13 +243,6 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
     for (int j=0; j < n; j++) {
       csub_f_row[j + 1] = ndx_f[i + m * j];
     }
-    // debug("appending quad cone with sub: ");
-    #ifndef NDEBUG
-      for (int j=0; j < n + 1; j++) {
-        printf("%d ", csub_f_row[j]);
-      }
-      printf("\n");
-    #endif
     check_res(MSK_appendcone(task, MSK_CT_QUAD, 0.0, n + 1, csub_f_row.data())); // 3rd argument (0.0) is reserved for future use by Mosek
   }
 
@@ -268,25 +259,25 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
 
   check_res(MSK_putobjsense(task, MSK_OBJECTIVE_SENSE_MAXIMIZE));
   
-  #ifndef NDEBUG
-    for (int i=0; i < 16; i++) {
-      MSKint32t nzi;
-      MSK_getarownumnz(task, i, &nzi);
-      MSKint32t* subi = (MSKint32t*) malloc(nzi * sizeof(MSKint32t));
-      MSKrealt* vali = (MSKrealt*) malloc(nzi * sizeof(MSKrealt));
-      MSK_getarow(task, i, &nzi, subi, vali);
-      printf("A row %d: ", i);
-      for (int j=0; j < nzi; j++) {
-        printf("%d: %f, ", subi[j], vali[j]);
-      }
-      printf("\n");
-      free(subi);
-      free(vali);
-    }
+  // #ifndef NDEBUG
+  //   for (int i=0; i < 16; i++) {
+  //     MSKint32t nzi;
+  //     MSK_getarownumnz(task, i, &nzi);
+  //     MSKint32t* subi = (MSKint32t*) malloc(nzi * sizeof(MSKint32t));
+  //     MSKrealt* vali = (MSKrealt*) malloc(nzi * sizeof(MSKrealt));
+  //     MSK_getarow(task, i, &nzi, subi, vali);
+  //     printf("A row %d: ", i);
+  //     for (int j=0; j < nzi; j++) {
+  //       printf("%d: %f, ", subi[j], vali[j]);
+  //     }
+  //     printf("\n");
+  //     free(subi);
+  //     free(vali);
+  //   }
 
-    MSK_printdata(task, MSK_STREAM_MSG, 0, 16, 0, nvar, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0);
-    MSK_printdata(task, MSK_STREAM_MSG, 0, 16, 0, nvar, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0);
-  #endif
+  //   MSK_printdata(task, MSK_STREAM_MSG, 0, 16, 0, nvar, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0);
+  //   MSK_printdata(task, MSK_STREAM_MSG, 0, 16, 0, nvar, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0);
+  // #endif
 
   double* xx;
   double* barx;
@@ -309,13 +300,13 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
       MSK_getbarxj(task, MSK_SOL_ITR, 0, barx);
 
       // debug("Optimal primal solution"); 
-      #ifndef NDEBUG
-        for(int i=0; i < nvar; ++i) 
-          printf("x[%d]   : % e\n",i,xx[i]); 
+      // #ifndef NDEBUG
+      //   for(int i=0; i < nvar; ++i) 
+      //     printf("x[%d]   : % e\n",i,xx[i]); 
 
-        for(int i=0; i < len_bar[0]; ++i) 
-          printf("barx[%d]: % e\n",i,barx[i]); 
-      #endif
+      //   for(int i=0; i < len_bar[0]; ++i) 
+      //     printf("barx[%d]: % e\n",i,barx[i]); 
+      // #endif
        
       MSK_freetask(task,xx); 
       MSK_freetask(task,barx); 

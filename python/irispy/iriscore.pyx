@@ -3,15 +3,15 @@ import numpy as np
 cimport numpy as np
 from cython.view cimport array as cvarray
 from cython.operator cimport dereference as deref
-from iriscore cimport CPolytope, CEllipsoid
+from iriscore cimport inflate_region as cinflate_region
 
 cdef eigenMatrixToNumpy(const MatrixXd &M):
     cdef cvarray = <double[:M.rows(),:M.cols()]> <double*> M.data()
-    return np.asarray(cvarray)
+    return np.asarray(cvarray).copy()
 
 cdef eigenVectorToNumpy(const VectorXd &v):
     cdef cvarray = <double[:v.size()]> <double*> v.data()
-    return np.asarray(cvarray)
+    return np.asarray(cvarray).copy()
 
 cdef class Polytope:
     cdef shared_ptr[CPolytope] thisptr
@@ -30,12 +30,12 @@ cdef class Polytope:
         cdef MatrixXd A_mat = copyToMatrix(&A[0,0], A.shape[0], A.shape[1])
         self.thisptr.get().setA(A_mat)
     def getA(self):
-        return eigenMatrixToNumpy(self.thisptr.get().getA()).copy()
+        return eigenMatrixToNumpy(self.thisptr.get().getA())
     def setB(self, np.ndarray[double, ndim=1, mode="c"] b not None):
         cdef VectorXd b_vec = copyToVector(&b[0], b.shape[0])
         self.thisptr.get().setB(b_vec)
     def getB(self):
-        return eigenVectorToNumpy(self.thisptr.get().getB()).copy()
+        return eigenVectorToNumpy(self.thisptr.get().getB())
     def appendConstraints(self, Polytope other):
         self.thisptr.get().appendConstraints(deref(other.thisptr))
 
@@ -51,9 +51,9 @@ cdef class Ellipsoid:
         return pyobj
 
     @staticmethod
-    def fromNSphere(np.ndarray[double, ndim=1, mode="c"] center not None, double radius=ELLIPSOID_C_EPSILON):
-        cdef int dim = center.shape[0]
-        cdef VectorXd d_vec = copyToVector(&center[0], center.shape[0])
+    def fromNSphere(center, double radius=ELLIPSOID_C_EPSILON):
+        cdef np.ndarray[double, ndim=1, mode="c"] d = np.asarray(center, dtype=np.float64)
+        cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
         return Ellipsoid.wrap(CEllipsoid.fromNSphere(d_vec, radius))
 
     def getDimension(self):
@@ -62,12 +62,14 @@ cdef class Ellipsoid:
         cdef MatrixXd C_mat = copyToMatrix(&C[0,0], C.shape[0], C.shape[1])
         self.thisptr.get().setC(C_mat)
     def getC(self):
-        return eigenMatrixToNumpy(self.thisptr.get().getC()).copy()
+        return eigenMatrixToNumpy(self.thisptr.get().getC())
     def setD(self, np.ndarray[double, ndim=1, mode="c"] d not None):
         cdef VectorXd d_vec = copyToVector(&d[0], d.shape[0])
         self.thisptr.get().setD(d_vec)
     def getD(self):
-        return eigenVectorToNumpy(self.thisptr.get().getD()).copy()
+        return eigenVectorToNumpy(self.thisptr.get().getD())
+    def getVolume(self):
+        return self.thisptr.get().getVolume()
 
 cdef class IRISRegion:
     cdef shared_ptr[CIRISRegion] thisptr
@@ -86,11 +88,18 @@ cdef class IRISRegion:
     def getEllipsoid(self):
         return Ellipsoid.wrap(self.thisptr.get().ellipsoid)
 
-def run_iris(obstacles, Ellipsoid start, Polytope bounds=None,  
+def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,  
                   require_containment=False,
                   error_on_infeasible_start=False, 
                   termination_threshold=2e-2, 
                   iter_limit = 100):
+
+    cdef Ellipsoid start
+    if isinstance(start_point_or_ellipsoid, Ellipsoid):
+        start = start_point_or_ellipsoid
+    else:
+        start = Ellipsoid.fromNSphere(start_point_or_ellipsoid)
+
     cdef int dim = start.getDimension()
     cdef CIRISProblem *problem = new CIRISProblem(dim)
 
@@ -111,7 +120,7 @@ def run_iris(obstacles, Ellipsoid start, Polytope bounds=None,
             assert(obs.shape[0] == dim, "Obstacle points should be size dim x num_points")
             obs_mat = copyToMatrix(&obs[0,0], obs.shape[0], obs.shape[1])
             problem.addObstacle(obs_mat)
-        region = IRISRegion.wrap(inflate_region(deref(problem), options))
+        region = IRISRegion.wrap(cinflate_region(deref(problem), options))
     finally:
         del problem
     return region

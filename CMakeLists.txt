@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 2.6.0)
+cmake_minimum_required(VERSION 2.8.0)
+
+cmake_policy(SET CMP0042 NEW)
+
 enable_testing()
 
 # pull in the pods macros. See cmake/pods.cmake for documentation

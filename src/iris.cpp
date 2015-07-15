@@ -39,6 +39,21 @@ void Polytope::appendConstraints(const Polytope &other) {
   b_.tail(other.getB().rows()) = other.getB();
 }
 
+int factorial(int n) {
+  return n == 0 ? 1 : factorial(n - 1) * n;
+}
+
+double nSphereVolume(int dim, double radius) {
+  double v;
+  int k = std::floor(dim / 2);
+  if (dim % 2 == 0) {
+    v = std::pow(M_PI, k) / static_cast<double>(factorial(k));
+  } else {
+    v = (2.0 * factorial(k) * std::pow(4 * M_PI, k)) / static_cast<double>(factorial(2 * k + 1));
+  }
+  return v * std::pow(radius, dim);
+}
+
 Ellipsoid::Ellipsoid(int dim) :
   C_(Eigen::MatrixXd(dim, dim)),
   d_(Eigen::VectorXd(dim)) {}
@@ -66,6 +81,9 @@ void Ellipsoid::setDEntry(Eigen::DenseIndex index, double value) {
 }
 int Ellipsoid::getDimension() const {
   return C_.cols();
+}
+double Ellipsoid::getVolume() const {
+  return C_.determinant() * nSphereVolume(this->getDimension(), 1.0);
 }
 std::shared_ptr<Ellipsoid> Ellipsoid::fromNSphere(Eigen::VectorXd &center, double radius) {
   const int dim = center.size();
@@ -100,8 +118,8 @@ void IRISProblem::setBounds(Polytope new_bounds) {
   this->bounds = new_bounds;
 }
 void IRISProblem::addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
-  std::cout << "adding obstacle: " << new_obstacle_vertices << std::endl;
-  std::cout << "dim: " << this->getDimension() << std::endl;
+  // std::cout << "adding obstacle: " << new_obstacle_vertices << std::endl;
+  // std::cout << "dim: " << this->getDimension() << std::endl;
   if (new_obstacle_vertices.rows() != this->getDimension()) {
     throw std::runtime_error("new_obstacle_vertices must have dim rows");
   }
@@ -139,7 +157,7 @@ void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKen
     iris_cvxgen::closest_point_in_convex_hull(Points, result);
   } else {
     if (!env) {
-      std::cout << "making env" << std::endl;
+      // std::cout << "making env" << std::endl;
       iris_mosek::check_res(MSK_makeenv(&env, NULL));
     }
     iris_mosek::closest_point_in_convex_hull(Points, result, &env);
@@ -254,9 +272,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
 
   while (1) {
-    std::cout << "calling hyperplanes with: " << std::endl;
-    std::cout << "C: " << region->ellipsoid->getC() << std::endl;
-    std::cout << "d: " << region->ellipsoid->getD() << std::endl;
+    // std::cout << "calling hyperplanes with: " << std::endl;
+    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
+    // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
     separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, *region->polytope, infeasible_start);
 
     // std::cout << "A: " << std::endl << region->polytope.A << std::endl;
@@ -272,9 +290,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
     region->polytope->appendConstraints(problem.getBounds());
 
-    std::cout << "calling inner_ellipsoid with: " << std::endl;
-    std::cout << "A: " << region->polytope->getA() << std::endl;
-    std::cout << "b: " << region->polytope->getB() << std::endl;
+    // std::cout << "calling inner_ellipsoid with: " << std::endl;
+    // std::cout << "A: " << region->polytope->getA() << std::endl;
+    // std::cout << "b: " << region->polytope->getB() << std::endl;
     volume = iris_mosek::inner_ellipsoid(*region->polytope, *region->ellipsoid);
 
     if (iter + 1 >= options.iter_limit || ((abs(volume - best_vol) / best_vol) < options.termination_threshold))

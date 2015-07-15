@@ -5,7 +5,7 @@ import numpy
 
 setup(ext_modules = cythonize(Extension(
     "iriscore",
-    sources=["iriscore.pyx"],
+    sources=["iriscore.pyx", "../../src/iris.cpp"],
     language="c++",
     include_dirs=[numpy.get_include(), "."],
     libraries=["iris", "iris_mosek", "mosek64", "iris_cvxgen_ldp_cpp"],
