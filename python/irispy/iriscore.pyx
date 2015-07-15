@@ -43,12 +43,11 @@ cdef class Ellipsoid:
     cdef shared_ptr[CEllipsoid] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            pass #TODO: don't pass
             self.thisptr = shared_ptr[CEllipsoid](new CEllipsoid(dim))
     @staticmethod
     cdef wrap(shared_ptr[CEllipsoid] ptr):
         pyobj = Ellipsoid(construct_new_cpp_object=False)
-        pyobj.thisptr = ptr 
+        pyobj.thisptr = ptr
         return pyobj
 
     @staticmethod

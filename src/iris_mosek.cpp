@@ -349,8 +349,6 @@ double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t 
 }
 
 void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKenv_t *existing_env) {
-  assert(Points.rows() == goal.size());
-
   const int dim = Points.rows();
   const int nw = Points.cols();
 

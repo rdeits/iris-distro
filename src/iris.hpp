@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include <vector>
 #include <memory>
+#include <iostream>
 
 const double ELLIPSOID_C_EPSILON = 1e-4;
 
@@ -18,6 +19,9 @@ class Polytope {
 public:
   Polytope(int dim=0);
   Polytope(Eigen::MatrixXd A, Eigen::VectorXd b);
+  ~Polytope() {
+    std::cout << "deleting polytope: " << this << std::endl;
+  }
   void setA(const Eigen::MatrixXd &A);
   const Eigen::MatrixXd& getA() const;
   void setB(const Eigen::VectorXd &b);
@@ -37,6 +41,9 @@ class Ellipsoid {
 public:
   Ellipsoid(int dim=0);
   Ellipsoid(Eigen::MatrixXd C, Eigen::VectorXd d);
+  ~Ellipsoid() {
+    std::cout << "deleting ellipsoid: " << this << std::endl;
+  }
   const Eigen::MatrixXd& getC() const;
   const Eigen::VectorXd& getD() const;
   void setC(const Eigen::MatrixXd &C_);

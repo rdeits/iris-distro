@@ -238,9 +238,6 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
 
 std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
 
-  assert(region.polytope->getDimension() == problem.getDimension());
-  assert(region.ellipsoid->getDimension() == problem.getDimension());
-
   std::shared_ptr<IRISRegion> region(new IRISRegion(problem.getDimension()));
   region->ellipsoid->setC(problem.getSeed().getC());
   region->ellipsoid->setD(problem.getSeed().getD());
