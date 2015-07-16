@@ -34,7 +34,7 @@ function(pods_install_matlab_path)
     	endif()
     endif() 
 
-    set(ADDPATH_FILE ${CMAKE_BINARY_DIR}/matlab/addpath_${MODULE_NAME}.m)
+    set(ADDPATH_FILE ${PROJECT_BINARY_DIR}/matlab/addpath_${MODULE_NAME}.m)
     
     file(WRITE ${ADDPATH_FILE}
 		"function addpath_${MODULE_NAME}(recurse)\n"
@@ -61,7 +61,7 @@ function(pods_install_matlab_path)
 		"end\n"
     )
 	
-	set(RMPATH_FILE ${CMAKE_BINARY_DIR}/matlab/rmpath_${MODULE_NAME}.m)
+	set(RMPATH_FILE ${PROJECT_BINARY_DIR}/matlab/rmpath_${MODULE_NAME}.m)
     
     file(WRITE ${RMPATH_FILE}
 		"function rmpath_${MODULE_NAME}(recurse)\n"
@@ -106,63 +106,63 @@ endfunction(pods_install_matlab_path)
 # only needs to be called once per project
 
 function(pods_configure_matlab_paths)
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_r_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_r_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_r_path()\n"
 		"path = '${CMAKE_INSTALL_RPATH}';\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_lib_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_lib_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_lib_path()\n"
 		"path = '${LIBRARY_INSTALL_PATH}';\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_bin_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_bin_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_bin_path()\n"
 		"path = '${EXECUTABLE_INSTALL_PATH}';\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_include_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_include_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_include_path()\n"
 		"path = '${INCLUDE_INSTALL_PATH}';\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_pkgconfig_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_pkgconfig_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_pkgconfig_path()\n"
 		"path = '${PKG_CONFIG_INSTALL_PATH}';\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_base_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_base_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_base_path()\n"
                 "  path = fullfile(fileparts(which(mfilename)),'..');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_data_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_data_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_data_path()\n"
 		"path = fullfile(pods_get_base_path(),'data');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_config_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_config_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_config_path()\n"
 		"path = fullfile(pods_get_base_path(),'config');\n"
     )
     install(FILES ${PODS_PATHFILE} DESTINATION matlab/)
     
-    set(PODS_PATHFILE ${CMAKE_BINARY_DIR}/matlab/pods_get_models_path.m)
+    set(PODS_PATHFILE ${PROJECT_BINARY_DIR}/matlab/pods_get_models_path.m)
     file(WRITE ${PODS_PATHFILE}
 		"function path = pods_get_models_path()\n"
 		"path = fullfile(pods_get_base_path(),'models');\n"

@@ -117,7 +117,7 @@ if (LCM_FOUND)
   execute_process(COMMAND mkdir -p ${LCMTYPES_DIR})
   include_directories(${CMAKE_CURRENT_BINARY_DIR}/lcmgen/)  # so people include with e.g. <lcmty  pes/pod.h>
 
-  set(LCMTYPES_SEARCHDIR ${CMAKE_SOURCE_DIR}/lcmtypes)
+  set(LCMTYPES_SEARCHDIR ${PROJECT_SOURCE_DIR}/lcmtypes)
 else()
   message(STATUS "disabling LCM.  lcm types will not be built.\n")
 endif()
@@ -379,7 +379,7 @@ function(add_c_lcmtype lcmtype)
   endif()
   set(lcmtype_w_package "${package_prefix}${lcmtype_we}")
 
-  add_custom_command(OUTPUT "${LCMTYPES_DIR}/${lcmtype_w_package}.c" "${LCMTYPES_DIR}/${lcmtype_w_package}.h" 
+  add_custom_command(OUTPUT "${LCMTYPES_DIR}/${lcmtype_w_package}.c" "${LCMTYPES_DIR}/${lcmtype_w_package}.h"
   		     COMMAND "${LCM_GEN_EXECUTABLE}" --c "${lcmtype}"
 		     DEPENDS ${lcmtype}
 		     WORKING_DIRECTORY ${LCMTYPES_DIR})
@@ -467,4 +467,4 @@ macro(add_lcmtype)
 endmacro()
 
 
-include_directories(${CMAKE_BINARY_DIR}/lcmgen/lcmtypes )
+include_directories(${PROJECT_BINARY_DIR}/lcmgen/lcmtypes )
