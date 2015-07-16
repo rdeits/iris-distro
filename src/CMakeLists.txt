@@ -1,8 +1,10 @@
 # add_library(iris_util iris_util.c)
 # target_link_libraries(iris_util lapack)
 
+add_library(iris_classes iris_classes.cpp)
+
 add_library(iris_mosek SHARED iris_mosek.cpp)
-target_link_libraries(iris_mosek mosek64)
+target_link_libraries(iris_mosek mosek64 iris_classes)
 
 add_library(iris SHARED iris.cpp)
 target_link_libraries(iris iris_mosek iris_cvxgen_ldp_cpp)
