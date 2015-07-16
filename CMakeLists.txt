@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.0)
 
-cmake_policy(SET CMP0042 NEW)
+if(APPLE)
+  cmake_policy(SET CMP0042 NEW)
+endif()
 
 enable_testing()
 
@@ -77,3 +79,4 @@ add_subdirectory(python)
 
 add_executable(testPPL test_ppl.cpp)
 target_link_libraries(testPPL ppl)
+pods_install_executables(testPPL)
