@@ -74,3 +74,6 @@ endif()
 add_subdirectory(cvxgen)
 add_subdirectory(src)
 add_subdirectory(python)
+
+add_executable(testPPL test_ppl.cpp)
+target_link_libraries(testPPL ppl)
