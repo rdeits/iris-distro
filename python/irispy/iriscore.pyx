@@ -1,6 +1,9 @@
 # import both numpy and the Cython declarations for numpy
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import colorConverter
+import mpl_toolkits.mplot3d as a3
+import scipy.spatial
 cimport numpy as np
 from cython.view cimport array as cvarray
 from cython.operator cimport dereference as deref
@@ -48,14 +51,28 @@ cdef class Polytope:
     def draw(self, ax=None, **kwargs):
         if self.getDimension() == 2:
             self.draw2d(ax=ax, **kwargs)
+        elif self.getDimension() == 3:
+            self.draw3d(ax=ax, **kwargs)
         else:
-            raise NotImplementedError("drawing for polytopes of dimension greater than 2 not implemented yet")
+            raise NotImplementedError("drawing for polytopes of dimension greater than 3 not implemented yet")
     def draw2d(self, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
         ax.add_patch(plt.Polygon(xy=np.vstack(self.generatorPoints()),**kwargs))
-
-
+    def draw3d(self, ax=None, **kwargs):
+        if ax is None:
+            ax = a3.Axes3D(plt.gcf())
+        points = np.vstack(self.generatorPoints())
+        tri = scipy.spatial.ConvexHull(points)
+        kwargs.setdefault("color", "r")
+        kwargs.setdefault("alpha", 1.0)
+        kwargs["facecolor"] = colorConverter.to_rgba(kwargs["color"], kwargs["alpha"])
+        for simplex in tri.simplices:
+            poly = a3.art3d.Poly3DCollection([points[simplex]], **kwargs)
+            if "alpha" in kwargs:
+                print "setting alpha"
+                poly.set_alpha(kwargs["alpha"])
+            ax.add_collection3d(poly)
 
 
 cdef class Ellipsoid:

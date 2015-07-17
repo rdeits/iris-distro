@@ -2,6 +2,7 @@ import irispy
 import numpy as np
 from unittest import TestCase
 import matplotlib.pyplot as plt
+import mpl_toolkits.mplot3d as a3
 
 class PolytopeTest(TestCase):
     def test_constructor(self):
@@ -50,5 +51,19 @@ class PolytopeTest(TestCase):
         ax.relim()
         ax.autoscale_view()
         # plt.show()
+
+    def test_plotting_3d(self):
+        fig = plt.figure()
+        ax = a3.Axes3D(fig)
+        p = irispy.Polytope()
+        A = np.vstack((np.eye(3),
+                       -np.eye(3)))
+        b = np.array([1.1, 1.2, 1.3, 1.4, 1.5, 1.6])
+        p.setA(A)
+        p.setB(b)
+        p.draw(ax, color="r", alpha=0.5, edgecolor="k")
+        ax.relim()
+        ax.autoscale_view()
+        plt.show()
 
 
