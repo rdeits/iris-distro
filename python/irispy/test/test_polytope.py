@@ -1,6 +1,7 @@
 import irispy
 import numpy as np
 from unittest import TestCase
+import matplotlib.pyplot as plt
 
 class PolytopeTest(TestCase):
     def test_constructor(self):
@@ -35,4 +36,19 @@ class PolytopeTest(TestCase):
                     found_expected[i] = True
                     print "found: ", ex
         self.assertTrue(all(found_expected))
+
+    def test_plotting(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(1,1,1)
+        p = irispy.Polytope()
+        A = np.vstack((np.eye(2),
+                       -np.eye(2)))
+        b = np.array([1.1, 1.2, 1.3, 1.4])
+        p.setA(A)
+        p.setB(b)
+        p.draw(ax,color="r", alpha=0.5)
+        ax.relim()
+        ax.autoscale_view()
+        # plt.show()
+
 

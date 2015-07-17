@@ -1,5 +1,6 @@
 # import both numpy and the Cython declarations for numpy
 import numpy as np
+import matplotlib.pyplot as plt
 cimport numpy as np
 from cython.view cimport array as cvarray
 from cython.operator cimport dereference as deref
@@ -44,6 +45,18 @@ cdef class Polytope:
     def generatorRays(self):
         cdef vector[VectorXd] pts = self.thisptr.get().generatorRays()
         return [eigenVectorToNumpy(pt) for pt in pts]
+    def draw(self, ax=None, **kwargs):
+        if self.getDimension() == 2:
+            self.draw2d(ax=ax, **kwargs)
+        else:
+            raise NotImplementedError("drawing for polytopes of dimension greater than 2 not implemented yet")
+    def draw2d(self, ax=None, **kwargs):
+        if ax is None:
+            ax = plt.gca()
+        ax.add_patch(plt.Polygon(xy=np.vstack(self.generatorPoints()),**kwargs))
+
+
+
 
 cdef class Ellipsoid:
     cdef shared_ptr[CEllipsoid] thisptr
