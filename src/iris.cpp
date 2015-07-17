@@ -2,8 +2,12 @@
 #include <numeric>
 #include <Eigen/LU>
 #include "iris.hpp"
-#include "iris_mosek.hpp"
 #include "iris/cvxgen_ldp.hpp"
+#include "Polytope.cpp"
+#include "Ellipsoid.cpp"
+#include "iris_classes.cpp"
+#include "iris_mosek.cpp"
+#include "iris_cdd.cpp"
 
 using namespace Eigen;
 

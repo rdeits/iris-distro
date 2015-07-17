@@ -38,6 +38,12 @@ cdef class Polytope:
         return eigenVectorToNumpy(self.thisptr.get().getB())
     def appendConstraints(self, Polytope other):
         self.thisptr.get().appendConstraints(deref(other.thisptr))
+    def generatorPoints(self):
+        cdef vector[VectorXd] pts = self.thisptr.get().generatorPoints()
+        return [eigenVectorToNumpy(pt) for pt in pts]
+    def generatorRays(self):
+        cdef vector[VectorXd] pts = self.thisptr.get().generatorRays()
+        return [eigenVectorToNumpy(pt) for pt in pts]
 
 cdef class Ellipsoid:
     cdef shared_ptr[CEllipsoid] thisptr
@@ -88,10 +94,10 @@ cdef class IRISRegion:
     def getEllipsoid(self):
         return Ellipsoid.wrap(self.thisptr.get().ellipsoid)
 
-def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,  
+def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
                   require_containment=False,
-                  error_on_infeasible_start=False, 
-                  termination_threshold=2e-2, 
+                  error_on_infeasible_start=False,
+                  termination_threshold=2e-2,
                   iter_limit = 100):
 
     cdef Ellipsoid start

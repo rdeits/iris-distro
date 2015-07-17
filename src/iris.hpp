@@ -29,10 +29,16 @@ public:
   int getDimension() const;
   int getNumberOfConstraints() const;
   void appendConstraints(const Polytope &other);
+  std::vector<Eigen::VectorXd> generatorPoints();
+  std::vector<Eigen::VectorXd> generatorRays();
 
 private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
+  bool dd_representation_dirty_ = true;
+  std::vector<Eigen::VectorXd> generator_points_;
+  std::vector<Eigen::VectorXd> generator_rays_;
+  void updateDDRepresentation();
 };
 
 
@@ -108,5 +114,6 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
 void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start);
 
+void getGenerators(const Eigen::MatrixXd &A, const Eigen::VectorXd &b, std::vector<Eigen::VectorXd> &points, std::vector<Eigen::VectorXd> &rays);
 
 #endif

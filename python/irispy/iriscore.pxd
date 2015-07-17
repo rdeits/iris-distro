@@ -24,6 +24,8 @@ cdef extern from "iris/iris.hpp":
 		const MatrixXd& getA()
 		const VectorXd& getB()
 		void appendConstraints(const CPolytope &other)
+		vector[VectorXd] generatorPoints()
+		vector[VectorXd] generatorRays()
 
 	cdef cppclass CEllipsoid "Ellipsoid":
 		CEllipsoid() except +
