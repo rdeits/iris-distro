@@ -21,6 +21,7 @@
 #   pods_install_executables(...)
 #
 #   pods_use_pkg_config_packages(...)
+#   pods_use_pkg_config_includes(...)
 #
 # Python
 #   pods_install_python_packages(...)
@@ -429,10 +430,10 @@ function(pods_find_pkg_config)
 
     if (found EQUAL 0)
        message(STATUS "Found ${ARGV0}")
-       set(${ARGV0}_FOUND 1 CACHE BOOL "")
+       set(${ARGV0}_FOUND 1 CACHE BOOL "" FORCE)
     else()
       message(STATUS "Could NOT find ${ARGV0} (version >= ${ARGV1}) using pods_find_pkg_config. PKG_CONFIG_PATH = $ENV{PKG_CONFIG_PATH}")
-      set(${ARGV0}_FOUND 0 CACHE BOOL "")
+      set(${ARGV0}_FOUND 0 CACHE BOOL "" FORCE)
     endif()
 endfunction()
 

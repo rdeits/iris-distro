@@ -122,6 +122,7 @@ function(mex_setup)
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/dummy.c "")
   execute_process(COMMAND ${mex} -largeArrayDims -v ${CMAKE_CURRENT_BINARY_DIR}/dummy.c OUTPUT_VARIABLE mexv_output ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+
   if ( WIN32 )
     get_mex_option(CC NAMES COMPILER REQUIRED)
     get_mex_option(CXX NAMES COMPILER REQUIRED)
@@ -331,17 +332,17 @@ function(add_mex)
     foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
       string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
       set_target_properties(${target} PROPERTIES
-	ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}"
+	      ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}"
       	LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_CURRENT_SOURCE_DIR}"
-	)
-     endforeach()
+	      )
+    endforeach()
 
-     if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-        # see comment by the definition of liblast above
-        set_target_properties(${target} PROPERTIES
-	  LINK_FLAGS_DEBUG "${MEX_LDDEBUGFLAGS}"
-          LINK_FLAGS_RELEASE "${MEX_LDOPTIMFLAGS}")
-        target_link_libraries(${target} liblast)
+    if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+      # see comment by the definition of liblast above
+      set_target_properties(${target} PROPERTIES
+        LINK_FLAGS_DEBUG "${MEX_LDDEBUGFLAGS}"
+        LINK_FLAGS_RELEASE "${MEX_LDOPTIMFLAGS}")
+      target_link_libraries(${target} liblast)
     endif()
   endif()
 
