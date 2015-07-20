@@ -162,7 +162,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
 
   while (1) {
-    std::cout << "calling hyperplanes with: " << std::endl;
+    // std::cout << "calling hyperplanes with: " << std::endl;
     // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
     // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
     separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
@@ -194,18 +194,18 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       }
     }
 
-    std::cout << "calling inner_ellipsoid with: " << std::endl;
+    // std::cout << "calling inner_ellipsoid with: " << std::endl;
     // std::cout << "A: " << region->polytope->getA() << std::endl;
     // std::cout << "b: " << region->polytope->getB() << std::endl;
     volume = iris_mosek::inner_ellipsoid(*region->polytope, *region->ellipsoid);
     if (debug) {
       debug->ellipsoid_history.push_back(*(region->ellipsoid));
     }
-    std::cout << "volume: " << volume << std::endl;
+    // std::cout << "volume: " << volume << std::endl;
 
     if (iter + 1 >= options.iter_limit || ((std::abs(volume - best_vol) / best_vol) < options.termination_threshold)) {
-      std::cout << "(abs(volume - best_vol) / best_vol): " << (std::abs(volume - best_vol) / best_vol) << std::endl;
-      std::cout << "term thresh: " << options.termination_threshold << std::endl;
+      // std::cout << "(abs(volume - best_vol) / best_vol): " << (std::abs(volume - best_vol) / best_vol) << std::endl;
+      // std::cout << "term thresh: " << options.termination_threshold << std::endl;
       break;
     }
 

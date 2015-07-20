@@ -62,25 +62,28 @@ def test_debug_data():
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
     print "done"
 
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-    plt.ion()
-
-    for poly, ellipsoid in debug.iterRegions():
-        print poly.generatorPoints()
-        poly.draw(ax)
-        ellipsoid.draw(ax)
-        # ax.relim()
-        ax.set_xlim([-2.5, 2.5])
-        ax.set_ylim([-2.5, 2.5])
-        # ax.autoscale_view()
-        plt.draw()
-        # plt.show()
-        plt.waitforbuttonpress()
-        ax.cla()
-        # raw_input()
-    plt.ioff()
+    debug.animate()
     plt.show()
+
+    # fig = plt.figure()
+    # ax = fig.add_subplot(1,1,1)
+    # plt.ion()
+
+    # for poly, ellipsoid in debug.iterRegions():
+    #     print poly.generatorPoints()
+    #     poly.draw(ax)
+    #     ellipsoid.draw(ax)
+    #     # ax.relim()
+    #     ax.set_xlim([-2.5, 2.5])
+    #     ax.set_ylim([-2.5, 2.5])
+    #     # ax.autoscale_view()
+    #     plt.draw()
+    #     # plt.show()
+    #     plt.waitforbuttonpress()
+    #     ax.cla()
+    #     # raw_input()
+    # plt.ioff()
+    # plt.show()
 
 if __name__ == '__main__':
     test_debug_data()

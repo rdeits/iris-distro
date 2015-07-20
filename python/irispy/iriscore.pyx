@@ -1,4 +1,5 @@
 import itertools
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import colorConverter
@@ -10,14 +11,23 @@ from cython.operator cimport dereference as deref
 from iriscore cimport inflate_region as cinflate_region
 
 cdef eigenMatrixToNumpy(const MatrixXd &M):
-    cdef cvarray = <double[:M.rows(),:M.cols()]> <double*> M.data()
-    return np.asarray(cvarray).copy()
+    cdef cvarray = <double[:M.rows():1,:M.cols()]> <double*> M.data()
+    return np.asarray(cvarray, order='F').copy()
 
 cdef eigenVectorToNumpy(const VectorXd &v):
     cdef cvarray = <double[:v.size()]> <double*> v.data()
-    return np.asarray(cvarray).copy()
+    return np.asarray(cvarray, order='F').copy()
 
-cdef class Polytope:
+cdef class DrawDispatcher:
+    def draw(self, ax=None, **kwargs):
+        if self.getDimension() == 2:
+            self.draw2d(ax=ax, **kwargs)
+        elif self.getDimension() == 3:
+            self.draw3d(ax=ax, **kwargs)
+        else:
+            raise NotImplementedError("drawing for objects of dimension greater than 3 not implemented yet")
+
+cdef class Polytope(DrawDispatcher):
     cdef shared_ptr[CPolytope] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
@@ -48,13 +58,6 @@ cdef class Polytope:
     def generatorRays(self):
         cdef vector[VectorXd] pts = self.thisptr.get().generatorRays()
         return [eigenVectorToNumpy(pt) for pt in pts]
-    def draw(self, ax=None, **kwargs):
-        if self.getDimension() == 2:
-            self.draw2d(ax=ax, **kwargs)
-        elif self.getDimension() == 3:
-            self.draw3d(ax=ax, **kwargs)
-        else:
-            raise NotImplementedError("drawing for polytopes of dimension greater than 3 not implemented yet")
     def draw2d(self, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
@@ -62,7 +65,7 @@ cdef class Polytope:
         hull = scipy.spatial.ConvexHull(points)
         kwargs.setdefault("edgecolor", "r")
         kwargs.setdefault("facecolor", "none")
-        ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
+        return ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
     def draw3d(self, ax=None, **kwargs):
         if ax is None:
             ax = a3.Axes3D(plt.gcf())
@@ -79,7 +82,7 @@ cdef class Polytope:
             ax.add_collection3d(poly)
 
 
-cdef class Ellipsoid:
+cdef class Ellipsoid(DrawDispatcher):
     cdef shared_ptr[CEllipsoid] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
@@ -119,12 +122,8 @@ cdef class Ellipsoid:
         hull = scipy.spatial.ConvexHull(points)
         kwargs.setdefault("edgecolor", "b")
         kwargs.setdefault("facecolor", "none")
-        ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
-    def draw(self, ax=None, **kwargs):
-        if self.getDimension() == 2:
-            self.draw2d(ax=ax, **kwargs)
-        else:
-            raise NotImplementedError("drawing for dimension greater than 2 not implemented yet")
+        kwargs.setdefault("linewidth", 1)
+        return ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
 
 cdef class IRISRegion:
     cdef shared_ptr[CIRISRegion] thisptr
@@ -182,6 +181,36 @@ cdef class IRISDebugData:
             yield self.getEllipsoid(i)
     def iterRegions(self):
         return itertools.izip(self.iterPolytopes(), self.iterEllipsoids())
+    def iterObstacles(self):
+        cdef vector[MatrixXd] obstacles = self.thisptr.get().obstacles
+        return (eigenMatrixToNumpy(obs) for obs in obstacles)
+    def animate(self, ax=None, pause=-1):
+        if ax is None:
+            fig = plt.figure()
+            ax = fig.add_subplot(1,1,1)
+        plt.ion()
+        for poly, ellipsoid in self.iterRegions():
+            ax.plot([self.getEllipsoid(0).getD()[0]],
+                    [self.getEllipsoid(0).getD()[1]],
+                    'go', markersize=10)
+            poly.draw(ax)
+            ellipsoid.draw(ax)
+            for obs in self.iterObstacles():
+                print obs
+                points = obs.T
+                hull = scipy.spatial.ConvexHull(points)
+                ax.add_patch(plt.Polygon(xy=points[hull.vertices],edgecolor='k', facecolor=colorConverter.to_rgba("k", 0.5)))
+            ax.set_xlim([-2.5, 2.5])
+            ax.set_ylim([-2.5, 2.5])
+            if pause > 0:
+                time.sleep(pause)
+            elif pause < 0:
+                plt.waitforbuttonpress()
+            ax.cla()
+
+        plt.ioff()
+
+
 
 def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
                   require_containment=False,
