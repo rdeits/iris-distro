@@ -221,20 +221,26 @@ double inner_ellipsoid(const iris::Polytope &polytope, iris::Ellipsoid &ellipsoi
   assert(con_ndx == ncon);
 
   MSKint32t csub[3];
+  int lhs_idx = 0;
+  // printf("l: %d num_s: %d num_z: %d num_sprime: %d\n", l, num_s, num_z, num_sprime);
   for (int j=0; j < num_s; j++) {
-    if (j < num_z) {
-      csub[0] = ndx_z[j];
+    if (lhs_idx < num_z) {
+      csub[0] = ndx_z[lhs_idx];
     } else {
-      csub[0] = ndx_sprime[j - num_z];
+      csub[0] = ndx_sprime[lhs_idx - num_z];
+      // printf("getting sprime %d\n", lhs_idx - num_z);
     }
-    if (j + 1 < num_z) {
-      csub[1] = ndx_z[j + 1];
+    if (lhs_idx + 1 < num_z) {
+      csub[1] = ndx_z[lhs_idx + 1];
     } else {
-      csub[1] = ndx_sprime[j + 1 - num_z];
+      csub[1] = ndx_sprime[lhs_idx + 1 - num_z];
+      // printf("getting sprime %d\n", lhs_idx + 1 - num_z);
     }
     csub[2] = ndx_s[j];
-    // debug("appending rquad cone with sub: %d %d %d", csub[0], csub[1], csub[2]);
+    // printf("lhs_idx: %d\n", lhs_idx);
+    // printf( "appending rquad cone with sub: %d %d %d\n", csub[0], csub[1], csub[2]);
     check_res(MSK_appendcone(task, MSK_CT_RQUAD, 0.0, 3, csub)); // 3rd argument (0.0) is reserved for future use by Mosek
+    lhs_idx += 2;
   }
 
   std::vector<MSKint32t> csub_f_row(1 + n);
