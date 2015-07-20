@@ -1,5 +1,7 @@
 using namespace Eigen;
 
+namespace iris {
+
 int factorial(int n) {
   return n == 0 ? 1 : factorial(n - 1) * n;
 }
@@ -52,4 +54,6 @@ std::shared_ptr<Ellipsoid> Ellipsoid::fromNSphere(Eigen::VectorXd &center, doubl
   C.diagonal().setConstant(radius);
   std::shared_ptr<Ellipsoid> ellipsoid(new Ellipsoid(C, center));
   return ellipsoid;
+}
+
 }

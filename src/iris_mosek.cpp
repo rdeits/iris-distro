@@ -22,7 +22,7 @@ static void MSKAPI printstr(void *handle,
   printf("%s",str); 
 } /* printstr */ 
 
-void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, Ellipsoid &ellipsoid) {
+void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, iris::Ellipsoid &ellipsoid) {
   int bar_ndx = 0;
   for (int j=0; j < 2*n; j++) {
     for (int i=j; i < 2*n; i++) {
@@ -39,7 +39,7 @@ void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, E
   }
 }
 
-double inner_ellipsoid(const Polytope &polytope, Ellipsoid &ellipsoid, MSKenv_t *existing_env) {
+double inner_ellipsoid(const iris::Polytope &polytope, iris::Ellipsoid &ellipsoid, MSKenv_t *existing_env) {
 
   MSKenv_t *env;
   if (existing_env) {

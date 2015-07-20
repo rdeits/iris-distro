@@ -11,8 +11,8 @@ cdef extern from "<memory>" namespace "std":
 		T operator*()
 		T *get()
 
-cdef extern from "iris/iris.hpp":
-	cdef cppclass CPolytope "Polytope":
+cdef extern from "iris/iris.hpp" namespace "iris":
+	cdef cppclass CPolytope "iris::Polytope":
 		CPolytope() except +
 		CPolytope(int dim) except +
 		int getDimension()
@@ -27,7 +27,7 @@ cdef extern from "iris/iris.hpp":
 		vector[VectorXd] generatorPoints()
 		vector[VectorXd] generatorRays()
 
-	cdef cppclass CEllipsoid "Ellipsoid":
+	cdef cppclass CEllipsoid "iris::Ellipsoid":
 		CEllipsoid() except +
 		CEllipsoid(int dim) except +
 		int getDimension()
@@ -41,12 +41,12 @@ cdef extern from "iris/iris.hpp":
 		@staticmethod
 		shared_ptr[CEllipsoid] fromNSphere(VectorXd &point, double radius)
 
-	cdef cppclass CIRISRegion "IRISRegion":
+	cdef cppclass CIRISRegion "iris::IRISRegion":
 		CIRISRegion(int dim) except +
 		shared_ptr[CPolytope] polytope
 		shared_ptr[CEllipsoid] ellipsoid
 
-	cdef cppclass CIRISProblem "IRISProblem":
+	cdef cppclass CIRISProblem "iris::IRISProblem":
 		CIRISProblem(int dim) except +
 		void setSeedPoint(VectorXd point)
 		void setSeedEllipsoid(CEllipsoid ellipsoid)
@@ -57,10 +57,12 @@ cdef extern from "iris/iris.hpp":
 		vector[MatrixXd] getObstacles()
 		CPolytope getBounds()
 
-	cdef cppclass CIRISOptions "IRISOptions":
+	cdef cppclass CIRISOptions "iris::IRISOptions":
 		bint require_containment, error_on_infeasible_start
 		double termination_threshold
 		int iter_limit
+
+	cdef cppclass CIRISDebugData "iris::IRISDebugData"
 
 	cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options)
 

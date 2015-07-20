@@ -64,6 +64,6 @@ class PolytopeTest(TestCase):
         p.draw(ax, color="r", alpha=0.5, edgecolor="k")
         ax.relim()
         ax.autoscale_view()
-        plt.show()
+        # plt.show()
 
 

@@ -1,3 +1,5 @@
+namespace iris {
+
 void IRISProblem::setSeedPoint(Eigen::VectorXd point) {
   if (point.size() != this->getDimension()) {
     throw(std::runtime_error("seed point must match dimension dim"));
@@ -35,4 +37,6 @@ std::vector<Eigen::MatrixXd> IRISProblem::getObstacles() const {
 }
 Polytope IRISProblem::getBounds() const {
   return this->bounds;
+}
+
 }

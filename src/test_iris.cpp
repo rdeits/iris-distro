@@ -4,6 +4,7 @@
 #include "iris/cvxgen_ldp.hpp"
 
 using namespace Eigen;
+using namespace iris;
 
 // valuecheck() and valuecheckMatrix are taken from the open-source Drake toolbox for planning and control: http://drake.mit.edu
 template <typename T>

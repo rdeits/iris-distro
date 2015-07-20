@@ -1,5 +1,3 @@
-#include <iostream>
-#include <Eigen/Core>
 #include "setoper.h"
 #include "cdd.h"
 
@@ -24,6 +22,8 @@ void dd_check(dd_ErrorType err) {
     throw std::runtime_error("dd error");
   }
 }
+
+namespace iris {
 
 void getGenerators(const MatrixXd &A, const VectorXd &b, std::vector<VectorXd> &points, std::vector<VectorXd> &rays) {
   assert(A.rows() == b.rows());
@@ -60,4 +60,6 @@ void getGenerators(const MatrixXd &A, const VectorXd &b, std::vector<VectorXd> &
   dd_FreeMatrix(hrep);
   dd_FreeMatrix(generators);
   dd_FreePolyhedra(poly);
+}
+
 }

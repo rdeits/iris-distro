@@ -11,6 +11,8 @@
 
 using namespace Eigen;
 
+namespace iris {
+
 template <typename T>
 std::vector<size_t> arg_sort(const std::vector<T> &vec) {
   std::vector<size_t> idx(vec.size());
@@ -143,6 +145,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   double volume;
   long int iter = 0;
   bool infeasible_start;
+  Polytope new_poly(problem.getDimension());
 
   if (debug) {
     debug->ellipsoid_history.push_back(*(region->ellipsoid));
@@ -154,7 +157,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     // std::cout << "calling hyperplanes with: " << std::endl;
     // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
     // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
-    separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, *region->polytope, infeasible_start);
+    separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
 
     // std::cout << "A: " << std::endl << region->polytope.A << std::endl;
     // std::cout << "b: " << region->polytope.b.transpose() << std::endl;
@@ -163,11 +166,25 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       throw(std::runtime_error("Error: initial point is infeasible\n"));
     }
 
-    if (options.require_containment && !(iter == 0 || infeasible_start)) {
-      throw(std::runtime_error("Not implemented yet"));
-    }
 
-    region->polytope->appendConstraints(problem.getBounds());
+    new_poly.appendConstraints(problem.getBounds());
+
+    if (options.require_containment) {
+      if (new_poly.contains(problem.getSeed().getD()) || iter == 0 || infeasible_start) {
+        *(region->polytope) = new_poly;
+        if (debug) {
+          debug->polytope_history.push_back(new_poly);
+        }
+      } else {
+        std::cout << "breaking early because the start point is no longer contained in the polytope" << std::endl;
+        return region;
+      }
+    } else {
+      *(region->polytope) = new_poly;
+      if (debug) {
+        debug->polytope_history.push_back(new_poly);
+      }
+    }
 
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
     // std::cout << "A: " << region->polytope->getA() << std::endl;
@@ -179,7 +196,12 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
     best_vol = volume; // always true because ellipsoid volume is guaranteed to be non-decreasing (see Deits14). 
     iter++;
+    if (debug) {
+      debug->iters = iter;
+    }
   }
 
   return region;
+}
+
 }

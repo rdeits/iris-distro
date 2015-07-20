@@ -6,6 +6,9 @@
 #include <memory>
 #include <iostream>
 
+
+namespace iris {
+  
 const double ELLIPSOID_C_EPSILON = 1e-4;
 
 struct IRISOptions {
@@ -31,6 +34,7 @@ public:
   void appendConstraints(const Polytope &other);
   std::vector<Eigen::VectorXd> generatorPoints();
   std::vector<Eigen::VectorXd> generatorRays();
+  bool contains(Eigen::VectorXd point, double tolerance=0.0);
 
 private:
   Eigen::MatrixXd A_;
@@ -80,8 +84,8 @@ struct IRISDebugData {
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polytope> polytope_history;
   std::vector<Eigen::MatrixXd> obstacles;
-  Eigen::VectorXd ellipsoid_times;
-  Eigen::VectorXd polytope_times;
+  // Eigen::VectorXd ellipsoid_times;
+  // Eigen::VectorXd polytope_times;
   double total_time;
   int iters;
 };
@@ -115,5 +119,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start);
 
 void getGenerators(const Eigen::MatrixXd &A, const Eigen::VectorXd &b, std::vector<Eigen::VectorXd> &points, std::vector<Eigen::VectorXd> &rays);
+
+}
 
 #endif

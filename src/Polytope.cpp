@@ -1,5 +1,6 @@
 using namespace Eigen;
 
+namespace iris {
 
 Polytope::Polytope(int dim):
   A_(0, dim),
@@ -51,4 +52,9 @@ std::vector<VectorXd> Polytope::generatorRays() {
     updateDDRepresentation();
   }
   return generator_rays_;
+}
+bool Polytope::contains(VectorXd point, double tolerance) {
+  return (A_ * point - b_).maxCoeff() <= tolerance;
+}
+
 }

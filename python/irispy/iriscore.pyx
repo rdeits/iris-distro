@@ -128,7 +128,8 @@ def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
                   require_containment=False,
                   error_on_infeasible_start=False,
                   termination_threshold=2e-2,
-                  iter_limit = 100):
+                  iter_limit = 100,
+                  return_debug_data=False):
 
     cdef Ellipsoid start
     if isinstance(start_point_or_ellipsoid, Ellipsoid):
