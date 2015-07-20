@@ -1,4 +1,4 @@
-# import both numpy and the Cython declarations for numpy
+import itertools
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import colorConverter
@@ -58,16 +58,20 @@ cdef class Polytope:
     def draw2d(self, ax=None, **kwargs):
         if ax is None:
             ax = plt.gca()
-        ax.add_patch(plt.Polygon(xy=np.vstack(self.generatorPoints()),**kwargs))
+        points = np.vstack(self.generatorPoints())
+        hull = scipy.spatial.ConvexHull(points)
+        kwargs.setdefault("edgecolor", "r")
+        kwargs.setdefault("facecolor", "none")
+        ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
     def draw3d(self, ax=None, **kwargs):
         if ax is None:
             ax = a3.Axes3D(plt.gcf())
         points = np.vstack(self.generatorPoints())
-        tri = scipy.spatial.ConvexHull(points)
+        hull = scipy.spatial.ConvexHull(points)
         kwargs.setdefault("color", "r")
         kwargs.setdefault("alpha", 1.0)
         kwargs["facecolor"] = colorConverter.to_rgba(kwargs["color"], kwargs["alpha"])
-        for simplex in tri.simplices:
+        for simplex in hull.simplices:
             poly = a3.art3d.Poly3DCollection([points[simplex]], **kwargs)
             if "alpha" in kwargs:
                 print "setting alpha"
@@ -106,6 +110,21 @@ cdef class Ellipsoid:
         return eigenVectorToNumpy(self.thisptr.get().getD())
     def getVolume(self):
         return self.thisptr.get().getVolume()
+    def draw2d(self, ax=None, **kwargs):
+        if ax is None:
+            ax = plt.gca()
+        theta = np.linspace(0, 2 * np.pi, 100)
+        y = np.vstack((np.sin(theta), np.cos(theta)))
+        points = (self.getC().dot(y) + self.getD()[:,np.newaxis]).T
+        hull = scipy.spatial.ConvexHull(points)
+        kwargs.setdefault("edgecolor", "b")
+        kwargs.setdefault("facecolor", "none")
+        ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
+    def draw(self, ax=None, **kwargs):
+        if self.getDimension() == 2:
+            self.draw2d(ax=ax, **kwargs)
+        else:
+            raise NotImplementedError("drawing for dimension greater than 2 not implemented yet")
 
 cdef class IRISRegion:
     cdef shared_ptr[CIRISRegion] thisptr
@@ -124,10 +143,50 @@ cdef class IRISRegion:
     def getEllipsoid(self):
         return Ellipsoid.wrap(self.thisptr.get().ellipsoid)
 
+cdef class IRISDebugData:
+    cdef shared_ptr[CIRISDebugData] thisptr
+    def __cinit__(self, construct_new_cpp_object=True):
+        if construct_new_cpp_object:
+            self.thisptr = shared_ptr[CIRISDebugData](new CIRISDebugData());
+    @staticmethod
+    cdef wrap(shared_ptr[CIRISDebugData] ptr):
+        pyobj = IRISDebugData(construct_new_cpp_object=False)
+        pyobj.thisptr = ptr
+        return pyobj
+    def getNumberOfPolytopes(self):
+        return self.thisptr.get().polytope_history.size()
+    def getNumberOfEllipsoids(self):
+        return self.thisptr.get().ellipsoid_history.size()
+    def getPolytope(self, index=-1):
+        print "getting polytope: ", index
+        if index < 0:
+            index = self.getNumberOfPolytopes() + index
+        if index >= self.getNumberOfPolytopes():
+            raise IndexError("polytope index out of bounds")
+        poly = Polytope(dim=self.thisptr.get().polytope_history[index].getDimension())
+        poly.thisptr.get()[0] = self.thisptr.get().polytope_history[index]
+        return poly
+    def iterPolytopes(self):
+        for i in xrange(self.getNumberOfPolytopes()):
+            yield self.getPolytope(i)
+    def getEllipsoid(self, index=-1):
+        if index < 0:
+            index = self.getNumberOfEllipsoids() + index
+        if index >= self.getNumberOfEllipsoids():
+            raise IndexError("ellipsoid index out of bounds")
+        ellipsoid = Ellipsoid(dim=self.thisptr.get().ellipsoid_history[index].getDimension())
+        ellipsoid.thisptr.get()[0] = self.thisptr.get().ellipsoid_history[index]
+        return ellipsoid
+    def iterEllipsoids(self):
+        for i in xrange(self.getNumberOfEllipsoids()):
+            yield self.getEllipsoid(i)
+    def iterRegions(self):
+        return itertools.izip(self.iterPolytopes(), self.iterEllipsoids())
+
 def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
                   require_containment=False,
                   error_on_infeasible_start=False,
-                  termination_threshold=2e-2,
+                  termination_threshold=2e-3,
                   iter_limit = 100,
                   return_debug_data=False):
 
@@ -157,7 +216,16 @@ def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
             assert(obs.shape[0] == dim, "Obstacle points should be size dim x num_points")
             obs_mat = copyToMatrix(&obs[0,0], obs.shape[0], obs.shape[1])
             problem.addObstacle(obs_mat)
-        region = IRISRegion.wrap(cinflate_region(deref(problem), options))
+        if return_debug_data:
+            debug = IRISDebugData()
+            region = IRISRegion.wrap(cinflate_region(deref(problem), options, debug.thisptr.get()))
+        else:
+            region = IRISRegion.wrap(cinflate_region(deref(problem), options))
+    except Exception as e:
+        print e
     finally:
         del problem
-    return region
+    if return_debug_data:
+        return region, debug
+    else:
+        return region

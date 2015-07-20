@@ -62,9 +62,14 @@ cdef extern from "iris/iris.hpp" namespace "iris":
 		double termination_threshold
 		int iter_limit
 
-	cdef cppclass CIRISDebugData "iris::IRISDebugData"
+	cdef cppclass CIRISDebugData "iris::IRISDebugData":
+		vector[CEllipsoid] ellipsoid_history
+		vector[CPolytope] polytope_history
+		vector[MatrixXd] obstacles
+		int iters
 
 	cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options)
+	cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options, CIRISDebugData *debug)
 
 	cdef const double ELLIPSOID_C_EPSILON
 

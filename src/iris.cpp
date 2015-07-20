@@ -1,6 +1,7 @@
 #include <iostream>
 #include <numeric>
 #include <Eigen/LU>
+#include <Eigen/StdVector>
 #include "iris.hpp"
 #include "iris/cvxgen_ldp.hpp"
 #include "Polytope.cpp"
@@ -148,13 +149,20 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   Polytope new_poly(problem.getDimension());
 
   if (debug) {
+    std::cout << "starting debug" << std::endl;
     debug->ellipsoid_history.push_back(*(region->ellipsoid));
-    debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
+    std::cout << "pushing back obstacles" << std::endl;
+    auto obstacles = problem.getObstacles();
+    for (auto obs = obstacles.begin(); obs != obstacles.end(); ++obs) {
+      std::cout << "pushing back obstacle: " << *obs << std::endl;
+      debug->obstacles.push_back(*obs);
+    }
+    // debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
   }
 
 
   while (1) {
-    // std::cout << "calling hyperplanes with: " << std::endl;
+    std::cout << "calling hyperplanes with: " << std::endl;
     // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
     // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
     separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
@@ -186,13 +194,20 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       }
     }
 
-    // std::cout << "calling inner_ellipsoid with: " << std::endl;
+    std::cout << "calling inner_ellipsoid with: " << std::endl;
     // std::cout << "A: " << region->polytope->getA() << std::endl;
     // std::cout << "b: " << region->polytope->getB() << std::endl;
     volume = iris_mosek::inner_ellipsoid(*region->polytope, *region->ellipsoid);
+    if (debug) {
+      debug->ellipsoid_history.push_back(*(region->ellipsoid));
+    }
+    std::cout << "volume: " << volume << std::endl;
 
-    if (iter + 1 >= options.iter_limit || ((abs(volume - best_vol) / best_vol) < options.termination_threshold))
+    if (iter + 1 >= options.iter_limit || ((std::abs(volume - best_vol) / best_vol) < options.termination_threshold)) {
+      std::cout << "(abs(volume - best_vol) / best_vol): " << (std::abs(volume - best_vol) / best_vol) << std::endl;
+      std::cout << "term thresh: " << options.termination_threshold << std::endl;
       break;
+    }
 
     best_vol = volume; // always true because ellipsoid volume is guaranteed to be non-decreasing (see Deits14). 
     iter++;

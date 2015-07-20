@@ -41,9 +41,9 @@ void getGenerators(const MatrixXd &A, const VectorXd &b, std::vector<VectorXd> &
   dd_check(err);
 
   dd_MatrixPtr generators = dd_CopyGenerators(poly);
-  dd_WriteMatrix(stdout, generators);
+  // dd_WriteMatrix(stdout, generators);
 
-  std::cout << "rowsize: " << generators->rowsize << " colsize: " << generators->colsize << std::endl;
+  // std::cout << "rowsize: " << generators->rowsize << " colsize: " << generators->colsize << std::endl;
   assert(dim + 1 == generators->colsize);
   for (int i=0; i < generators->rowsize; i++) {
     VectorXd point_or_ray(dim);
