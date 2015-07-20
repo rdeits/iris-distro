@@ -28,6 +28,21 @@ cdef class DrawDispatcher:
         else:
             raise NotImplementedError("drawing for objects of dimension greater than 3 not implemented yet")
 
+def draw_3d_convhull(points, ax, **kwargs):
+    kwargs.setdefault("edgecolor", "k")
+    kwargs.setdefault("facecolor", "r")
+    kwargs.setdefault("alpha", 0.5)
+    kwargs["facecolor"] = colorConverter.to_rgba(kwargs["facecolor"], kwargs["alpha"])
+    hull = scipy.spatial.ConvexHull(points)
+    artists = []
+    for simplex in hull.simplices:
+        poly = a3.art3d.Poly3DCollection([points[simplex]], **kwargs)
+        if "alpha" in kwargs:
+            poly.set_alpha(kwargs["alpha"])
+        ax.add_collection3d(poly)
+        artists.append(poly)
+    return artists
+
 cdef class Polytope(DrawDispatcher):
     cdef shared_ptr[CPolytope] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
@@ -80,21 +95,13 @@ cdef class Polytope(DrawDispatcher):
         hull = scipy.spatial.ConvexHull(points)
         kwargs.setdefault("edgecolor", "r")
         kwargs.setdefault("facecolor", "none")
-        return ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
+        return [ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))]
     def draw3d(self, ax=None, **kwargs):
         if ax is None:
             ax = a3.Axes3D(plt.gcf())
         points = np.vstack(self.generatorPoints())
-        hull = scipy.spatial.ConvexHull(points)
-        kwargs.setdefault("edgecolor", "k")
         kwargs.setdefault("facecolor", "r")
-        kwargs.setdefault("alpha", 1.0)
-        kwargs["facecolor"] = colorConverter.to_rgba(kwargs["facecolor"], kwargs["alpha"])
-        for simplex in hull.simplices:
-            poly = a3.art3d.Poly3DCollection([points[simplex]], **kwargs)
-            if "alpha" in kwargs:
-                poly.set_alpha(kwargs["alpha"])
-            ax.add_collection3d(poly)
+        return draw_3d_convhull(points, ax, **kwargs)
 
 
 cdef class Ellipsoid(DrawDispatcher):
@@ -107,7 +114,6 @@ cdef class Ellipsoid(DrawDispatcher):
         pyobj = Ellipsoid(construct_new_cpp_object=False)
         pyobj.thisptr = ptr
         return pyobj
-
     @staticmethod
     def fromNSphere(center, double radius=ELLIPSOID_C_EPSILON):
         cdef np.ndarray[double, ndim=1, mode="c"] d = np.asarray(center, dtype=np.float64)
@@ -138,7 +144,21 @@ cdef class Ellipsoid(DrawDispatcher):
         kwargs.setdefault("edgecolor", "b")
         kwargs.setdefault("facecolor", "none")
         kwargs.setdefault("linewidth", 1)
-        return ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))
+        return [ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))]
+    def draw3d(self, ax=None, **kwargs):
+        if ax is None:
+            ax = a3.Axes3D(plt.gcf())
+
+        theta = np.linspace(0, 2 * np.pi, 20)
+        y = np.vstack((np.sin(theta), np.cos(theta), np.zeros_like(theta)))
+        for phi in np.linspace(0, np.pi, 10):
+            R = np.array([[1.0, 0.0, 0.0],
+                          [0.0, np.cos(phi), -np.sin(phi)],
+                          [0.0, np.sin(phi), np.cos(phi)]])
+            y = np.hstack((y, R.dot(y)))
+        x = self.getC().dot(y) + self.getD()[:,np.newaxis]
+        kwargs.setdefault("facecolor", "b")
+        return draw_3d_convhull(x.T, ax, **kwargs)
 
 cdef class IRISRegion:
     cdef shared_ptr[CIRISRegion] thisptr
@@ -201,7 +221,47 @@ cdef class IRISDebugData:
     def boundingPoints(self):
         cdef vector[VectorXd] pts = self.thisptr.get().bounds.generatorPoints()
         return [eigenVectorToNumpy(pt) for pt in pts]
-    def animate(self, fig=None, pause=0.5, show=True, repeat_delay=2.0):
+    def animate(self, *args, **kwargs):
+        cdef int dim = self.thisptr.get().bounds.getDimension()
+        if dim == 2:
+            self.animate2d(*args, **kwargs)
+        elif dim == 3:
+            self.animate3d(*args, **kwargs)
+        else:
+            raise ValueError("not implemented for dimension > 3")
+
+    def animate3d(self, fig=None, pause=0.5, show=True, repeat_delay=2.0): 
+        if fig is None:
+            fig = plt.figure()
+            ax = a3.Axes3D(fig)
+        bounding_pts = np.vstack(self.boundingPoints())
+        lb = bounding_pts.min(axis=0)
+        ub = bounding_pts.max(axis=0)
+        width = ub - lb
+
+        ax.set_xlim(lb[0] - 0.1 * width[0], ub[0] + 0.1 * width[0])
+        ax.set_ylim(lb[1] - 0.1 * width[1], ub[1] + 0.1 * width[1])
+        ax.set_zlim(lb[2] - 0.1 * width[2], ub[2] + 0.1 * width[2])
+
+        artist_sets = []
+        for poly, ellipsoid in self.iterRegions():
+            # ax.cla()
+            artists = []
+            d = self.getEllipsoid(0).getD()
+            artists.extend(ax.plot([d[0]], [d[1]], 'go', zs=[d[2]],  markersize=10))
+            artists.extend(poly.draw(ax))
+            artists.extend(ellipsoid.draw(ax))
+            for obs in self.iterObstacles():
+                artists.extend(draw_3d_convhull(obs.T, ax, edgecolor='k', facecolor='k', alpha=0.5))
+            artist_sets.append(tuple(artists))
+
+        ani = animation.ArtistAnimation(fig, artist_sets, interval=pause*1000, repeat_delay=repeat_delay*1000)
+        if show:
+            plt.show()
+
+
+    def animate2d(self, fig=None, pause=0.5, show=True, repeat_delay=2.0):
+
         if fig is None:
             fig = plt.figure()
             ax = plt.gca()
@@ -221,8 +281,8 @@ cdef class IRISDebugData:
             artists.extend(ax.plot([self.getEllipsoid(0).getD()[0]],
                     [self.getEllipsoid(0).getD()[1]],
                     'go', markersize=10))
-            artists.append(poly.draw(ax))
-            artists.append(ellipsoid.draw(ax))
+            artists.extend(poly.draw(ax))
+            artists.extend(ellipsoid.draw(ax))
             for obs in self.iterObstacles():
                 points = obs.T
                 hull = scipy.spatial.ConvexHull(points)
