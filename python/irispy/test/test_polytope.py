@@ -9,7 +9,7 @@ class PolytopeTest(TestCase):
         p = irispy.Polytope()
         A = np.zeros((2,2))
 
-        print A
+        # print A
         p.setA(A)
         A2 = p.getA()
         A2[0,0] = 1
@@ -23,7 +23,7 @@ class PolytopeTest(TestCase):
         p.setA(A)
         p.setB(b)
         points = p.generatorPoints()
-        print points
+        # print points
 
         expected = [np.array([1.1, 1.2]),
                     np.array([-1.3, 1.2]),
@@ -35,7 +35,7 @@ class PolytopeTest(TestCase):
             for i, ex in enumerate(expected):
                 if np.all(np.abs(point - ex) < 1e-3):
                     found_expected[i] = True
-                    print "found: ", ex
+                    # print "found: ", ex
         self.assertTrue(all(found_expected))
 
     def test_plotting(self):
@@ -47,7 +47,7 @@ class PolytopeTest(TestCase):
         b = np.array([1.1, 1.2, 1.3, 1.4])
         p.setA(A)
         p.setB(b)
-        p.draw(ax,color="r", alpha=0.5)
+        p.draw(ax, alpha=0.5)
         ax.relim()
         ax.autoscale_view()
         # plt.show()
@@ -61,7 +61,7 @@ class PolytopeTest(TestCase):
         b = np.array([1.1, 1.2, 1.3, 1.4, 1.5, 1.6])
         p.setA(A)
         p.setB(b)
-        p.draw(ax, color="r", alpha=0.5, edgecolor="k")
+        p.draw(ax)
         ax.relim()
         ax.autoscale_view()
         # plt.show()

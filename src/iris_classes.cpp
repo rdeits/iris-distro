@@ -25,7 +25,7 @@ void IRISProblem::setBounds(Polytope new_bounds) {
   this->bounds = new_bounds;
 }
 void IRISProblem::addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
-  std::cout << "adding obstacle: " << new_obstacle_vertices << std::endl;
+  // std::cout << "adding obstacle: " << new_obstacle_vertices << std::endl;
   // std::cout << "dim: " << this->getDimension() << std::endl;
   if (new_obstacle_vertices.rows() != this->getDimension()) {
     throw std::runtime_error("new_obstacle_vertices must have dim rows");

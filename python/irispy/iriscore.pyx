@@ -2,6 +2,7 @@ import itertools
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 from matplotlib.colors import colorConverter
 import mpl_toolkits.mplot3d as a3
 import scipy.spatial
@@ -21,9 +22,9 @@ cdef eigenVectorToNumpy(const VectorXd &v):
 cdef class DrawDispatcher:
     def draw(self, ax=None, **kwargs):
         if self.getDimension() == 2:
-            self.draw2d(ax=ax, **kwargs)
+            return self.draw2d(ax=ax, **kwargs)
         elif self.getDimension() == 3:
-            self.draw3d(ax=ax, **kwargs)
+            return self.draw3d(ax=ax, **kwargs)
         else:
             raise NotImplementedError("drawing for objects of dimension greater than 3 not implemented yet")
 
@@ -37,6 +38,20 @@ cdef class Polytope(DrawDispatcher):
         pyobj = Polytope(construct_new_cpp_object=False)
         pyobj.thisptr = ptr
         return pyobj
+    @staticmethod
+    def from_bounds(lower_bound, upper_bound):
+        lower_bound = np.asarray(lower_bound, dtype=np.float64)
+        upper_bound= np.asarray(upper_bound, dtype=np.float64)
+        assert(lower_bound.size == upper_bound.size)
+        assert(len(lower_bound.shape) == 1)
+        assert(len(upper_bound.shape) == 1)
+        dim = lower_bound.shape[0]
+        A = np.vstack((np.eye(dim), -np.eye(dim)))
+        b = np.hstack((upper_bound, -lower_bound))
+        poly = Polytope(dim)
+        poly.setA(A)
+        poly.setB(b)
+        return poly
 
     def getDimension(self):
         return self.thisptr.get().getDimension()
@@ -71,13 +86,13 @@ cdef class Polytope(DrawDispatcher):
             ax = a3.Axes3D(plt.gcf())
         points = np.vstack(self.generatorPoints())
         hull = scipy.spatial.ConvexHull(points)
-        kwargs.setdefault("color", "r")
+        kwargs.setdefault("edgecolor", "k")
+        kwargs.setdefault("facecolor", "r")
         kwargs.setdefault("alpha", 1.0)
-        kwargs["facecolor"] = colorConverter.to_rgba(kwargs["color"], kwargs["alpha"])
+        kwargs["facecolor"] = colorConverter.to_rgba(kwargs["facecolor"], kwargs["alpha"])
         for simplex in hull.simplices:
             poly = a3.art3d.Poly3DCollection([points[simplex]], **kwargs)
             if "alpha" in kwargs:
-                print "setting alpha"
                 poly.set_alpha(kwargs["alpha"])
             ax.add_collection3d(poly)
 
@@ -157,7 +172,6 @@ cdef class IRISDebugData:
     def getNumberOfEllipsoids(self):
         return self.thisptr.get().ellipsoid_history.size()
     def getPolytope(self, index=-1):
-        print "getting polytope: ", index
         if index < 0:
             index = self.getNumberOfPolytopes() + index
         if index >= self.getNumberOfPolytopes():
@@ -184,33 +198,40 @@ cdef class IRISDebugData:
     def iterObstacles(self):
         cdef vector[MatrixXd] obstacles = self.thisptr.get().obstacles
         return (eigenMatrixToNumpy(obs) for obs in obstacles)
-    def animate(self, ax=None, pause=-1):
-        if ax is None:
+    def boundingPoints(self):
+        cdef vector[VectorXd] pts = self.thisptr.get().bounds.generatorPoints()
+        return [eigenVectorToNumpy(pt) for pt in pts]
+    def animate(self, fig=None, pause=0.5, show=True, repeat_delay=2.0):
+        if fig is None:
             fig = plt.figure()
-            ax = fig.add_subplot(1,1,1)
-        plt.ion()
+            ax = plt.gca()
+
+        bounding_pts = np.vstack(self.boundingPoints())
+        lb = bounding_pts.min(axis=0)
+        ub = bounding_pts.max(axis=0)
+        width = ub - lb
+
+        ax.set_xlim(lb[0] - 0.1 * width[0], ub[0] + 0.1 * width[0])
+        ax.set_ylim(lb[1] - 0.1 * width[1], ub[1] + 0.1 * width[1])
+
+        artist_sets = []
         for poly, ellipsoid in self.iterRegions():
-            ax.plot([self.getEllipsoid(0).getD()[0]],
+            # ax.cla()
+            artists = []
+            artists.extend(ax.plot([self.getEllipsoid(0).getD()[0]],
                     [self.getEllipsoid(0).getD()[1]],
-                    'go', markersize=10)
-            poly.draw(ax)
-            ellipsoid.draw(ax)
+                    'go', markersize=10))
+            artists.append(poly.draw(ax))
+            artists.append(ellipsoid.draw(ax))
             for obs in self.iterObstacles():
-                print obs
                 points = obs.T
                 hull = scipy.spatial.ConvexHull(points)
-                ax.add_patch(plt.Polygon(xy=points[hull.vertices],edgecolor='k', facecolor=colorConverter.to_rgba("k", 0.5)))
-            ax.set_xlim([-2.5, 2.5])
-            ax.set_ylim([-2.5, 2.5])
-            if pause > 0:
-                time.sleep(pause)
-            elif pause < 0:
-                plt.waitforbuttonpress()
-            ax.cla()
+                artists.append(ax.add_patch(plt.Polygon(xy=points[hull.vertices],edgecolor='k', facecolor=colorConverter.to_rgba("k", 0.5))))
+            artist_sets.append(tuple(artists))
 
-        plt.ioff()
-
-
+        ani = animation.ArtistAnimation(fig, artist_sets, interval=pause*1000, repeat_delay=repeat_delay*1000)
+        if show:
+            plt.show()
 
 def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
                   require_containment=False,

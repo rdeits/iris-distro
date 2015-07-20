@@ -149,12 +149,13 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   Polytope new_poly(problem.getDimension());
 
   if (debug) {
-    std::cout << "starting debug" << std::endl;
+    // std::cout << "starting debug" << std::endl;
+    debug->bounds = problem.getBounds();
     debug->ellipsoid_history.push_back(*(region->ellipsoid));
-    std::cout << "pushing back obstacles" << std::endl;
+    // std::cout << "pushing back obstacles" << std::endl;
     auto obstacles = problem.getObstacles();
     for (auto obs = obstacles.begin(); obs != obstacles.end(); ++obs) {
-      std::cout << "pushing back obstacle: " << *obs << std::endl;
+      // std::cout << "pushing back obstacle: " << *obs << std::endl;
       debug->obstacles.push_back(*obs);
     }
     // debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());

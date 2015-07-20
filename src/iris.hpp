@@ -84,6 +84,7 @@ struct IRISDebugData {
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polytope> polytope_history;
   std::vector<Eigen::MatrixXd> obstacles;
+  Polytope bounds;
   // Eigen::VectorXd ellipsoid_times;
   // Eigen::VectorXd polytope_times;
   // double total_time;

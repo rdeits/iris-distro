@@ -48,42 +48,38 @@ class IRISTest(TestCase):
         self.assertAlmostEqual(d[0], 0.5, 3)
         self.assertAlmostEqual(d[1], 0.5, 3)
 
-def test_debug_data():
-    import matplotlib.pyplot as plt
+    def test_debug_data(self):
+        import matplotlib.pyplot as plt
 
-    obstacles = [np.array([[0.3, 0.5, 1.0, 1.0],
-                           [0.1, 1.0, 1.0, 0.0]])]
-    bounds = irispy.Polytope()
-    bounds.setA(np.vstack((np.eye(2), -np.eye(2))))
-    bounds.setB(np.array([2.0, 2, 2, 2]))
-    start = [0.1, -0.05]
+        obstacles = [np.array([[0.3, 0.5, 1.0, 1.0],
+                               [0.1, 1.0, 1.0, 0.0]])]
+        bounds = irispy.Polytope()
+        bounds.setA(np.vstack((np.eye(2), -np.eye(2))))
+        bounds.setB(np.array([2.0, 2, 2, 2]))
+        start = [0.1, -0.05]
 
-    print "running with debug"
-    region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
-    print "done"
+        # print "running with debug"
+        region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
+        # print "done"
 
-    debug.animate()
-    plt.show()
+        debug.animate(pause=0.5, show=True)
 
-    # fig = plt.figure()
-    # ax = fig.add_subplot(1,1,1)
-    # plt.ion()
+    def test_random_obstacles_2d(self):
+        bounds = irispy.Polytope.from_bounds([0, 0], [1, 1])
+        obstacles = []
+        for i in range(5):
+            center = np.random.random((2,))
+            scale = np.random.random() * 0.3
+            pts = np.random.random((2,4))
+            pts = pts - np.mean(pts, axis=1)[:,np.newaxis]
+            pts = scale * pts + center[:,np.newaxis]
+            obstacles.append(pts)
+            start = [0.0, 0.0]
 
-    # for poly, ellipsoid in debug.iterRegions():
-    #     print poly.generatorPoints()
-    #     poly.draw(ax)
-    #     ellipsoid.draw(ax)
-    #     # ax.relim()
-    #     ax.set_xlim([-2.5, 2.5])
-    #     ax.set_ylim([-2.5, 2.5])
-    #     # ax.autoscale_view()
-    #     plt.draw()
-    #     # plt.show()
-    #     plt.waitforbuttonpress()
-    #     ax.cla()
-    #     # raw_input()
-    # plt.ioff()
-    # plt.show()
+        region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
 
-if __name__ == '__main__':
-    test_debug_data()
+        debug.animate(pause=0.5, show=True)
+
+
+
+
