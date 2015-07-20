@@ -229,9 +229,36 @@ void test_iris() {
   printf("test_iris passed\n");
 }
 
+void test_for_thin_mosek_ellipsoid_bug() {
+  MatrixXd A(4,3);
+  A << -1, 0, 0,
+       0, -1, 0,
+       0, 0, -1,
+       1, 1, 1;
+  VectorXd b(4);
+  b << 0, 0, 0, 1;
+  Polytope polytope(A, b);
+
+  Ellipsoid ellipsoid(3);
+
+  iris_mosek::inner_ellipsoid(polytope, ellipsoid);
+
+  MatrixXd C_expected(3,3);
+  C_expected <<  0.2523,   -0.0740,   -0.0740,
+                 -0.0740,    0.2523,   -0.0740,
+                 -0.0740,   -0.0740,    0.2523;
+  VectorXd d_expected(3);
+  d_expected << 0.2732, 0.2732, 0.2732;
+  valuecheckMatrix(ellipsoid.getC(), C_expected, 1e-3);
+  valuecheckMatrix(ellipsoid.getD(), d_expected, 1e-3);
+
+  std::cout << ellipsoid.getC() << std::endl;
+}
+
 int main() {
   test_append_polytope();
   test_mosek_ellipsoid();
+  test_for_thin_mosek_ellipsoid_bug();
   test_infeasible_ellipsoid();
   test_closest_point();
   test_separating_hyperplanes();
