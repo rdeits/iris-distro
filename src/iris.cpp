@@ -4,7 +4,7 @@
 #include <Eigen/StdVector>
 #include "iris.hpp"
 #include "iris/cvxgen_ldp.hpp"
-#include "Polytope.cpp"
+#include "Polyhedron.cpp"
 #include "Ellipsoid.cpp"
 #include "iris_classes.cpp"
 #include "iris_mosek.cpp"
@@ -47,15 +47,15 @@ void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKen
   // std::cout << "closest point: " << result.transpose() << std::endl;
 }
 
-void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polytope &polytope, bool &infeasible_start) {
+void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polyhedron &polyhedron, bool &infeasible_start) {
 
   int dim = ellipsoid.getDimension();
   infeasible_start = false;
   int n_obs = obstacle_pts.size();
 
   if (n_obs == 0) {
-    polytope.setA(MatrixXd::Zero(0, dim));
-    polytope.setB(VectorXd::Zero(0));
+    polyhedron.setA(MatrixXd::Zero(0, dim));
+    polyhedron.setB(VectorXd::Zero(0));
     return;
   }
 
@@ -121,8 +121,8 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     }
   }
 
-  MatrixXd A = polytope.getA();
-  VectorXd b = polytope.getB();
+  MatrixXd A = polyhedron.getA();
+  VectorXd b = polyhedron.getB();
   A.resize(planes.size(), dim);
   b.resize(planes.size(), 1);
 
@@ -130,8 +130,8 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     A.row(it - planes.begin()) = it->first.transpose();
     b(it - planes.begin()) = it->second;
   }
-  polytope.setA(A);
-  polytope.setB(b);
+  polyhedron.setA(A);
+  polyhedron.setB(b);
 
   return;
 }
@@ -146,7 +146,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   double volume;
   long int iter = 0;
   bool infeasible_start;
-  Polytope new_poly(problem.getDimension());
+  Polyhedron new_poly(problem.getDimension());
 
   if (debug) {
     // std::cout << "starting debug" << std::endl;
@@ -168,8 +168,8 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
     separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
 
-    // std::cout << "A: " << std::endl << region->polytope.A << std::endl;
-    // std::cout << "b: " << region->polytope.b.transpose() << std::endl;
+    // std::cout << "A: " << std::endl << region->polyhedron.A << std::endl;
+    // std::cout << "b: " << region->polyhedron.b.transpose() << std::endl;
 
     if (options.error_on_infeasible_start && infeasible_start) {
       throw(std::runtime_error("Error: initial point is infeasible\n"));
@@ -180,31 +180,33 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
 
     if (options.require_containment) {
       if (new_poly.contains(problem.getSeed().getD()) || iter == 0 || infeasible_start) {
-        *(region->polytope) = new_poly;
+        *(region->polyhedron) = new_poly;
         if (debug) {
-          debug->polytope_history.push_back(new_poly);
+          debug->polyhedron_history.push_back(new_poly);
         }
       } else {
-        std::cout << "breaking early because the start point is no longer contained in the polytope" << std::endl;
+        std::cout << "breaking early because the start point is no longer contained in the polyhedron" << std::endl;
         return region;
       }
     } else {
-      *(region->polytope) = new_poly;
+      *(region->polyhedron) = new_poly;
       if (debug) {
-        debug->polytope_history.push_back(new_poly);
+        debug->polyhedron_history.push_back(new_poly);
       }
     }
 
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
-    // std::cout << "A: " << region->polytope->getA() << std::endl;
-    // std::cout << "b: " << region->polytope->getB() << std::endl;
-    volume = iris_mosek::inner_ellipsoid(*region->polytope, *region->ellipsoid);
+    // std::cout << "A: " << region->polyhedron->getA() << std::endl;
+    // std::cout << "b: " << region->polyhedron->getB() << std::endl;
+    volume = iris_mosek::inner_ellipsoid(*region->polyhedron, *region->ellipsoid);
     if (debug) {
       debug->ellipsoid_history.push_back(*(region->ellipsoid));
     }
     // std::cout << "volume: " << volume << std::endl;
 
-    if (iter + 1 >= options.iter_limit || ((std::abs(volume - best_vol) / best_vol) < options.termination_threshold)) {
+    const bool at_iter_limit = (options.iter_limit > 0) && (iter + 1 >= options.iter_limit);
+    const bool insufficient_progress = (std::abs(volume - best_vol) / best_vol) < options.termination_threshold;
+    if (at_iter_limit || insufficient_progress) {
       // std::cout << "(abs(volume - best_vol) / best_vol): " << (std::abs(volume - best_vol) / best_vol) << std::endl;
       // std::cout << "term thresh: " << options.termination_threshold << std::endl;
       break;

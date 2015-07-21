@@ -18,7 +18,7 @@ int IRISProblem::getDimension() const {
 Ellipsoid IRISProblem::getSeed() const {
   return this->seed;
 }
-void IRISProblem::setBounds(Polytope new_bounds) {
+void IRISProblem::setBounds(Polyhedron new_bounds) {
   if (new_bounds.getDimension() != this->getDimension()) {
     throw std::runtime_error("bounds must match dimension dim");
   }
@@ -35,7 +35,7 @@ void IRISProblem::addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
 const std::vector<Eigen::MatrixXd>& IRISProblem::getObstacles() const {
   return this->obstacle_pts;
 }
-Polytope IRISProblem::getBounds() const {
+Polyhedron IRISProblem::getBounds() const {
   return this->bounds;
 }
 

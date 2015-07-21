@@ -43,14 +43,14 @@ def draw_3d_convhull(points, ax, **kwargs):
         artists.append(poly)
     return artists
 
-cdef class Polytope(DrawDispatcher):
-    cdef shared_ptr[CPolytope] thisptr
+cdef class Polyhedron(DrawDispatcher):
+    cdef shared_ptr[CPolyhedron] thisptr
     def __cinit__(self, dim=0, construct_new_cpp_object=True):
         if construct_new_cpp_object:
-            self.thisptr = shared_ptr[CPolytope](new CPolytope(dim))
+            self.thisptr = shared_ptr[CPolyhedron](new CPolyhedron(dim))
     @staticmethod
-    cdef wrap(shared_ptr[CPolytope] ptr):
-        pyobj = Polytope(construct_new_cpp_object=False)
+    cdef wrap(shared_ptr[CPolyhedron] ptr):
+        pyobj = Polyhedron(construct_new_cpp_object=False)
         pyobj.thisptr = ptr
         return pyobj
     @staticmethod
@@ -63,7 +63,7 @@ cdef class Polytope(DrawDispatcher):
         dim = lower_bound.shape[0]
         A = np.vstack((np.eye(dim), -np.eye(dim)))
         b = np.hstack((upper_bound, -lower_bound))
-        poly = Polytope(dim)
+        poly = Polyhedron(dim)
         poly.setA(A)
         poly.setB(b)
         return poly
@@ -80,7 +80,7 @@ cdef class Polytope(DrawDispatcher):
         self.thisptr.get().setB(b_vec)
     def getB(self):
         return eigenVectorToNumpy(self.thisptr.get().getB())
-    def appendConstraints(self, Polytope other):
+    def appendConstraints(self, Polyhedron other):
         self.thisptr.get().appendConstraints(deref(other.thisptr))
     def generatorPoints(self):
         cdef vector[VectorXd] pts = self.thisptr.get().generatorPoints()
@@ -167,12 +167,12 @@ cdef class IRISRegion:
             self.thisptr = shared_ptr[CIRISRegion](new CIRISRegion(dim))
     @staticmethod
     cdef wrap(shared_ptr[CIRISRegion] ptr):
-        pyobj = IRISRegion(dim=ptr.get().polytope.get().getDimension(), construct_new_cpp_object=False)
+        pyobj = IRISRegion(dim=ptr.get().polyhedron.get().getDimension(), construct_new_cpp_object=False)
         pyobj.thisptr = ptr
         return pyobj
 
-    def getPolytope(self):
-        return Polytope.wrap(self.thisptr.get().polytope)
+    def getPolyhedron(self):
+        return Polyhedron.wrap(self.thisptr.get().polyhedron)
 
     def getEllipsoid(self):
         return Ellipsoid.wrap(self.thisptr.get().ellipsoid)
@@ -187,21 +187,21 @@ cdef class IRISDebugData:
         pyobj = IRISDebugData(construct_new_cpp_object=False)
         pyobj.thisptr = ptr
         return pyobj
-    def getNumberOfPolytopes(self):
-        return self.thisptr.get().polytope_history.size()
+    def getNumberOfPolyhedrons(self):
+        return self.thisptr.get().polyhedron_history.size()
     def getNumberOfEllipsoids(self):
         return self.thisptr.get().ellipsoid_history.size()
-    def getPolytope(self, index=-1):
+    def getPolyhedron(self, index=-1):
         if index < 0:
-            index = self.getNumberOfPolytopes() + index
-        if index >= self.getNumberOfPolytopes():
-            raise IndexError("polytope index out of bounds")
-        poly = Polytope(dim=self.thisptr.get().polytope_history[index].getDimension())
-        poly.thisptr.get()[0] = self.thisptr.get().polytope_history[index]
+            index = self.getNumberOfPolyhedrons() + index
+        if index >= self.getNumberOfPolyhedrons():
+            raise IndexError("polyhedron index out of bounds")
+        poly = Polyhedron(dim=self.thisptr.get().polyhedron_history[index].getDimension())
+        poly.thisptr.get()[0] = self.thisptr.get().polyhedron_history[index]
         return poly
-    def iterPolytopes(self):
-        for i in xrange(self.getNumberOfPolytopes()):
-            yield self.getPolytope(i)
+    def iterPolyhedrons(self):
+        for i in xrange(self.getNumberOfPolyhedrons()):
+            yield self.getPolyhedron(i)
     def getEllipsoid(self, index=-1):
         if index < 0:
             index = self.getNumberOfEllipsoids() + index
@@ -214,7 +214,7 @@ cdef class IRISDebugData:
         for i in xrange(self.getNumberOfEllipsoids()):
             yield self.getEllipsoid(i)
     def iterRegions(self):
-        return itertools.izip(self.iterPolytopes(), self.iterEllipsoids())
+        return itertools.izip(self.iterPolyhedrons(), self.iterEllipsoids())
     def iterObstacles(self):
         cdef vector[MatrixXd] obstacles = self.thisptr.get().obstacles
         return (eigenMatrixToNumpy(obs) for obs in obstacles)
@@ -293,7 +293,7 @@ cdef class IRISDebugData:
         if show:
             plt.show()
 
-def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
+def inflate_region(obstacles, start_point_or_ellipsoid, Polyhedron bounds=None,
                   require_containment=False,
                   error_on_infeasible_start=False,
                   termination_threshold=2e-2,
@@ -310,7 +310,7 @@ def inflate_region(obstacles, start_point_or_ellipsoid, Polytope bounds=None,
     cdef CIRISProblem *problem = new CIRISProblem(dim)
 
     if bounds is None:
-        bounds = Polytope(dim)
+        bounds = Polyhedron(dim)
     problem.setBounds(deref(bounds.thisptr))
     problem.setSeedEllipsoid(deref(start.thisptr))
 

@@ -53,7 +53,7 @@ def test_debug_data():
 
     obstacles = [np.array([[0.3, 0.5, 1.0, 1.0],
                            [0.1, 1.0, 1.0, 0.0]])]
-    bounds = irispy.Polytope()
+    bounds = irispy.Polyhedron()
     bounds.setA(np.vstack((np.eye(2), -np.eye(2))))
     bounds.setB(np.array([2.0, 2, 2, 2]))
     start = [0.1, -0.05]
@@ -65,7 +65,7 @@ def test_debug_data():
     debug.animate(pause=0.5, show=False)
 
 def test_random_obstacles_2d():
-    bounds = irispy.Polytope.from_bounds([0, 0], [1, 1])
+    bounds = irispy.Polyhedron.from_bounds([0, 0], [1, 1])
     obstacles = []
     for i in range(5):
         center = np.random.random((2,))
@@ -81,7 +81,7 @@ def test_random_obstacles_2d():
     debug.animate(pause=0.5, show=False)
 
 def test_random_obstacles_3d():
-    bounds = irispy.Polytope.from_bounds([0, 0, 0], [1, 1, 1])
+    bounds = irispy.Polyhedron.from_bounds([0, 0, 0], [1, 1, 1])
     obstacles = []
     for i in range(5):
         center = np.random.random((3,))

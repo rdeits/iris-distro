@@ -1,6 +1,6 @@
 function [C, d, volume] = maximal_ellipse(A,b)
 
-% poly = iris.Polytope(A, b).reduce();
+% poly = iris.Polyhedron(A, b).reduce();
 [Ad, ia] = unique(A,'rows');
 A = Ad;
 b = b(ia);

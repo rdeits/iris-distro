@@ -4,9 +4,9 @@ from unittest import TestCase
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as a3
 
-class PolytopeTest(TestCase):
+class PolyhedronTest(TestCase):
     def test_constructor(self):
-        p = irispy.Polytope()
+        p = irispy.Polyhedron()
         A = np.zeros((2,2))
 
         # print A
@@ -16,7 +16,7 @@ class PolytopeTest(TestCase):
         self.assertAlmostEqual(p.getA()[0,0], 0.0)
 
     def test_generators(self):
-        p = irispy.Polytope()
+        p = irispy.Polyhedron()
         A = np.vstack((np.eye(2),
                        -np.eye(2)))
         b = np.array([1.1, 1.2, 1.3, 1.4])
@@ -41,7 +41,7 @@ class PolytopeTest(TestCase):
     def test_plotting(self):
         fig = plt.figure()
         ax = fig.add_subplot(1,1,1)
-        p = irispy.Polytope()
+        p = irispy.Polyhedron()
         A = np.vstack((np.eye(2),
                        -np.eye(2)))
         b = np.array([1.1, 1.2, 1.3, 1.4])
@@ -55,7 +55,7 @@ class PolytopeTest(TestCase):
     def test_plotting_3d(self):
         fig = plt.figure()
         ax = a3.Axes3D(fig)
-        p = irispy.Polytope()
+        p = irispy.Polyhedron()
         A = np.vstack((np.eye(3),
                        -np.eye(3)))
         b = np.array([1.1, 1.2, 1.3, 1.4, 1.5, 1.6])

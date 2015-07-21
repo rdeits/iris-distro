@@ -15,9 +15,9 @@ cdef extern from "<memory>" namespace "std":
         T *get()
 
 cdef extern from "iris/iris.hpp" namespace "iris":
-    cdef cppclass CPolytope "iris::Polytope":
-        CPolytope() except +
-        CPolytope(int dim) except +
+    cdef cppclass CPolyhedron "iris::Polyhedron":
+        CPolyhedron() except +
+        CPolyhedron(int dim) except +
         int getDimension()
         int getNumberOfConstraints()
         void setA(MatrixXd A_)
@@ -26,7 +26,7 @@ cdef extern from "iris/iris.hpp" namespace "iris":
         void setB(VectorXd b_)
         const MatrixXd& getA()
         const VectorXd& getB()
-        void appendConstraints(const CPolytope &other)
+        void appendConstraints(const CPolyhedron &other)
         vector[VectorXd] generatorPoints()
         vector[VectorXd] generatorRays()
 
@@ -46,7 +46,7 @@ cdef extern from "iris/iris.hpp" namespace "iris":
 
     cdef cppclass CIRISRegion "iris::IRISRegion":
         CIRISRegion(int dim) except +
-        shared_ptr[CPolytope] polytope
+        shared_ptr[CPolyhedron] polyhedron
         shared_ptr[CEllipsoid] ellipsoid
 
     cdef cppclass CIRISProblem "iris::IRISProblem":
@@ -55,10 +55,10 @@ cdef extern from "iris/iris.hpp" namespace "iris":
         void setSeedEllipsoid(CEllipsoid ellipsoid)
         int getDimension()
         CEllipsoid getSeed()
-        void setBounds(CPolytope bounds)
+        void setBounds(CPolyhedron bounds)
         void addObstacle(MatrixXd new_obstacle_vertices)
         vector[MatrixXd] getObstacles()
-        CPolytope getBounds()
+        CPolyhedron getBounds()
 
     cdef cppclass CIRISOptions "iris::IRISOptions":
         bint require_containment, error_on_infeasible_start
@@ -67,10 +67,10 @@ cdef extern from "iris/iris.hpp" namespace "iris":
 
     cdef cppclass CIRISDebugData "iris::IRISDebugData":
         vector[CEllipsoid] ellipsoid_history
-        vector[CPolytope] polytope_history
+        vector[CPolyhedron] polyhedron_history
         vector[MatrixXd] obstacles
         int iters
-        CPolytope bounds
+        CPolyhedron bounds
 
     cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options)
     cdef shared_ptr[CIRISRegion] inflate_region(const CIRISProblem &problem, const CIRISOptions &options, CIRISDebugData *debug)

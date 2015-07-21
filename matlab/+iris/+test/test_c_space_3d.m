@@ -41,7 +41,7 @@ for j = 1:length(base_obstacles)
     plot(obs(1,:), obs(2,:), 'ko-', 'MarkerFaceColor', 'k');
   end
 end
-x = iris.sample_convex_polytope(A,b,50);
+x = iris.sample_convex_polyhedron(A,b,50);
 for k = 1:size(x,2)
   R = iris.util.rotmat(x(3,k));
   bot_x = bsxfun(@plus, R * bot, x(1:2,k));

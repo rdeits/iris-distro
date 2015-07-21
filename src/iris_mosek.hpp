@@ -28,11 +28,11 @@ public:
 
 class InnerEllipsoidInfeasibleError: public std::exception {
   const char * what () const throw () {
-    return "Inner ellipsoid problem is infeasible (this likely means that the polytope has no interior)";
+    return "Inner ellipsoid problem is infeasible (this likely means that the polyhedron has no interior)";
   }
 };
 
-double inner_ellipsoid(const iris::Polytope &polytope, iris::Ellipsoid &ellipsoid, MSKenv_t *existing_env=NULL);
+double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid &ellipsoid, MSKenv_t *existing_env=NULL);
 
 void closest_point_in_convex_hull(const Eigen::MatrixXd &Points, Eigen::VectorXd &result, MSKenv_t *existing_env=NULL);
 

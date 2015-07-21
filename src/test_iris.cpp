@@ -61,7 +61,7 @@ void valuecheckMatrix(const Eigen::MatrixBase<DerivedA>& a, const Eigen::MatrixB
   }
 }
 
-void test_append_polytope() {
+void test_append_polyhedron() {
 
   MatrixXd A(3,2);
   A << -1, 0,
@@ -69,14 +69,14 @@ void test_append_polytope() {
        1, 1;
   VectorXd b(3);
   b << 0, 0, 1;
-  Polytope p(A, b);
+  Polyhedron p(A, b);
 
   MatrixXd A2(2,2);
   A2 << 2, 3,
         4, 5;
   VectorXd b2(2);
   b2 << 6, 7;
-  Polytope other(A2, b2);
+  Polyhedron other(A2, b2);
 
   p.appendConstraints(other);
 
@@ -88,7 +88,7 @@ void test_append_polytope() {
                  2, 3,
                  4, 5;
   valuecheckMatrix(p.getA(), A_expected, 1e-12);
-  printf("test_append_polytope passed\n");
+  printf("test_append_polyhedron passed\n");
 }
 
 void test_mosek_ellipsoid() {
@@ -98,11 +98,11 @@ void test_mosek_ellipsoid() {
         1, 1;
   VectorXd b(3);
   b << 0, 0, 1;
-  Polytope polytope(A, b);
+  Polyhedron polyhedron(A, b);
 
   Ellipsoid ellipsoid(2);
 
-  iris_mosek::inner_ellipsoid(polytope, ellipsoid);
+  iris_mosek::inner_ellipsoid(polyhedron, ellipsoid);
 
   MatrixXd C_expected(2,2);
   C_expected << 0.332799, -0.132021,
@@ -122,13 +122,13 @@ void test_infeasible_ellipsoid() {
         1, 1;
   VectorXd b(3);
   b << 0, 0, -1;
-  Polytope polytope(A, b);
+  Polyhedron polyhedron(A, b);
 
   Ellipsoid ellipsoid(2);
 
   
   try {
-    iris_mosek::inner_ellipsoid(polytope, ellipsoid);
+    iris_mosek::inner_ellipsoid(polyhedron, ellipsoid);
   } catch (iris_mosek::InnerEllipsoidInfeasibleError &e) {
     printf("test_infeasble_ellipsoid passed\n");
     return;
@@ -183,7 +183,7 @@ void test_separating_hyperplanes() {
   std::vector<MatrixXd> obstacles;
   obstacles.push_back(obs);
 
-  Polytope result(2);
+  Polyhedron result(2);
   bool infeasible_start;
   separating_hyperplanes(obstacles, ellipsoid, result, infeasible_start);
   valuecheck(infeasible_start, false);
@@ -237,11 +237,11 @@ void test_for_thin_mosek_ellipsoid_bug() {
        1, 1, 1;
   VectorXd b(4);
   b << 0, 0, 0, 1;
-  Polytope polytope(A, b);
+  Polyhedron polyhedron(A, b);
 
   Ellipsoid ellipsoid(3);
 
-  iris_mosek::inner_ellipsoid(polytope, ellipsoid);
+  iris_mosek::inner_ellipsoid(polyhedron, ellipsoid);
 
   MatrixXd C_expected(3,3);
   C_expected <<  0.2523,   -0.0740,   -0.0740,
@@ -256,7 +256,7 @@ void test_for_thin_mosek_ellipsoid_bug() {
 }
 
 int main() {
-  test_append_polytope();
+  test_append_polyhedron();
   test_mosek_ellipsoid();
   test_for_thin_mosek_ellipsoid_bug();
   test_infeasible_ellipsoid();

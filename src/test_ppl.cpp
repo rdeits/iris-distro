@@ -31,7 +31,7 @@ typedef Linear_Form<FP_Interval> FP_Linear_Form;
 //! The type of an interval abstract store.
 typedef Box<FP_Interval> FP_Interval_Abstract_Store;
 
-void getGenerators(const Polytope* self) {
+void getGenerators(const Polyhedron* self) {
   const int dim = self->getDimension();
   NNC_Polyhedron ppl_polyhedron(dim);
   std::vector<Variable> vars;
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
        0, -1;
   VectorXd b(4);
   b << 0.5, 0.5, 0.5, 0.5;
-  Polytope poly(A, b);
+  Polyhedron poly(A, b);
   getGenerators(&poly);
 
   return 0;

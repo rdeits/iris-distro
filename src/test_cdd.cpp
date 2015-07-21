@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
   VectorXd b(4);
   b << 1, 1, 0.5, 0.5;
 
-  iris::Polytope poly(A, b);
+  iris::Polyhedron poly(A, b);
   std::vector<VectorXd> points = poly.generatorPoints();
 
   for (auto pt = points.begin(); pt != points.end(); ++pt) {

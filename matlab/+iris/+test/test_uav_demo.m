@@ -3,7 +3,7 @@ function test_uav_demo(dim)
 % IRIS with a mixed-integer program to solve path planning problems around
 % obstacles. The figure which is created shows an environment with several
 % obstacles (black) and several IRIS regions which have been seeded. Each IRIS
-% region is shown by a green dot at its seed point, a red polytope, and a blue
+% region is shown by a green dot at its seed point, a red polyhedron, and a blue
 % ellipsoid. In addition, a trajectory for a simple "UAV" model is shown in
 % magenta. The UAV is modeled as a double integrator, and we plan a trajectory
 % to minimize total acceleration over a discrete trajectory. You can interact
