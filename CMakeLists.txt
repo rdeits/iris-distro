@@ -4,11 +4,17 @@ if(APPLE)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+include(cmake/mex.cmake)
+mex_setup()
 enable_testing()
+
+# require python
+find_package(PythonInterp REQUIRED)
 
 # pull in the pods macros. See cmake/pods.cmake for documentation
 set(POD_NAME iris)
 include(cmake/pods.cmake)
+include(cmake/matlab_pods.cmake)
 
 if (CMAKE_COMPILER_IS_GNUCC)
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
@@ -45,16 +51,8 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
-include(cmake/mex.cmake)
-mex_setup()
-add_subdirectory(matlab/+iris)
-
-# require python
-find_package(PythonInterp REQUIRED)
-
 # install all python files in the python/ subdirectory
 pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
-
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
 
@@ -75,11 +73,10 @@ endif()
 
 add_subdirectory(cvxgen)
 add_subdirectory(src)
-
+add_subdirectory(matlab/+iris)
+add_subdirectory(python)
 
 # setup matlab pods-compliance
-include(cmake/matlab_pods.cmake)
 pods_configure_matlab_paths()
 pods_install_matlab_path(iris)
 
-add_subdirectory(python)
