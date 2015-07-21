@@ -45,16 +45,16 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
+include(cmake/mex.cmake)
+mex_setup()
+add_subdirectory(matlab/+iris)
+
 # require python
 find_package(PythonInterp REQUIRED)
 
 # install all python files in the python/ subdirectory
 pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
-# setup matlab pods-compliance
-include(cmake/matlab_pods.cmake)
-pods_configure_matlab_paths()
-pods_install_matlab_path(iris)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
 
@@ -75,4 +75,11 @@ endif()
 
 add_subdirectory(cvxgen)
 add_subdirectory(src)
+
+
+# setup matlab pods-compliance
+include(cmake/matlab_pods.cmake)
+pods_configure_matlab_paths()
+pods_install_matlab_path(iris)
+
 add_subdirectory(python)
