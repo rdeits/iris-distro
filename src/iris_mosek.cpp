@@ -22,24 +22,24 @@ static void MSKAPI printstr(void *handle,
   printf("%s",str); 
 } /* printstr */ 
 
-void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, iris::Ellipsoid &ellipsoid) {
+void extract_solution(double* xx, double* barx, int n, std::vector<int> ndx_d, iris::Ellipsoid *ellipsoid) {
   int bar_ndx = 0;
   for (int j=0; j < 2*n; j++) {
     for (int i=j; i < 2*n; i++) {
-      if (j < ellipsoid.getDimension() && i < ellipsoid.getDimension()) {
-        ellipsoid.setCEntry(i,j, barx[bar_ndx]);
-        ellipsoid.setCEntry(j, i, barx[bar_ndx]);  // since barx is just the lower triangle
+      if (j < ellipsoid->getDimension() && i < ellipsoid->getDimension()) {
+        ellipsoid->setCEntry(i,j, barx[bar_ndx]);
+        ellipsoid->setCEntry(j, i, barx[bar_ndx]);  // since barx is just the lower triangle
       }
       bar_ndx++;
     }
   }
 
-  for (int i=0; i < ellipsoid.getDimension(); i++) {
-    ellipsoid.setDEntry(i, xx[ndx_d[i]]);
+  for (int i=0; i < ellipsoid->getDimension(); i++) {
+    ellipsoid->setDEntry(i, xx[ndx_d[i]]);
   }
 }
 
-double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid &ellipsoid, MSKenv_t *existing_env) {
+double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *ellipsoid, MSKenv_t *existing_env) {
 
   MSKenv_t *env;
   if (existing_env) {
@@ -324,7 +324,9 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid &elli
       std::cout << "Primal or dual infeasibility certificate found." << std::endl;
       throw(InnerEllipsoidInfeasibleError());
     case MSK_SOL_STA_UNKNOWN: 
-      std::cout << "The status of the solution could not be determined." << std::endl;
+      std::cout << "Inner ellipsoid: The status of the solution could not be determined." << std::endl;
+      std::cout << "A: " << std::endl << polyhedron.getA() << std::endl;
+      std::cout << "b: " << polyhedron.getB().transpose() << std::endl;
       throw(InnerEllipsoidInfeasibleError());
     default: 
       printf("other solution status: %d\n", solsta);
@@ -421,6 +423,7 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
   switch(solsta) {
     case MSK_SOL_STA_OPTIMAL:
     case MSK_SOL_STA_NEAR_OPTIMAL:
+    case MSK_SOL_STA_UNKNOWN: 
       MSK_getxxslice(task, MSK_SOL_ITR, 0, dim, result.data());
       break;
     case MSK_SOL_STA_DUAL_INFEAS_CER: 
@@ -433,13 +436,13 @@ void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKe
         free(env);
       }
       throw(InnerEllipsoidInfeasibleError());
-    case MSK_SOL_STA_UNKNOWN: 
-      std::cout << "The status of the solution could not be determined." << std::endl;
-      if (!existing_env) {
-        MSK_deleteenv(env);
-        free(env);
-      }
-      throw(InnerEllipsoidInfeasibleError());
+      // std::cout << "Points: " << std::endl << Points << std::endl;
+      // std::cout << "Closest point in convex hull: The status of the solution could not be determined." << std::endl;
+      // if (!existing_env) {
+      //   MSK_deleteenv(env);
+      //   free(env);
+      // }
+      // throw(InnerEllipsoidInfeasibleError());
     default: 
       printf("other solution status: %d\n", solsta);
       if (!existing_env) {

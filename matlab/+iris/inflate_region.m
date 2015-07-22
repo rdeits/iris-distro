@@ -13,11 +13,7 @@ if exist('+iris/inflate_regionmex', 'file')
   disp('using c++ IRIS library')
 
   if ~iscell(obstacles)
-    obstacle_cell = cell(1, size(obstacles, 3));
-    for i = 1:size(obstacles, 3)
-      obstacle_cell{i} = obstacles(:,:,i);
-    end
-    obstacles = obstacle_cell;
+    obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
   end
 
   if nargout > 4
@@ -33,5 +29,15 @@ if exist('+iris/inflate_regionmex', 'file')
   end
 else
   disp('falling back to Matlab-only library');
-  [A, b, C, d, results] = inflate_region_fallback(obstacles, A_bounds, b_bounds, start, options);
+  if iscell(obstacles)
+    padded = pad_obstacle_points(obstacles);
+    obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacles)));
+  else
+    obstacle_pts = obstacles;
+  end
+  [A, b, C, d, results] = inflate_region_fallback(obstacle_pts, A_bounds, b_bounds, start, options);
+  results.obstacles = obstacles;
+  if ~iscell(results.obstacles)
+    results.obstacles = mat2cell(results.obstacles, size(results.obstacles, 1), size(results.obstacles, 2), ones(1, size(results.obstacles, 3)));
+  end
 end

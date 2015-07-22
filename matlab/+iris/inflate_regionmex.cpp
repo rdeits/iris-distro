@@ -52,6 +52,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                       mxGetNumberOfElements(prhs[narg]));
   narg++;
 
+  // mexPrintf("made maps\n");
+
   const mxArray* options_ptr = prhs[narg];
 
   const int dim = start.size();
@@ -66,6 +68,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   iris::IRISProblem problem(dim);
   problem.setSeedPoint(start);
 
+  // mexPrintf("set seed\n");
+
   const size_t n_obs = mxGetNumberOfElements(obstacles);
   for (size_t i=0; i < n_obs; i++) {
     const mxArray *obs_ptr = mxGetCell(obstacles, i);
@@ -77,6 +81,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
     problem.addObstacle(obs);
   }
+
+  // mexPrintf("added obstacles\n");
 
   iris::IRISOptions options;
   const mxArray *opt;
@@ -92,6 +98,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   opt = mxGetField(options_ptr, 0, "iter_limit");
   if (opt) options.iter_limit = static_cast<int>(mxGetScalar(opt));
 
+  // mexPrintf("got options\n");
+
   problem.setBounds(iris::Polyhedron(A_bounds, b_bounds));
 
   std::shared_ptr<iris::IRISRegion> region;
@@ -102,6 +110,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   } else {
     region = iris::inflate_region(problem, options);
   }
+
+  // mexPrintf("ran iris\n");
 
   narg = 0;
   if (nlhs > narg) plhs[narg] = eigenToMatlab(region->polyhedron->getA());
@@ -116,26 +126,31 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   if (nlhs > narg) plhs[narg] = eigenToMatlab(region->ellipsoid->getD());
   narg++;
 
-  const size_t n_polys[1] = {debug->polyhedron_history.size()};
-  if (nlhs > narg) plhs[narg] = mxCreateCellArray(1, n_polys);
-  for (int i=0; i < debug->polyhedron_history.size(); i++) {
-    const size_t dims[1] = {1};
-    const char* fields[2] = {"A", "b"};
-    mxArray* entry = mxCreateStructArray(1, dims, 2, fields);
-    mxSetField(entry, 0, "A", eigenToMatlab(debug->polyhedron_history[i].getA()));
-    mxSetField(entry, 0, "b", eigenToMatlab(debug->polyhedron_history[i].getB()));
-    mxSetCell(plhs[narg], i, entry);
+  if (nlhs > narg) {
+    const size_t n_polys[1] = {debug->polyhedron_history.size()};
+    plhs[narg] = mxCreateCellArray(1, n_polys);
+    for (int i=0; i < debug->polyhedron_history.size(); i++) {
+      const size_t dims[1] = {1};
+      const char* fields[2] = {"A", "b"};
+      mxArray* entry = mxCreateStructArray(1, dims, 2, fields);
+      mxSetField(entry, 0, "A", eigenToMatlab(debug->polyhedron_history[i].getA()));
+      mxSetField(entry, 0, "b", eigenToMatlab(debug->polyhedron_history[i].getB()));
+      mxSetCell(plhs[narg], i, entry);
+    }
   }
   narg++;
 
-  const size_t n_ellipsoids[1] = {debug->ellipsoid_history.size()};
-  if (nlhs > narg) plhs[narg] = mxCreateCellArray(1, n_ellipsoids);
-  for (int i=0; i < debug->ellipsoid_history.size(); i++) {
-    const size_t dims[1] = {1};
-    const char* fields[2] = {"C", "d"};
-    mxArray* entry = mxCreateStructArray(1, dims, 2, fields);
-    mxSetField(entry, 0, "C", eigenToMatlab(debug->ellipsoid_history[i].getC()));
-    mxSetField(entry, 0, "d", eigenToMatlab(debug->ellipsoid_history[i].getD()));
-    mxSetCell(plhs[narg], i, entry);
+  if (nlhs > narg) {
+    const size_t n_ellipsoids[1] = {debug->ellipsoid_history.size()};
+    plhs[narg] = mxCreateCellArray(1, n_ellipsoids);
+    for (int i=0; i < debug->ellipsoid_history.size(); i++) {
+      const size_t dims[1] = {1};
+      const char* fields[2] = {"C", "d"};
+      mxArray* entry = mxCreateStructArray(1, dims, 2, fields);
+      mxSetField(entry, 0, "C", eigenToMatlab(debug->ellipsoid_history[i].getC()));
+      mxSetField(entry, 0, "d", eigenToMatlab(debug->ellipsoid_history[i].getD()));
+      mxSetCell(plhs[narg], i, entry);
+    }
   }
+  narg++;
 }

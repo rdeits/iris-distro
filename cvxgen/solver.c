@@ -26,7 +26,7 @@ void set_defaults(void) {
   settings.verbose = 1;
   settings.verbose_refinement = 0;
   settings.better_start = 1;
-  settings.kkt_reg = 1e-7;
+  settings.kkt_reg = 1e-8;
 }
 void setup_pointers(void) {
   work.y = work.x + 11;

@@ -1,4 +1,4 @@
-add_library(iris iris.cpp)
+add_library(iris SHARED iris.cpp)
 target_link_libraries(iris mosek64 iris_cvxgen_ldp_cpp cdd)
 
 add_executable(testIris test_iris.cpp)

@@ -1,4 +1,4 @@
-function [A, b, C, d, results] = inflate_region_fallback(obstacles, A_bounds, b_bounds, start, options)
+function [A, b, C, d, results] = inflate_region_fallback(obstacle_pts, A_bounds, b_bounds, start, options)
 % MATLAB-only implementation of IRIS. This is slower and less flexible than the c++ interface, but does not require any compilation.  
 import iris.*;
 
@@ -10,25 +10,14 @@ end
 
 results = inflation_results();
 results.start = start;
-if iscell(obstacles)
-  results.obstacles = obstacles;
-else
-  results.obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
-end
-results.n_obs = numel(results.obstacles);
-
-if iscell(obstacles)
-  padded = pad_obstacle_points(obstacles);
-  obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacles)));
-else
-  obstacle_pts = obstacles;
-end
+results.obstacles = obstacle_pts;
+results.n_obs = size(results.obstacles, 3);
 
 t0 = tic;
 
 dim = size(A_bounds, 2);
 d = start;
-C = 0.01 * eye(dim);
+C = 1e-4 * eye(dim);
 best_vol = -inf;
 iter = 1;
 results.e_history{1} = struct('C', C, 'd', d);

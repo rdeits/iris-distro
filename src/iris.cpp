@@ -198,7 +198,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
     // std::cout << "A: " << region->polyhedron->getA() << std::endl;
     // std::cout << "b: " << region->polyhedron->getB() << std::endl;
-    volume = iris_mosek::inner_ellipsoid(*region->polyhedron, *region->ellipsoid);
+    volume = iris_mosek::inner_ellipsoid(*region->polyhedron, region->ellipsoid.get());
     if (debug) {
       debug->ellipsoid_history.push_back(*(region->ellipsoid));
     }
