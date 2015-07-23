@@ -57,7 +57,7 @@ while true
   results.e_time = results.e_time + toc;
   results.e_history{iter+1} = struct('C', C, 'd', d);
 
-  if abs(cvx_optval - best_vol)/best_vol < 2e-2
+  if abs(cvx_optval - best_vol)/best_vol < 2e-2 || iter >= options.iter_limit
     break
   end
   best_vol = cvx_optval;
@@ -65,4 +65,4 @@ while true
 end
 
 results.iters = iter;
-results.total_time = toc(t0);
+results.total_time = toc(t0)
