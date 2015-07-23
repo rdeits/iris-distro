@@ -64,10 +64,10 @@ def test_debug_data():
 
     debug.animate(pause=0.5, show=False)
 
-def test_random_obstacles_2d():
+def test_random_obstacles_2d(show=False):
     bounds = irispy.Polyhedron.from_bounds([0, 0], [1, 1])
     obstacles = []
-    for i in range(5):
+    for i in range(10):
         center = np.random.random((2,))
         scale = np.random.random() * 0.3
         pts = np.random.random((2,4))
@@ -78,9 +78,9 @@ def test_random_obstacles_2d():
 
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
 
-    debug.animate(pause=0.5, show=False)
+    debug.animate(pause=0.5, show=show)
 
-def test_random_obstacles_3d():
+def test_random_obstacles_3d(show=False):
     bounds = irispy.Polyhedron.from_bounds([0, 0, 0], [1, 1, 1])
     obstacles = []
     for i in range(5):
@@ -94,12 +94,12 @@ def test_random_obstacles_3d():
 
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
 
-    debug.animate(pause=0.5, show=False)
+    debug.animate(pause=0.5, show=show)
 
 
 
 
 if __name__ == '__main__':
-    test_random_obstacles_3d()
+    test_random_obstacles_2d(True)
 
 

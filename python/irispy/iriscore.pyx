@@ -211,7 +211,7 @@ cdef class IRISDebugData:
         ellipsoid.thisptr.get()[0] = self.thisptr.get().ellipsoid_history[index]
         return ellipsoid
     def iterEllipsoids(self):
-        for i in xrange(self.getNumberOfEllipsoids()):
+        for i in xrange(1, self.getNumberOfEllipsoids()):
             yield self.getEllipsoid(i)
     def iterRegions(self):
         return itertools.izip(self.iterPolyhedrons(), self.iterEllipsoids())
