@@ -338,14 +338,15 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
 
   MSKrealt obj_val;
   MSK_getprimalobj(task, MSK_SOL_ITR, &obj_val);
-  double volume = pow(obj_val, n);
+  // double volume = pow(obj_val, n);
 
   MSK_deletetask(&task);
   if (!existing_env) {
     MSK_deleteenv(env);
     free(env);
   }
-  return volume;
+  return ellipsoid->getVolume();
+  // return volume;
 }
 
 void closest_point_in_convex_hull(const MatrixXd &Points, VectorXd &result, MSKenv_t *existing_env) {
