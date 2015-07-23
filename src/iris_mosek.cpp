@@ -305,6 +305,8 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
       MSK_getxx(task, MSK_SOL_ITR, xx);
       MSK_getbarxj(task, MSK_SOL_ITR, 0, barx);
 
+      extract_solution(xx, barx, n, ndx_d, ellipsoid);
+
       // debug("Optimal primal solution"); 
       // #ifndef NDEBUG
       //   for(int i=0; i < nvar; ++i) 
@@ -333,7 +335,6 @@ double inner_ellipsoid(const iris::Polyhedron &polyhedron, iris::Ellipsoid *elli
       throw(InnerEllipsoidInfeasibleError());
   }
   
-  extract_solution(xx, barx, n, ndx_d, ellipsoid);
 
   MSKrealt obj_val;
   MSK_getprimalobj(task, MSK_SOL_ITR, &obj_val);
