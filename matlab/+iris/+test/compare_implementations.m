@@ -1,13 +1,13 @@
 function compare_implementations()
 
-n_trials = 100;
+n_trials = 50;
 n_obstacles = 1000;
 matlab_times = nan(1, n_trials);
 cpp_times = nan(1, n_trials);
 
-
-for j = 1:n_trials
-  dim = 1 + ceil(j / 20);
+iter = 1;
+while iter <= n_trials
+  dim = 1 + ceil(iter / 20);
   A_bounds = [eye(dim); -eye(dim)];
   b_bounds = [ones(dim, 1); zeros(dim, 1)];
 
@@ -19,18 +19,25 @@ for j = 1:n_trials
                    'termination_threshold', 2e-2,...
                    'iter_limit', 100);
 
-  t0 = tic();
-  [A_c, b_c, C_c, d_c] = iris.inflate_regionmex(obstacles, A_bounds, b_bounds, start, options);
-  cpp_times(j) = toc(t0);
+  try
+    t0 = tic();
+    [A_c, b_c, C_c, d_c] = iris.inflate_regionmex(obstacles, A_bounds, b_bounds, start, options);
+    cpp_times(iter) = toc(t0);
 
-  t0 = tic();
-  [A_m, b_m, C_m, d_m] = iris.inflate_region_fallback(obstacle_pts, A_bounds, b_bounds, start, options);
-  matlab_times(j) = toc(t0);
+    t0 = tic();
+    [A_m, b_m, C_m, d_m] = iris.inflate_region_fallback(obstacle_pts, A_bounds, b_bounds, start, options);
+    matlab_times(iter) = toc(t0);
+
+    iter = iter + 1
+  catch
+    continue
+  end
 
   % assert(iris.util.equal_up_to_permutations(A_c, A_m, 1e-2));
   % assert(iris.util.equal_up_to_permutations(b_c, b_m, 1e-2));
-  % assert(all(all(abs(C_c - C_m) < 1e-2)));
-  % assert(all(all(abs(d_c - d_m) < 1e-2)));
+  assert(all(all(abs(C_c - C_m) < 1e-2)));
+  assert(all(all(abs(d_c - d_m) < 1e-2)));
+
 end
 
 fprintf(1, 'c++ mean: %f std: %f\n', mean(cpp_times), std(cpp_times));
