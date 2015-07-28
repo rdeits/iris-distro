@@ -13,7 +13,7 @@ results.start = start;
 results.obstacles = obstacle_pts;
 results.n_obs = size(results.obstacles, 3);
 
-t0 = tic;
+t_start = tic;
 
 dim = size(A_bounds, 2);
 d = start;
@@ -23,12 +23,12 @@ iter = 1;
 results.e_history{1} = struct('C', C, 'd', d);
 
 while true
-  tic
+  t0 = tic();
   [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d);
   if options.error_on_infeasible_start && infeas_start
     error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
   end
-  results.p_time = results.p_time + toc;
+  results.p_time = results.p_time + toc(t0);
   if iter > 1 && DEBUG
     for i = 1:length(b)
       assert(min(eig([(b(i) - A(i,:) * d) * eye(dim), C * (A(i,:)');
@@ -52,9 +52,9 @@ while true
     results.p_history{iter} = struct('A', A, 'b', b);
   end
 
-  tic
+  t0 = tic();
   [C, d, cvx_optval] = maximal_ellipse(A,b);
-  results.e_time = results.e_time + toc;
+  results.e_time = results.e_time + toc(t0);
   results.e_history{iter+1} = struct('C', C, 'd', d);
 
   if abs(cvx_optval - best_vol)/best_vol < 2e-2 || iter >= options.iter_limit
@@ -65,4 +65,4 @@ while true
 end
 
 results.iters = iter;
-results.total_time = toc(t0)
+results.total_time = toc(t_start)

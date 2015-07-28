@@ -10,6 +10,8 @@
 #include "iris_mosek.cpp"
 #include "iris_cdd.cpp"
 
+#include <chrono>
+
 using namespace Eigen;
 
 namespace iris {
@@ -121,10 +123,12 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     }
   }
 
-  MatrixXd A = polyhedron.getA();
-  VectorXd b = polyhedron.getB();
-  A.resize(planes.size(), dim);
-  b.resize(planes.size(), 1);
+  // MatrixXd A = polyhedron.getA();
+  // VectorXd b = polyhedron.getB();
+  // A.resize(planes.size(), dim);
+  // b.resize(planes.size(), 1);
+  MatrixXd A(planes.size(), dim);
+  VectorXd b(planes.size());
 
   for (auto it = planes.begin(); it != planes.end(); ++it) {
     A.row(it - planes.begin()) = it->first.transpose();
@@ -161,12 +165,18 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     // debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
   }
 
+  float p_time = 0;
+  float e_time = 0;
 
   while (1) {
+    auto begin = std::chrono::high_resolution_clock::now();
     // std::cout << "calling hyperplanes with: " << std::endl;
     // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
     // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
     separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
+    auto end = std::chrono::high_resolution_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
+    p_time += elapsed.count();
 
     // std::cout << "A: " << std::endl << region->polyhedron.A << std::endl;
     // std::cout << "b: " << region->polyhedron.b.transpose() << std::endl;
@@ -198,11 +208,18 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
     // std::cout << "A: " << region->polyhedron->getA() << std::endl;
     // std::cout << "b: " << region->polyhedron->getB() << std::endl;
+    begin = std::chrono::high_resolution_clock::now();
     volume = iris_mosek::inner_ellipsoid(*region->polyhedron, region->ellipsoid.get());
+    end = std::chrono::high_resolution_clock::now();
+    elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
+    e_time += elapsed.count();
+
     if (debug) {
       debug->ellipsoid_history.push_back(*(region->ellipsoid));
     }
+    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
     // std::cout << "volume: " << volume << std::endl;
+    // std::cout << "det: " << region->ellipsoid->getC().determinant() << std::endl;
 
     const bool at_iter_limit = (options.iter_limit > 0) && (iter + 1 >= options.iter_limit);
     const bool insufficient_progress = (std::abs(volume - best_vol) / best_vol) < options.termination_threshold;
@@ -219,6 +236,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     }
   }
 
+  std::cout << "c++ p time: " << p_time << std::endl;
+  std::cout << "c++ e time: " << e_time << std::endl;
+  std::cout << "c++ iters: " << iter << std::endl;
   return region;
 }
 

@@ -1,5 +1,6 @@
 #include <mex.h>
 #include <Eigen/Core>
+#include <chrono>
 #include "iris/iris.hpp"
 
 using namespace Eigen;
@@ -27,6 +28,7 @@ mxArray* eigenToMatlab(const MatrixXd &m)
 }
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
+  // auto begin = std::chrono::high_resolution_clock::now();
 
   if (nrhs != 5 || nlhs > 6) {
     mexErrMsgTxt("usage: [A, b, C, d, p_history, e_history] = inflate_regionmex(obstacles, A_bounds, b_bounds, start, options)");
@@ -102,15 +104,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
   problem.setBounds(iris::Polyhedron(A_bounds, b_bounds));
 
+  // auto end = std::chrono::high_resolution_clock::now();
+  // auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
+  // std::cout << "pre-solve time: " << elapsed.count() << " s" << std::endl;
+
   std::shared_ptr<iris::IRISRegion> region;
   std::unique_ptr<iris::IRISDebugData> debug;
+  // begin = std::chrono::high_resolution_clock::now();
   if (nlhs > 4) {
     debug.reset(new iris::IRISDebugData());
     region = iris::inflate_region(problem, options, debug.get());
   } else {
     region = iris::inflate_region(problem, options);
   }
+  // end = std::chrono::high_resolution_clock::now();
+  // elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
+  // std::cout << "solve time: " << elapsed.count() << " s" << std::endl;
 
+  // begin = std::chrono::high_resolution_clock::now();
   // mexPrintf("ran iris\n");
 
   narg = 0;
@@ -153,4 +164,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
   }
   narg++;
+
+  // end = std::chrono::high_resolution_clock::now();
+  // elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
+  // std::cout << "post-solve time: " << elapsed.count() << " s" << std::endl;
 }

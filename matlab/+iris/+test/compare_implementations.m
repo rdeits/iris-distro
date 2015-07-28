@@ -1,7 +1,7 @@
 function compare_implementations()
 
 n_trials = 50;
-n_obstacles = 1000;
+n_obstacles = 5;
 matlab_times = nan(1, n_trials);
 cpp_times = nan(1, n_trials);
 
