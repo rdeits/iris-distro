@@ -4,3 +4,6 @@
 [submodule "iris"]
 	path = iris
 	url = git@github.com:rdeits/iris.git
+[submodule "mosek-pod"]
+	path = mosek-pod
+	url = git@github.com:rdeits/mosek-pod.git
