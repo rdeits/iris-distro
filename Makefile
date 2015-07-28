@@ -4,6 +4,7 @@ default_target: all
 
 # get a list of subdirs to build by reading tobuild.txt
 SUBDIRS:=$(shell grep -v "^\#" tobuild.txt)
+TESTDIRS:=$(shell grep -v "^\#" totest.txt)
 
 # Figure out where to build the software.
 #   Use BUILD_PREFIX if it was passed in.
