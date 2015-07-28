@@ -3,3 +3,4 @@ pod-build
 *.so
 .DS_Store
 *.pyc
+build/
