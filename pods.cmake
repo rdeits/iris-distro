@@ -52,6 +52,7 @@ function(call_cygpath format var)
 #  separate_arguments(${var})
   string(REGEX REPLACE "([^\\\\]) " "\\1;" ${var} ${${var}})  # separate arguments didn't respect the "Program\ Files"... it resulted in "Program;Files"
   string(REGEX REPLACE "\\\\" "" ${var} "${${var}}")  # now zap the \
+  string(STRIP ${${var}} ${var})
   execute_process(COMMAND ${cygpath} ${format} ${${var}} OUTPUT_VARIABLE varout OUTPUT_STRIP_TRAILING_WHITESPACE)
   string(REGEX REPLACE "(\r?\n)+" ";" varout ${varout})
 #  message("after cygpath ${format}: ${varout}")
@@ -610,8 +611,9 @@ function(pods_use_pkg_config_classpath)
         ${PKG_CONFIG_EXECUTABLE} --variable=classpath ${arg}
         OUTPUT_VARIABLE _pods_pkg_classpath_flags)
       string(STRIP ${_pods_pkg_classpath_flags} _pods_pkg_classpath_flags)
-      string(REPLACE " " ":" _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
+      string(REPLACE ":" " " _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
       java_compiler_path(_pods_pkg_classpath_flags)
+      string(REPLACE " " ":" _pods_pkg_classpath_flags ${_pods_pkg_classpath_flags})
 
       set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH}:${_pods_pkg_classpath_flags})
       string(REPLACE "::" ":" CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH})
@@ -630,7 +632,6 @@ function(pods_use_pkg_config_classpath)
     endforeach()
 
     set( CMAKE_JAVA_INCLUDE_PATH ${CMAKE_JAVA_INCLUDE_PATH} PARENT_SCOPE )
-
 endfunction()
 
 
