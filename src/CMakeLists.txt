@@ -1,5 +1,6 @@
 add_library(iris SHARED iris.cpp)
-target_link_libraries(iris mosek64 iris_cvxgen_ldp_cpp cdd)
+target_link_libraries(iris iris_cvxgen_ldp_cpp cdd)
+pods_use_pkg_config_packages(iris mosek)
 
 add_executable(testIris test_iris.cpp)
 target_link_libraries(testIris iris)
