@@ -9,6 +9,15 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
   [Online]. Available:
   <a href='http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf'>http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf</a>
 
+
+Installation
+============
+
+This project is distributed in accordance with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If you've used pods before, then it should be easy to integrate IRIS along with your other Pods projects. If you haven't, then don't worry: Pods are designed to make it easy to build and run software like this without forcing you to install anything globally. You'll just have to do a few things:
+
+
+
+
 Setup
 =====
 
