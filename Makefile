@@ -27,6 +27,15 @@ all:
 	done
 	@# Place additional commands here if you have any
 
+test:	all
+	@for subdir in $(TESTDIRS); do \
+		echo "\n-------------------------------------------"; \
+		echo "-- $$subdir"; \
+		echo "-------------------------------------------"; \
+		$(MAKE) -C $$subdir test || exit 2; \
+	done
+	@# Place additional commands here if you have any
+
 clean:
 	@for subdir in $(SUBDIRS); do \
 		echo "\n-------------------------------------------"; \
