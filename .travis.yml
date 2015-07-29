@@ -65,4 +65,6 @@ script:
   - make
   - source build/config/pods_setup_all.sh
   - source venv/bin/activate
+  - python -c "import scipy; print scipy.__version__"
+  - python -c "import scipy.spatial"
   - CTEST_OUTPUT_ON_FAILURE=1 make test
