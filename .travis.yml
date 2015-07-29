@@ -2,8 +2,11 @@ language: cpp
 
 sudo: false
 cache:
-  directories:
-    - $HOME/.cache/pip
+  - pip
+  - directories:
+      - $HOME/.cache/pip
+      - $HOME/iris-distro/venv/build/cython
+      - $HOME/iris-distro/venv/build/numpy
 
 addons:
   apt:
