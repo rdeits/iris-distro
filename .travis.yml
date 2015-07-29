@@ -2,10 +2,8 @@ language: cpp
 
 sudo: false
 cache:
-  - pip
-  - directories:
-      - $HOME/.cache/pip
-      - $HOME/iris-distro/venv/build/cython
+  directories:
+    - $HOME/.cache/pip
 
 addons:
   apt:
@@ -19,7 +17,6 @@ addons:
       - g++-4.8
       - clang
       - python-virtualenv
-      - python-numpy
 
 compiler: 
   - gcc
@@ -41,7 +38,7 @@ before_install:
   - git submodule update --init --recursive
   - virtualenv venv
   - source venv/bin/activate
-  - pip install cython
+  - pip install cython numpy
 
 script: 
   - mkdir build
