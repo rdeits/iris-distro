@@ -41,7 +41,7 @@ git:
   submodules: false
 
 before_install:
-  - sudo apt-get update -qq
+  # - sudo apt-get update -qq
   # - sudo apt-get install -y python-tk
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
