@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris-distro)
-
 Introduction
 ============
 
@@ -10,6 +8,8 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
   to: <em>Workshop on the Algorithmic Fundamentals of Robotics</em>, Aug. 2014.
   [Online]. Available:
   <a href='http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf'>http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf</a>
+
+[![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris-distro)
 
 Requirements
 ============
