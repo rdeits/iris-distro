@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <iostream>
 #include <numeric>
 #include <Eigen/LU>

@@ -1,4 +1,3 @@
-#include <stdexcept>
 #include "setoper.h"
 #include "cdd.h"
 
