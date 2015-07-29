@@ -9,8 +9,6 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
   [Online]. Available:
   <a href='http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf'>http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf</a>
 
-[![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris)
-
 This project is distributed in accordance with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If you've used pods before, then it should be easy to integrate IRIS along with your other Pods projects. If not, then check out <https://github.com/rdeits/iris-distro> for more information.
 
 This package contains the IRIS algorithm and its MATLAB and Python bindings, but it doesn't include the additional tools you'll need like Mosek, Eigen, and cddlib. You can find all of those, plus more detailed installation instructions, here: <https://github.com/rdeits/iris-distro>
