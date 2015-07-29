@@ -13,6 +13,7 @@ Requirements
 ============
 
 	pkg-config
+	cmake
 	python (tested with python 2.7)
 
 Required python packages (for the Python wrapper only):
