@@ -1,8 +1,9 @@
-language: python
+language: cpp
 
 sudo: false
-cache: 
-  - pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 addons:
   apt:
@@ -34,6 +35,8 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
+  - virtualenv venv
+  - source venv/bin/activate
   - pip install cython
 
 script: 
