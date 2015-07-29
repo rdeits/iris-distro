@@ -58,7 +58,8 @@ before_install:
   - source venv/bin/activate
   - pip install --upgrade pip
   - pip install --upgrade distribute
-  - pip install cython scipy --cache-dir=$HOME/.pip-cache
+  - pip install --upgrade cython scipy --cache-dir=$HOME/.pip-cache
+  - python -c "import scipy; print scipy.__version__"
 
 script:
   - mkdir build
