@@ -9,66 +9,68 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
   [Online]. Available:
   <a href='http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf'>http://groups.csail.mit.edu/robotics-center/public_papers/Deits14.pdf</a>
 
+Requirements
+============
+
+	pkg-config
+	python (tested with python 2.7)
+
+Required python packages (for the Python wrapper only):
+	
+	scipy
+	numpy
+	matplotlib
+	nose
+
+You'll also need a license for the Mosek optimization toolbox <https://www.mosek.com/> (this package includes a downloader for the Mosek code, but you have to get your own license). Mosek has free licenses available for academic use.
+
+Optionally, you can install the `cddmex` package for Matlab to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/). If you're not planning on using the Matlab bindings, then you won't need it. 
 
 Installation
 ============
 
+First, make sure you've got all the necessary submodules:
+
+	git submodule update --init --recursive
+
 This project is distributed in accordance with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If you've used pods before, then it should be easy to integrate IRIS along with your other Pods projects. If you haven't, then don't worry: Pods are designed to make it easy to build and run software like this without forcing you to install anything globally. You'll just have to do a few things:
 
+First, you'll need to make a `build` folder where IRIS will be installed:
 
+	mkdir build
 
-
-Setup
-=====
-
-The primary algorithm is distributed as:
-
-	inflate_region.m
-
-You'll need to build a few tools first, and in order to do so, you'll need to make sure that the `matlab` executable is on your system path. The `matlab` executable lives in `/Applications/MATLAB_R2014b.app/bin/` or similar on OSX and `/usr/local/MATLAB/R2014a/bin/` on linux. You can either add that folder to your system PATH variable put a symbolic link to the `matlab` executable somewhere that is already on your path, like `/usr/local/bin`.
-
-To build IRIS, just `cd` into the IRIS folder and run:
+Then build and install IRIS and its dependencies:
 
 	make
 
-Requirements
-------------
+To be able to use IRIS, you'll also need to update your `PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`, etc. The easiest way to do that is to add the following to your shell's startup file (for most Mac and Linux systems, that's `~/.bashrc`):
 
-The MATLAB implementation requires the Mosek toolbox for MATLAB <http://docs.mosek.com/7.0/toolbox/>, and the Python implementation currently requires both Mosek and Gurobi <http://www.gurobi.com/>. Both have free licenses available for academic use.
+	source /wherever/you/put/iris-distro/build/config/pods_setup_all.sh
 
-Optionally, you can install the `cddmex` package to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/).
+If you want to use the Matlab bindings, you'll also have to add the folder `wherever/you/put/iris-distro/build/matlab` to Matlab's path. 
 
- The code is distributed as a MATLAB package, so only the `matlab` directory (the one that contains the "+iris" folder) needs to be added to your MATLAB path. You should be able to test it by running (in MATLAB):
+Example Usage
+=============
 
-	>>> import iris.test.*;
-	>>> test_poly_2d;
+Python wrapper
+--------------
 
-You'll also need `liboimp-dev`
+	python -m irispy.test.test_iris_2d
 
-Pods Compatibility
-------------------
+Matlab wrapper
+--------------
 
-This software is designed to be compatible with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If that means nothing to you, don't worry about it: just make sure the `matlab` folder is on your MATLAB path and/or the `python` folder is on your `PYTHONPATH`. If you are familiar with Pods, then you can also use the wrapper pods provided by the RobotLocomotion group to satisfy the Gurobi and Mosek dependencies (licenses for both must be acquired separately).
+	>>> addpath_iris
+	>>> iris.test.test_poly_2d();
 
-* Gurobi: <https://github.com/RobotLocomotion/gurobi>
-* Mosek: <https://github.com/RobotLocomotion/mosek>
+C++ library
+-----------
 
-Python Implementation
----------------------
-
-An experimental Python implementation of the base algorithm is also provided in `python/irispy`. You can see a demonstration of its operation in irispy_exploration.ipynb (an IPython notebook), which can also be viewed online through [nbviewer](http://nbviewer.ipython.org/urls/raw.githubusercontent.com/rdeits/iris-distro/master/python/irispy_exploration.ipynb)
-
-Python Requirements
--------------------
-
-To run the Python implementation, you will need at least:
-
-	* numpy
-	* scipy
-	* PyPolyhedron: http://cens.ioc.ee/projects/polyhedron/
+See `iris/src/iris_demo.cpp` for a basic usage example. 
 
 Examples
 ========
+
 Here are some animations of the algorithm running in various
 environments:
 
