@@ -26,6 +26,7 @@ Mac OSX (with homebrew):
 
 Required python packages (for the Python wrapper only):
 	
+	cython
 	scipy
 	numpy
 	matplotlib
