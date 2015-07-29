@@ -3,10 +3,10 @@ language: cpp
 sudo: false
 
 cache:
-  - pip
-  - directories:
-      - "$HOME/.pip-cache"
-      - "$HOME/iris-distro/venv"
+  pip: true
+  directories:
+    - "$HOME/.pip-cache"
+    - "$HOME/iris-distro/venv"
 
 addons:
   apt:
