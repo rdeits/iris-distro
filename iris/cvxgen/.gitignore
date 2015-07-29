@@ -1,0 +1,5 @@
+*.so
+*.o
+*.mexa64
+*.mexmaci64
+
