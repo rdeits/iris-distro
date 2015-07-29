@@ -5,8 +5,7 @@ cache:
   - pip
   - directories:
       - $HOME/.cache/pip
-      - $HOME/iris-distro/venv/build/cython
-      - $HOME/iris-distro/venv/build/numpy
+      - $HOME/iris-distro/venv
 
 addons:
   apt:
