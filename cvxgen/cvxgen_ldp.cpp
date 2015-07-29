@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "cvxgen_ldp.hpp"
 
 extern "C" {
