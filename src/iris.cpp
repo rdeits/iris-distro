@@ -237,9 +237,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     }
   }
 
-  std::cout << "c++ p time: " << p_time << std::endl;
-  std::cout << "c++ e time: " << e_time << std::endl;
-  std::cout << "c++ iters: " << iter << std::endl;
+  // std::cout << "c++ p time: " << p_time << std::endl;
+  // std::cout << "c++ e time: " << e_time << std::endl;
+  // std::cout << "c++ iters: " << iter << std::endl;
   return region;
 }
 
