@@ -56,8 +56,5 @@ before_install:
 script:
   - mkdir build
   - make
-  # - source build/config/pods_setup_all.sh
-  - export PATH=$PATH:$HOME/iris-distro/build/bin
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/iris-distro/build/lib
-  - export PYTHONPATH=$HOME/iris-distro/build/lib/python2.7/dist-packages
+  - source build/config/pods_setup_all.sh
   - CTEST_OUTPUT_ON_FAILURE=1 make test
