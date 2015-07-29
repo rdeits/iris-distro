@@ -20,7 +20,6 @@ addons:
       - g++-4.8
       - clang
       - python-virtualenv
-      - python-nose
 
 compiler:
   - gcc
@@ -46,7 +45,7 @@ before_install:
   - git submodule update --init --recursive
   - virtualenv venv
   - source venv/bin/activate
-  - pip install cython numpy
+  - pip install -r python_requirements.txt
 
 script:
   - mkdir build
