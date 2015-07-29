@@ -56,4 +56,5 @@ before_install:
 script:
   - mkdir build
   - make
+  - source build/config/pods_setup_all.sh
   - CTEST_OUTPUT_ON_FAILURE=1 make test
