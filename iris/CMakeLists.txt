@@ -79,5 +79,5 @@ add_subdirectory(python)
 # setup matlab pods-compliance
 pods_configure_matlab_paths()
 pods_install_matlab_path(iris)
-pods_install_bash_setup(iris "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages")
+pods_install_bash_setup(iris "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages:\$PYTHONPATH")
 
