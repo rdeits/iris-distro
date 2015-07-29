@@ -12,7 +12,6 @@ addons:
       - gcc-4.8
       - g++-4.8
       - clang
-      - cython
 
 compiler: 
   - gcc
@@ -30,6 +29,7 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
+  - pip install -r requirements.txt
 
 script: 
   - mkdir build
