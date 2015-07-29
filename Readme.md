@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This package contains the IRIS algorithm for iterative convex regional inflation by semidefinite programming, implemented in MATLAB and Python. It is designed to take an environment containing many (convex) obstacles and a start point, and to compute a large convex obstacle-free region. This region can then be used to define linear constraints for some other objective function which the user might want to optimize over the obstacle-free space. The algorithm is described in:
+This package contains the IRIS algorithm for iterative convex regional inflation by semidefinite programming, implemented in C++ with bindings for MATLAB and Python. It is designed to take an environment containing many (convex) obstacles and a start point, and to compute a large convex obstacle-free region. This region can then be used to define linear constraints for some other objective function which the user might want to optimize over the obstacle-free space. The algorithm is described in:
 
 R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regions of
   obstacle-free space through semidefinite programming,&rdquo; Submitted
@@ -21,19 +21,26 @@ Ubuntu (with apt-get):
 	libgmp-dev
 
 Mac OSX (with homebrew):
-	
+
 	pkg-config
 	cmake
 	gmp
 
-Required python packages (for the Python wrapper only): (see requirements.txt). To install them all, you can do:
+You'll also need some python packages to build and use the python bindings. You can install them on ubuntu with these apt-get packages:
+
+    python-numpy
+    python-scipy
+    python-matplotlib
+    python-nose
+    cython
+
+Or you can install the `liblapack-dev`, `libblas-dev`, and `gfortran` packages from apt-get, and then install the python modules with pip:
 
 	pip install -r python_requirements.txt
 
-
 You'll also need a license for the Mosek optimization toolbox <https://www.mosek.com/> (this package includes a downloader for the Mosek code, but you have to get your own license). Mosek has free licenses available for academic use.
 
-Optionally, you can install the `cddmex` package for Matlab to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/). If you're not planning on using the Matlab bindings, then you won't need it. 
+Optionally, you can install the `cddmex` package for Matlab to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/). If you're not planning on using the Matlab bindings, then you won't need it.
 
 Installation
 ============
@@ -56,7 +63,7 @@ To be able to use IRIS, you'll also need to update your `PATH`, `LD_LIBRARY_PATH
 
 	source /wherever/you/put/iris-distro/build/config/pods_setup_all.sh
 
-If you want to use the Matlab bindings, you'll also have to add the folder `wherever/you/put/iris-distro/build/matlab` to Matlab's path. 
+If you want to use the Matlab bindings, you'll also have to add the folder `wherever/you/put/iris-distro/build/matlab` to Matlab's path.
 
 Example Usage
 =============
@@ -75,7 +82,7 @@ Matlab wrapper
 C++ library
 -----------
 
-See `iris/src/iris_demo.cpp` for a basic usage example. 
+See `iris/src/iris_demo.cpp` for a basic usage example.
 
 Examples
 ========
