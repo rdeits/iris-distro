@@ -1,0 +1,12 @@
+[submodule "cmake"]
+	path = cmake
+	url = git@github.com:RobotLocomotion/cmake.git
+[submodule "iris"]
+	path = iris
+	url = git@github.com:rdeits/iris.git
+[submodule "mosek-pod"]
+	path = mosek-pod
+	url = git@github.com:rdeits/mosek-pod.git
+[submodule "iris-externals"]
+	path = iris-externals
+	url = git@github.com:rdeits/iris-externals.git

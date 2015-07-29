@@ -1,2 +1,6 @@
 pod-build
 *.mex*
+*.so
+.DS_Store
+*.pyc
+build/
