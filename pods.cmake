@@ -241,7 +241,7 @@ function(pods_install_bash_setup package)
 
   if (APPLE)
      set(LD_LIBRARY_PATH DYLD_LIBRARY_PATH)
-  elseif()
+  else()
      set(LD_LIBRARY_PATH LD_LIBRARY_PATH)
   endif()
 
