@@ -38,7 +38,7 @@ before_install:
   - git submodule update --init --recursive
   - virtualenv venv
   - source venv/bin/activate
-  - pip install cython
+  - pip install cython numpy
 
 script: 
   - mkdir build
