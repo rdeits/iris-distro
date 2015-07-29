@@ -59,11 +59,10 @@ before_install:
   - pip install --upgrade pip
   - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
   - pip install --upgrade cython scipy --cache-dir=$HOME/.pip-cache
-  - python -c "import scipy; print scipy.__version__"
-  - python -c "import scipy.spatial"
 
 script:
   - mkdir build
   - make
   - source build/config/pods_setup_all.sh
+  - source venv/bin/activate
   - CTEST_OUTPUT_ON_FAILURE=1 make test
