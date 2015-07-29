@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-
 include(ExternalProject)
 
 ExternalProject_Add(eigen_project
@@ -7,6 +6,8 @@ ExternalProject_Add(eigen_project
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
 	)
+ExternalProject_Get_Property(eigen_project BINARY_DIR)
+install(FILES ${BINARY_DIR}/eigen3.pc DESTINATION lib/pkgconfig)
 
 set(CDD_PROJECT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/cdd_project-prefix/src/cdd_project)
 ExternalProject_Add(cdd_project

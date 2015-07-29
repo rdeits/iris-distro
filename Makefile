@@ -27,7 +27,7 @@ endif
 
 all: pod-build/Makefile
 	# cp -r $(shell pwd)/matlab/+iris $(BUILD_PREFIX)/matlab/
-	$(MAKE) -C pod-build all
+	$(MAKE) -C pod-build all install
 
 pod-build/Makefile:
 	$(MAKE) configure
