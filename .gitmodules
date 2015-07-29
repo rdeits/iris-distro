@@ -1,5 +1,5 @@
 [submodule "cmake"]
-	path = cmake
+	path = iris/cmake
 	url = git@github.com:RobotLocomotion/cmake.git
 [submodule "mosek-pod"]
 	path = mosek-pod
