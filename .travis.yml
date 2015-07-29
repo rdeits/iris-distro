@@ -18,14 +18,11 @@ addons:
       - libgmp-dev
       - gcc-4.8
       - g++-4.8
-      - gfortran
       - clang
-      - libblas-dev
-      - liblapack-dev
-      # - python-numpy
-      # - python-scipy
-      # - python-matplotlib
-      # - python-nose
+      - python-numpy
+      - python-scipy
+      - python-matplotlib
+      - python-nose
       - python-virtualenv
 
 compiler:
@@ -50,11 +47,11 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
-  - virtualenv venv
+  - virtualenv --system-site-packages venv
   - source venv/bin/activate
   - pip install --upgrade pip
   - pip install --upgrade distribute
-  - pip install -r python_requirements.txt --cache-dir=$HOME/.pip-cache
+  - pip install cython --cache-dir=$HOME/.pip-cache
 
 script:
   - mkdir build
