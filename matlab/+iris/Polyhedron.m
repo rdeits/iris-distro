@@ -1,4 +1,4 @@
-classdef Polytope
+classdef Polyhedron
 
   properties
     A;
@@ -10,7 +10,7 @@ classdef Polytope
   end
 
   methods
-    function obj = Polytope(A, b, Aeq, beq)
+    function obj = Polyhedron(A, b, Aeq, beq)
       if nargin < 3
         Aeq = [];
       end
@@ -39,14 +39,14 @@ classdef Polytope
     end
     
     function reduced_poly = reduce(obj)
-      % Find a minimal representation of the polytope
+      % Find a minimal representation of the polyhedron
       if ~exist('cddmex', 'file')
         error('IRIS:MissingDependency', 'This function requires the cddmex tool. The easiest way to get it is using tbxmanager: http://www.tbxmanager.com/');
       end
       H = struct('A', [obj.Aeq; obj.A], 'B', [obj.beq; obj.b], 'lin', (1:size(obj.Aeq, 1))');
       Hred = cddmex('reduce_h', H);
-      assert(isempty(Hred.lin), 'as far as I know, Hred.lin should always be empty. That is, the reduced polytope should not contain equality constraints. -rdeits');
-      reduced_poly = iris.Polytope(Hred.A, Hred.B);
+      assert(isempty(Hred.lin), 'as far as I know, Hred.lin should always be empty. That is, the reduced polyhedron should not contain equality constraints. -rdeits');
+      reduced_poly = iris.Polyhedron(Hred.A, Hred.B);
     end
 
     function plotVertices(obj, varargin)
@@ -101,7 +101,7 @@ classdef Polytope
   methods(Static)
     function obj = fromVertices(vertices)
       [A, b] = iris.thirdParty.polytopes.vert2lcon(vertices');
-      obj = iris.Polytope(A, b);
+      obj = iris.Polyhedron(A, b);
     end
 
     function obj = from2DVertices(vertices)
@@ -111,25 +111,25 @@ classdef Polytope
       k = convhull(x,y, 'simplify', true);
       A = [(y(k(2:end)) - y(k(1:end-1)))', (x(k(1:end-1)) - x(k(2:end)))'];
       b = sum(A' .* [x(k(1:end-1)); y(k(1:end-1))], 1)';
-      obj = iris.Polytope(A, b);
+      obj = iris.Polyhedron(A, b);
     end
 
     function obj = from2DVerticesAndPlane(vertices, normal, v)
       assert(size(vertices, 1) == 2);
       % normal' * [x;y;z] = v;
-      obj = iris.Polytope.from2DVertices(vertices);
+      obj = iris.Polyhedron.from2DVertices(vertices);
       obj.Aeq = reshape(normal, 1, []);
       obj.beq = v;
       obj.A = [obj.A, zeros(size(obj.A, 1), 1)];
     end
 
     function obj = fromBounds(lb, ub)
-      % create a polytope representing a bounding box in n dimensions
+      % create a polyhedron representing a bounding box in n dimensions
       dim = length(lb);
       assert(length(lb) == length(ub));
       A = [eye(dim); -eye(dim)];
       b = [reshape(ub,[],1); reshape(-lb,[],1)];
-      obj = iris.Polytope(A, b);
+      obj = iris.Polyhedron(A, b);
     end
   end
 end

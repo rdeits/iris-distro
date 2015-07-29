@@ -44,14 +44,10 @@ function [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d)
         A(i,:) = nhat';
         b(i) = b0;
       else
-        if all(size(ys) <= [3, 8])
-          ystar = iris.least_distance.cvxgen_ldp(ys);
-        else
-          if isempty(mosek_res)
-            [~,mosek_res] = mosekopt('symbcon echo(0)');
-          end
-          ystar = iris.least_distance.mosek_ldp(ys, mosek_res);
+        if isempty(mosek_res)
+          [~,mosek_res] = mosekopt('symbcon echo(0)');
         end
+        ystar = iris.least_distance.mosek_ldp(ys, mosek_res);
 
         if norm(ystar) < 1e-3
           % d is inside the obstacle. So we'll just reverse nhat to try to push the

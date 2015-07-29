@@ -1,7 +1,7 @@
 function [inner_poly, outer_poly] = project_c_space_region(A, b )
-% Given a polytope of free C-space Ax <= b, project it down into the plane.
-% inner_poly is a patch of xy poses where the polytope contains all orientations of the
-% bot, and outer_poly is a patch of xy poses where the polytope contains only some
+% Given a polyhedron of free C-space Ax <= b, project it down into the plane.
+% inner_poly is a patch of xy poses where the polyhedron contains all orientations of the
+% bot, and outer_poly is a patch of xy poses where the polyhedron contains only some
 % orientations of the bot. inner_poly may be empty.
 
 import iris.thirdParty.polytopes.lcon2vert;

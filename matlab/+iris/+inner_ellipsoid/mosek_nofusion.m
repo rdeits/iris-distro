@@ -1,5 +1,5 @@
 function [C, d] = mosek_nofusion(A, b)
-% Find the largest ellipsoid in the polytope defined by Ax <= b. This
+% Find the largest ellipsoid in the polyhedron defined by Ax <= b. This
 % should return the same result as iris.inner_ellipsoid.mosek_ellipsoid.m.
 % It implements the same algorithm, but does not use the Mosek Fusion
 % symbolic API, and is consequently about 2X faster. You can compare all of

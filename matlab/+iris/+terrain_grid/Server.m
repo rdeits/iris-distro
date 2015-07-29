@@ -16,7 +16,7 @@ classdef Server < handle
       p.addRequired('yaw', @isnumeric);
       p.addRequired('collision_model', @(x) isa(x, 'iris.terrain_grid.CollisionModel'));
       p.addParamValue('map_id', -1, @isnumeric);
-      p.addParamValue('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
+      p.addParamValue('xy_bounds', iris.Polyhedron(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polyhedron'));
       p.addParamValue('plane_distance_tolerance', 0.025, @isnumeric);
       p.addParamValue('plane_angle_tolerance', 10 * pi/180, @isnumeric);
       p.addParamValue('excluded_grid', []);
@@ -123,8 +123,8 @@ classdef Server < handle
         end
       end
 
-      %% Add a bounding polytope
-      bounds = iris.Polytope.from2DVertices([heightmap.X(end,1), heightmap.X(end,end), heightmap.X(1,end), heightmap.X(1,1); 
+      %% Add a bounding polyhedron
+      bounds = iris.Polyhedron.from2DVertices([heightmap.X(end,1), heightmap.X(end,end), heightmap.X(1,end), heightmap.X(1,1); 
                                              heightmap.Y(end,1), heightmap.Y(end,end), heightmap.Y(1,end), heightmap.Y(1,1)]);
       % Add bounds on yaw angle
       bounds.A = [bounds.A, zeros(size(bounds.A, 1), 1); 
@@ -159,7 +159,7 @@ classdef Server < handle
       p.addParamValue('default_yaw', 0, @isnumeric);
       p.addParamValue('max_slope_angle', 40 * pi/180, @isnumeric);
       p.addParamValue('max_height_variation', 0.05, @isnumeric);
-      p.addParamValue('xy_bounds', iris.Polytope(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polytope'));
+      p.addParamValue('xy_bounds', iris.Polyhedron(zeros(0,2),zeros(0,1)), @(x) isa(x, 'iris.Polyhedron'));
       p.addParamValue('max_num_regions', inf, @(x) x > 0);
       p.addParamValue('debug', false);
       p.parse(map_id, collision_model, varargin{:});

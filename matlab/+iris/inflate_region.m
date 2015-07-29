@@ -1,73 +1,43 @@
-function [A, b, C, d, results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start, options)
+function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, start, varargin)
 import iris.*;
 
-DEBUG = false;
+p = inputParser();
+p.addOptional('require_containment', false, @isnumeric);
+p.addOptional('error_on_infeasible_start', false, @isnumeric);
+p.addOptional('termination_threshold', 2e-2, @(x) x > 0);
+p.addOptional('iter_limit', 100, @isnumeric);
+p.parse(varargin{:});
+options = p.Results;
 
-if nargin < 5
-  options = struct();
-end
-if ~isfield(options, 'require_containment'); options.require_containment = false; end
-if ~isfield(options, 'error_on_infeas_start'); options.error_on_infeas_start = false; end
-if iscell(obstacle_pts)
-  padded = pad_obstacle_points(obstacle_pts);
-  obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacle_pts)));
-end
+if exist('+iris/inflate_regionmex', 'file')
+  disp('using c++ IRIS library')
 
-results = inflation_results();
-results.start = start;
-results.obstacles = obstacle_pts;
-results.n_obs = size(obstacle_pts, 3);
-
-t0 = tic;
-
-dim = size(A_bounds, 2);
-d = start;
-C = 0.01 * eye(dim);
-best_vol = -inf;
-iter = 1;
-results.e_history{1} = struct('C', C, 'd', d);
-
-while true
-  tic
-  [A, b, infeas_start] = separating_hyperplanes(obstacle_pts, C, d);
-  if options.error_on_infeas_start && infeas_start
-    error('IRIS:InfeasibleStart', 'ellipse center is inside an obstacle');
+  if ~iscell(obstacles)
+    obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
   end
-  results.p_time = results.p_time + toc;
-  if iter > 1 && DEBUG
-    for i = 1:length(b)
-      assert(min(eig([(b(i) - A(i,:) * d) * eye(dim), C * (A(i,:)');
-         (C * (A(i,:)'))', (b(i) - A(i,:) * d)])) >= -1e-3);
-    end
-  end
-  A = [A; A_bounds];
-  b = [b; b_bounds];
 
-  if options.require_containment
-    if all(A * start <= b) || iter == 1 || infeas_start
-      results.p_history{iter} = struct('A', A, 'b', b);
-    else
-      hist = results.p_history{iter-1};
-      A = hist.A;
-      b = hist.b;
-      disp('Breaking early because start point is no longer contained in polytope');
-      break
-    end
+  if nargout > 4
+    [A, b, C, d, p_history, e_history] = inflate_regionmex(obstacles, A_bounds, b_bounds, start, options);
+    results = inflation_results();
+    results.start = start;
+    results.obstacles = obstacles;
+    results.n_obs = numel(obstacles);
+    results.e_history = e_history;
+    results.p_history = p_history;
   else
-    results.p_history{iter} = struct('A', A, 'b', b);
+    [A, b, C, d] = inflate_regionmex(obstacles, A_bounds, b_bounds, start, options);
   end
-
-  tic
-  [C, d, cvx_optval] = maximal_ellipse(A,b);
-  results.e_time = results.e_time + toc;
-  results.e_history{iter+1} = struct('C', C, 'd', d);
-
-  if abs(cvx_optval - best_vol)/best_vol < 2e-2
-    break
+else
+  disp('falling back to Matlab-only library');
+  if iscell(obstacles)
+    padded = pad_obstacle_points(obstacles);
+    obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacles)));
+  else
+    obstacle_pts = obstacles;
   end
-  best_vol = cvx_optval;
-  iter = iter + 1;
+  [A, b, C, d, results] = inflate_region_fallback(obstacle_pts, A_bounds, b_bounds, start, options);
+  results.obstacles = obstacles;
+  if ~iscell(results.obstacles)
+    results.obstacles = mat2cell(results.obstacles, size(results.obstacles, 1), size(results.obstacles, 2), ones(1, size(results.obstacles, 3)));
+  end
 end
-
-results.iters = iter;
-results.total_time = toc(t0);

@@ -3,33 +3,35 @@ import iris.thirdParty.polytopes.*;
 h = figure(2);
 cla
 hold on
-n_obs = size(obstacles, 3);
+n_obs = numel(obstacles);
 if isempty(obstacles)
   n_obs = 0;
 end
 % Draw obstacle interiors
 for j = 1:n_obs
-  if size(obstacles, 2) > 1
-    if size(obstacles, 2) > 2
-      k = convhull(obstacles(1,:,j), obstacles(2,:,j));
+  obs = obstacles{j};
+  if size(obs, 2) > 1
+    if size(obs, 2) > 2
+      k = convhull(obs(1,:), obs(2,:));
     else
       k = [1,2,1];
     end
-    patch(obstacles(1,k,j), obstacles(2,k,j), 'k', 'FaceColor', [.6,.6,.6], 'LineWidth', 0.1);
+    patch(obs(1,k), obs(2,k), 'k', 'FaceColor', [.6,.6,.6], 'LineWidth', 0.1);
   else
-    plot(obstacles(1,:,j), obstacles(2,:,j), 'ko');
+    plot(obs(1,:), obs(2,:), 'ko');
   end
 end
 
 % Draw obstacle boundaries on top
 for j = 1:n_obs
-  if size(obstacles, 2) > 1
-    if size(obstacles, 2) > 2
-      k = convhull(obstacles(1,:,j), obstacles(2,:,j));
+  obs = obstacles{j};
+  if size(obs, 2) > 1
+    if size(obs, 2) > 2
+      k = convhull(obs(1,:), obs(2,:));
     else
       k = [1,2,1];
     end
-    plot(obstacles(1,k,j), obstacles(2,k,j), 'k', 'LineWidth', 2);
+    plot(obs(1,k), obs(2,k), 'k', 'LineWidth', 2);
   end
 end
 for j = 1:size(A,1)-4
