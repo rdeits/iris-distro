@@ -1,7 +1,9 @@
 language: cpp
 
 sudo: false
-cache: pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 
 addons:
   apt:
