@@ -24,7 +24,6 @@ addons:
       - python-matplotlib
       - python-nose
       - python-virtualenv
-      - python-tk
 
 compiler:
   - gcc
@@ -53,6 +52,7 @@ before_install:
   - pip install --upgrade pip
   - pip install --upgrade distribute
   - pip install cython --cache-dir=$HOME/.pip-cache
+  - pip install tk --cache-dir=$HOME/.pip-cache
 
 script:
   - mkdir build
