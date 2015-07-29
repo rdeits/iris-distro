@@ -1,5 +1,6 @@
 #include <iostream>
-#include "iris.hpp"
+#include "iris/iris.hpp"
+#include "test_util.hpp"
 
 using namespace Eigen;
 
@@ -17,6 +18,15 @@ int main(int argc, char **argv) {
 
   for (auto pt = points.begin(); pt != points.end(); ++pt) {
     std::cout << pt->transpose() << std::endl;
+  }
+
+
+  MatrixXd pts_expected(2,4);
+  pts_expected << -0.5, 1.0, 1.0, -0.5,
+                  -0.5, -0.5, 1.0, 1.0;
+
+  for (auto pt = points.begin(); pt != points.end(); ++pt) {
+    valuecheckMatrix(*pt, pts_expected.col(pt - points.begin()), 1e-6);
   }
 
   return 0;

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "ppl.hh"
-#include "iris.hpp"
+#include "iris/iris.hpp"
+
+// Note: this test is no longer in use (and never really worked anyway). I'm just keeping it around in case I ever want to try again with PPL. 
 
 using namespace Parma_Polyhedra_Library;
 using namespace Eigen;
