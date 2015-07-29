@@ -1,3 +1,5 @@
+language: cpp
+
 sudo: false
 addons:
   apt:
@@ -5,8 +7,13 @@ addons:
       - cmake
       - pkg-config
       - libgmp-dev
+      - gcc-4.8
+      - g++-4.8
+      - clang
 
-compiler: gcc
+compiler: 
+  - gcc
+  - clang
 
 install:
 - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
