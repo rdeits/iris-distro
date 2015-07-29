@@ -24,6 +24,7 @@ addons:
       - python-matplotlib
       - python-nose
       - python-virtualenv
+      - python-tk
 
 compiler:
   - gcc
