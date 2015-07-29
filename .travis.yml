@@ -1,6 +1,6 @@
 language: cpp
 
-# sudo: false
+sudo: false
 
 cache:
   pip: true
@@ -42,7 +42,7 @@ git:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y python-tk
+  # - sudo apt-get install -y python-tk
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
@@ -59,7 +59,6 @@ before_install:
   - pip install --upgrade pip
   - pip install --upgrade distribute
   - pip install cython scipy --cache-dir=$HOME/.pip-cache
-  # - pip install tk --cache-dir=$HOME/.pip-cache
 
 script:
   - mkdir build
