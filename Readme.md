@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris-distro)
+
 Introduction
 ============
 
