@@ -50,3 +50,4 @@ before_install:
 script:
   - mkdir build
   - make
+  - make test
