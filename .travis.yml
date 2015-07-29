@@ -20,6 +20,7 @@ addons:
       - g++-4.8
       - clang
       - python-virtualenv
+      - python-nose
 
 compiler:
   - gcc
