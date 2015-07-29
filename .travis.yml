@@ -22,9 +22,6 @@ addons:
       - libblas-dev
       - liblapack-dev
       - clang
-      - python-numpy
-      - python-matplotlib
-      - python-nose
       - python-virtualenv
 
 compiler:
@@ -54,11 +51,11 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
-  - virtualenv --system-site-packages venv
+  - virtualenv venv
   - source venv/bin/activate
   - pip install --upgrade pip
   - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
-  - pip install --upgrade cython scipy --cache-dir=$HOME/.pip-cache
+  - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
 
 script:
   - mkdir build
