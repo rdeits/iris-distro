@@ -3,6 +3,8 @@ language: cpp
 sudo: false
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
       - cmake
       - pkg-config
