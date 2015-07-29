@@ -46,6 +46,7 @@ before_install:
   - virtualenv venv
   - source venv/bin/activate
   - pip install --upgrade pip
+  - pip install --upgrade setuptools
   - pip install -r python_requirements.txt --cache-dir $HOME/.pip-cache
 
 script:
