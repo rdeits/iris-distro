@@ -35,7 +35,7 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
   - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
-  - pip install -r requirements.txt
+  - pip install cython
 
 script: 
   - mkdir build
