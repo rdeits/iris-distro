@@ -19,6 +19,8 @@ addons:
       - gcc-4.8
       - g++-4.8
       - gfortran
+      - libblas-dev
+      - liblapack-dev
       - clang
       - python-numpy
       - python-matplotlib
