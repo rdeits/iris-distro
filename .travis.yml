@@ -19,10 +19,12 @@ addons:
       - gcc-4.8
       - g++-4.8
       - clang
-      - python-numpy
-      - python-scipy
-      - python-matplotlib
-      - python-nose
+      - libblas-dev
+      - liblapack-dev
+      # - python-numpy
+      # - python-scipy
+      # - python-matplotlib
+      # - python-nose
       - python-virtualenv
 
 compiler:
@@ -50,8 +52,8 @@ before_install:
   - virtualenv venv
   - source venv/bin/activate
   - pip install --upgrade pip
-  # - pip install --upgrade distribute
-  - pip install cython --cache-dir $HOME/.pip-cache
+  - pip install --upgrade distribute
+  - pip install -r python_requirements.txt --cache-dir=$HOME/.pip-cache
 
 script:
   - mkdir build
