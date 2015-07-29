@@ -24,13 +24,10 @@ Mac OSX (with homebrew):
 	cmake
 	gmp
 
-Required python packages (for the Python wrapper only):
-	
-	cython
-	scipy
-	numpy
-	matplotlib
-	nose
+Required python packages (for the Python wrapper only): (see requirements.txt). To install them all, you can do:
+
+	pip install -r python_requirements.txt
+
 
 You'll also need a license for the Mosek optimization toolbox <https://www.mosek.com/> (this package includes a downloader for the Mosek code, but you have to get your own license). Mosek has free licenses available for academic use.
 
