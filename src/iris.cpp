@@ -190,7 +190,20 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     new_poly.appendConstraints(problem.getBounds());
 
     if (options.require_containment) {
-      if (new_poly.contains(problem.getSeed().getD()) || iter == 0 || infeasible_start) {
+      bool all_points_contained;
+      if (options.required_containment_points.size()) {
+        all_points_contained = true;
+        for (auto pt = options.required_containment_points.begin(); pt != options.required_containment_points.end(); ++pt) {
+          if (!new_poly.contains(*pt)) {
+            all_points_contained = false;
+            break;
+          }
+        }
+      } else {
+        all_points_contained = new_poly.contains(problem.getSeed().getD());
+      }
+
+      if (all_points_contained || infeasible_start) {
         *(region->polyhedron) = new_poly;
         if (debug) {
           debug->polyhedron_history.push_back(new_poly);

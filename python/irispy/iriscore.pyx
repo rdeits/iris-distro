@@ -230,7 +230,7 @@ cdef class IRISDebugData:
         else:
             raise ValueError("not implemented for dimension > 3")
 
-    def animate3d(self, fig=None, pause=0.5, show=True, repeat_delay=2.0): 
+    def animate3d(self, fig=None, pause=0.5, show=True, repeat_delay=2.0):
         if fig is None:
             fig = plt.figure()
             ax = a3.Axes3D(fig)
@@ -295,6 +295,7 @@ cdef class IRISDebugData:
 
 def inflate_region(obstacles, start_point_or_ellipsoid, Polyhedron bounds=None,
                   require_containment=False,
+                  required_containment_points=[],
                   error_on_infeasible_start=False,
                   termination_threshold=2e-2,
                   iter_limit = 100,
@@ -316,9 +317,16 @@ def inflate_region(obstacles, start_point_or_ellipsoid, Polyhedron bounds=None,
 
     cdef CIRISOptions options
     options.require_containment = require_containment
+    cdef VectorXd point_vector
+    cdef np.ndarray[double, ndim=1, mode="c"] point_array
+    for point in required_containment_points:
+        point_array = np.asarray(point, dtype=np.float64)
+        point_vector = copyToVector(&point_array[0], point_array.size)
+        options.required_containment_points.push_back(point_vector)
     options.error_on_infeasible_start = error_on_infeasible_start
     options.termination_threshold = termination_threshold
     options.iter_limit = iter_limit
+
     cdef MatrixXd obs_mat
     cdef np.ndarray[double, ndim=2, mode="c"] obs
     try:

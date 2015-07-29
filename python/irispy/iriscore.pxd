@@ -62,6 +62,7 @@ cdef extern from "iris/iris.hpp" namespace "iris":
 
     cdef cppclass CIRISOptions "iris::IRISOptions":
         bint require_containment, error_on_infeasible_start
+        vector[VectorXd] required_containment_points
         double termination_threshold
         int iter_limit
 
