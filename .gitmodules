@@ -7,6 +7,3 @@
 [submodule "mosek-pod"]
 	path = mosek-pod
 	url = git@github.com:rdeits/mosek-pod.git
-[submodule "iris-externals"]
-	path = iris-externals
-	url = git@github.com:rdeits/iris-externals.git
