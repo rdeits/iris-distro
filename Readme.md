@@ -12,9 +12,17 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
 Requirements
 ============
 
+Ubuntu (with apt-get):
+
 	pkg-config
 	cmake
-	python (tested with python 2.7)
+	libgmp-dev
+
+Mac OSX (with homebrew):
+	
+	pkg-config
+	cmake
+	gmp
 
 Required python packages (for the Python wrapper only):
 	
