@@ -18,9 +18,9 @@ addons:
       - libgmp-dev
       - gcc-4.8
       - g++-4.8
+      - gfortran
       - clang
       - python-numpy
-      - python-scipy
       - python-matplotlib
       - python-nose
       - python-virtualenv
@@ -56,7 +56,7 @@ before_install:
   - source venv/bin/activate
   - pip install --upgrade pip
   - pip install --upgrade distribute
-  - pip install cython --cache-dir=$HOME/.pip-cache
+  - pip install cython scipy --cache-dir=$HOME/.pip-cache
   # - pip install tk --cache-dir=$HOME/.pip-cache
 
 script:
