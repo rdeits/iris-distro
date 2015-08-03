@@ -1,3 +1,0 @@
-[submodule "cmake"]
-	path = iris/cmake
-	url = git@github.com:RobotLocomotion/cmake.git
