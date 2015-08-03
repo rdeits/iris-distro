@@ -4,3 +4,4 @@ pod-build
 .DS_Store
 *.pyc
 build/
+externals_config.cmake
