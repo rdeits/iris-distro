@@ -2,6 +2,9 @@ language: cpp
 
 sudo: false
 
+notifications:
+  email: false
+
 cache:
   pip: true
   directories:
