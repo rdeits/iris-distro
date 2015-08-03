@@ -15,7 +15,11 @@ else()
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 		)
 	ExternalProject_Get_Property(eigen_project BINARY_DIR)
-	install(FILES ${BINARY_DIR}/eigen3.pc DESTINATION lib/pkgconfig)
+	ExternalProject_Add_Step(eigen_project install_pc_file
+		COMMAND cp ${BINARY_DIR}/eigen3.pc ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/eigen3.pc
+		DEPENDEES install
+		COMMENT "installing eigen3.pc file for pkg-config"
+		)
 
 	set(CDD_PROJECT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/cdd_project-prefix/src/cdd_project)
 	ExternalProject_Add(cdd_project
