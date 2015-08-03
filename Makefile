@@ -55,7 +55,7 @@ else
 endif
 
 .PHONY: configure
-configure:
+configure: externals_config.cmake
 #	@echo "BUILD_SYSTEM: '$(BUILD_SYSTEM)'"
 	@echo "BUILD_PREFIX: $(BUILD_PREFIX)"
 
@@ -78,9 +78,12 @@ ifeq ($(BUILD_SYSTEM),Windows_NT)
 	rd /s build
 else
 	-if [ -e pod-build/install_manifest.txt ]; then rm -f `cat pod-build/install_manifest.txt`; fi
-	-if [ -d pod-build ]; then cmake --build pod-build --target clean; fi #rm -rf pod-build; fi
+	-if [ -d pod-build ]; then cmake --build pod-build --target clean; rm -rf pod-build; fi
 	-rm -rf build
 endif
+
+externals_config.cmake:
+	touch externals_config.cmake
 
 test:
 	$(MAKE) -C pod-build/iris_project-prefix/src/iris_project-build test
