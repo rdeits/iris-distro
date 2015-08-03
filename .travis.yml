@@ -34,9 +34,6 @@ python:
 install:
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
-git:
-  submodules: false
-
 before_install:
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
@@ -44,10 +41,6 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_b279d3ed6718_key -iv $encrypted_b279d3ed6718_iv -in lic.enc -out lic -d
   - mkdir -p $HOME/mosek
   - mv lic $HOME/mosek/mosek.lic
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
-  - git submodule update --init
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
-  - git submodule update --init --recursive
   - virtualenv venv
   - source venv/bin/activate
   - pip install --upgrade pip
