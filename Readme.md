@@ -45,17 +45,13 @@ Optionally, you can install the `cddmex` package for Matlab to speed up some fun
 Installation
 ============
 
-First, make sure you've got all the necessary submodules:
-
-	git submodule update --init --recursive
-
 This project is distributed in accordance with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If you've used pods before, then it should be easy to integrate IRIS along with your other Pods projects. If you haven't, then don't worry: Pods are designed to make it easy to build and run software like this without forcing you to install anything globally. You'll just have to do a few things:
 
 First, you'll need to make a `build` folder where IRIS will be installed:
 
 	mkdir build
 
-Then build and install IRIS and its dependencies:
+Then build and install IRIS and its dependencies to that folder:
 
 	make
 
