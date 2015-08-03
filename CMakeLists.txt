@@ -16,7 +16,7 @@ else()
 		)
 	ExternalProject_Get_Property(eigen_project BINARY_DIR)
 	ExternalProject_Add_Step(eigen_project install_pc_file
-		COMMAND cp ${BINARY_DIR}/eigen3.pc ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/eigen3.pc
+		COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig && cp ${BINARY_DIR}/eigen3.pc ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/eigen3.pc
 		DEPENDEES install
 		COMMENT "installing eigen3.pc file for pkg-config"
 		)
