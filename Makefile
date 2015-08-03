@@ -25,6 +25,9 @@ ifeq "$(BUILD_TYPE)" ""
 BUILD_TYPE="Release"
 endif
 
+test: 
+	$(MAKE) -C pod-build/iris_project-prefix/src/iris_project-build test
+
 .PHONY: all
 all: pod-build/Makefile
 
