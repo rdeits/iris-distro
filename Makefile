@@ -88,11 +88,14 @@ externals_config.cmake:
 test:
 	$(MAKE) -C pod-build/iris_project-prefix/src/iris_project-build test
 
-superbuild:
+configure-superbuild:
 	cp configurations/superbuild.cmake externals_config.cmake
 
-iris_only:
-	cp configurations/iris_only.cmake externals_config.cmake
+configure-no-externals:
+	cp configurations/no_externals.cmake externals_config.cmake
+
+configure-cdd-only:
+	cp configurations/cdd_only.cmake externals_config.cmake
 
 # other (custom) targets are passed through to the cmake-generated Makefile
 %::

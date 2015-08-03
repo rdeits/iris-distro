@@ -65,7 +65,7 @@ Installation without externals
 ------------------------------
 By default, IRIS will build its external dependencies as part of the build process. If you want to turn any or all of them off, you can set the `WITH_EIGEN`, `WITH_CDD`, and `WITH_MOSEK` options to `OFF` using cmake. The easiest way to do that is to run:
 
-    make iris_only
+    make configure-no-externals
     make
 
 which will edit the `externals_config.cmake` file to set those options automatically. If you've already built IRIS, you'll need to do a `make clean` first.
