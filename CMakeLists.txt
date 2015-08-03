@@ -10,6 +10,10 @@ option(WITH_MOSEK "convex optimization solver; free for academics. Only disable 
 option(WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
 set(iris_dependencies)
 
+message("with eigen: " ${WITH_EIGEN})
+message("with cdd: " ${WITH_CDD})
+message("with mosek: " ${WITH_MOSEK})
+
 if (WITH_EIGEN)
 	ExternalProject_Add(eigen_project
 		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2

@@ -60,6 +60,18 @@ To be able to use IRIS, you'll also need to update your `PATH`, `LD_LIBRARY_PATH
 
 If you want to use the Matlab bindings, you'll also have to add the folder `wherever/you/put/iris-distro/build/matlab` to Matlab's path.
 
+------------------------------
+Installation without externals
+------------------------------
+By default, IRIS will build its external dependencies as part of the build process. If you want to turn any or all of them off, you can set the `WITH_EIGEN`, `WITH_CDD`, and `WITH_MOSEK` options to `OFF` using cmake. The easiest way to do that is to run:
+
+    make configure-no-externals
+    make
+
+which will edit the `externals_config.cmake` file to set those options automatically. If you've already built IRIS, you'll need to do a `make clean` first.
+
+If you're using IRIS as part of another project with cmake, you can just set the CMAKE_CACHE_ARGS to include `-DWITH_EIGEN:BOOL=OFF` etc. For more information, see: <http://www.cmake.org/cmake/help/v3.0/module/ExternalProject.html>.
+
 Example Usage
 =============
 
