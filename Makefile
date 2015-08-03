@@ -78,7 +78,7 @@ ifeq ($(BUILD_SYSTEM),Windows_NT)
 	rd /s build
 else
 	-if [ -e pod-build/install_manifest.txt ]; then rm -f `cat pod-build/install_manifest.txt`; fi
-	-if [ -d pod-build ]; then cmake --build pod-build --target clean-all; fi #rm -rf pod-build; fi
+	-if [ -d pod-build ]; then cmake --build pod-build --target clean; fi #rm -rf pod-build; fi
 	-rm -rf build
 endif
 

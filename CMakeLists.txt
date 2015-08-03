@@ -5,9 +5,9 @@ if(APPLE)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-option(WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
-option(WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
-option(WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
+option(WITH_EIGEN "c++ matrix library. Only disable if you have this already.")
+option(WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already.")
+option(WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already.")
 set(iris_dependencies)
 
 message("with eigen: " ${WITH_EIGEN})
