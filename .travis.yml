@@ -47,7 +47,6 @@ before_install:
   - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
   - git submodule update --init
   - sed -i 's/git@github.com:/https:\/\/github.com\//' iris/.gitmodules
-  - sed -i 's/git@github.com:/https:\/\/github.com\//' mosek-pod/.gitmodules
   - git submodule update --init --recursive
   - virtualenv venv
   - source venv/bin/activate
