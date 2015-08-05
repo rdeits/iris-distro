@@ -1,21 +1,42 @@
-# find_package(PythonLibs REQUIRED)
-# find_package(PythonInterp REQUIRED)
+find_package(NumPy REQUIRED)
+include_directories(${NUMPY_INCLUDE_DIRS})
 
-# add_custom_command(OUTPUT iriscore.cpp
-#   COMMAND cython --cplus ${CMAKE_CURRENT_SOURCE_DIR}/iriscore.pyx 
-#   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/iriscore.pyx ${CMAKE_CURRENT_SOURCE_DIR}/iriscore.pxd iris
-#   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+execute_process(COMMAND python-config --prefix
+	OUTPUT_VARIABLE PYTHON_PREFIX
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+# Overload the PYTHON_INCLUDE_DIR because, on OSX, cmake finds the correct library version but latches on to an old Apple-provided python 2.6 header directory. 
+set(PYTHON_INCLUDE_DIR ${PYTHON_PREFIX}/include/python${PYVERSION})
 
-# # Find the numpy include path
-# execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import numpy; print numpy.get_include()" OUTPUT_VARIABLE NUMPY_INCLUDE_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+find_package(Cython)
+if (CYTHON_FOUND AND 0)
+	include(UseCython)
 
-# include_directories(${PYTHON_INCLUDE_DIRS})
-# include_directories(${NUMPY_INCLUDE_PATH})
-# add_library(iriscore MODULE ${CMAKE_CURRENT_SOURCE_DIR}/iriscore.cpp)
-# target_link_libraries(iriscore ${PYTHON_LIBRARIES} iris)
-# set_target_properties(iriscore PROPERTIES 
-# 	PREFIX ""
-# 	OUTPUT_NAME "iriscore"
-# 	LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-# install(TARGETS iriscore DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
+	set_source_files_properties(
+		${CMAKE_CURRENT_SOURCE_DIR}/iriscore.pyx
+		${CMAKE_CURRENT_SOURCE_DIR}/iriscoretest.pyx
+		PROPERTIES CYTHON_IS_CXX TRUE )
 
+	cython_add_module(iriscore iriscore.pyx)
+	target_link_libraries(iriscore iris)
+	cython_add_module(iriscoretest iriscoretest.pyx)
+	target_link_libraries(iriscoretest iris)
+else()
+	find_package( PythonLibs REQUIRED )
+	include_directories( ${PYTHON_INCLUDE_DIRS} )
+
+	python_add_module( iriscore ${CMAKE_CURRENT_SOURCE_DIR}/iriscore.cpp )
+	python_add_module( iriscoretest ${CMAKE_CURRENT_SOURCE_DIR}/iriscoretest.cpp )
+	if( APPLE )
+		set_target_properties( iriscore PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
+		set_target_properties( iriscoretest PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
+	else()
+		target_link_libraries( iriscore ${PYTHON_LIBRARIES} )
+		target_link_libraries( iriscoretest ${PYTHON_LIBRARIES} )
+	endif()
+	target_link_libraries(iriscore iris)
+	target_link_libraries(iriscoretest iris)
+endif()
+
+install(TARGETS iriscore iriscoretest
+	    DESTINATION lib/python${PYVERSION}/dist-packages/irispy)
