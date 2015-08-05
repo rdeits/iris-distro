@@ -24,8 +24,8 @@ addons:
       - cmake
       - pkg-config
       - libgmp-dev
-      - gcc-4.8
-      - g++-4.8
+      # - gcc-4.8
+      # - g++-4.8
       - gfortran
       - libblas-dev
       - liblapack-dev
@@ -39,8 +39,8 @@ compiler:
 python:
   - '2.7'
 
-install:
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+# install:
+#   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
 before_install:
   - mkdir -p $HOME/.config/matplotlib

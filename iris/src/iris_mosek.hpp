@@ -24,6 +24,7 @@ public:
   const char * what () const throw () {
     return message.c_str();
   }
+  ~IRISMosekError() throw() {}
 };
 
 class InnerEllipsoidInfeasibleError: public std::exception {

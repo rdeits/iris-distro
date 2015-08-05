@@ -54,7 +54,7 @@ public:
 private:
   Eigen::MatrixXd A_;
   Eigen::VectorXd b_;
-  bool dd_representation_dirty_ = true;
+  bool dd_representation_dirty_;
   std::vector<Eigen::VectorXd> generator_points_;
   std::vector<Eigen::VectorXd> generator_rays_;
   void updateDDRepresentation();
