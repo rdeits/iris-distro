@@ -4,7 +4,8 @@ if(APPLE)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-include(cmake/mex.cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
+include(mex)
 mex_setup()
 enable_testing()
 

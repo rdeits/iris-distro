@@ -1,5 +1,4 @@
 scipy
 numpy
 matplotlib
-cython
 nose
