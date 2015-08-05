@@ -9,7 +9,7 @@ execute_process(COMMAND python-config --prefix
 set(PYTHON_INCLUDE_DIR ${PYTHON_PREFIX}/include/python${PYVERSION})
 
 find_package(Cython)
-if (CYTHON_FOUND AND 0)
+if (CYTHON_FOUND)
 	include(UseCython)
 
 	set_source_files_properties(
