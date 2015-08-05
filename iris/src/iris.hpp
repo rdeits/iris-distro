@@ -11,19 +11,26 @@ namespace iris {
 
 const double ELLIPSOID_C_EPSILON = 1e-4;
 
-struct IRISOptions {
+class IRISOptions {
+public:
   // If require_containment is true and required_containment_points is empty,
   // then the IRIS region is required to contain the center of the seed
   // ellipsoid. Otherwise, the IRIS region is required to contain all points
   // in required_containment_points.
   // If require_containment is false, then required_containment_points has no 
   // effect. 
-  bool require_containment = false;
-  std::vector<Eigen::VectorXd> required_containment_points = {};
+  bool require_containment;
+  std::vector<Eigen::VectorXd> required_containment_points;
+  bool error_on_infeasible_start;
+  double termination_threshold;
+  int iter_limit;
 
-  bool error_on_infeasible_start = false;
-  double termination_threshold = 2e-2;
-  int iter_limit = 100;
+  IRISOptions():
+    require_containment(false),
+    required_containment_points({}),
+    error_on_infeasible_start(false),
+    termination_threshold(2e-2),
+    iter_limit(100) {};
 };
 
 class Polyhedron {
