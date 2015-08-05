@@ -5,6 +5,11 @@ sudo: false
 notifications:
   email: false
 
+branches:
+  only:
+    - master
+    - stable
+
 cache:
   pip: true
   directories:
