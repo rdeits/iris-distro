@@ -4,10 +4,12 @@ namespace iris {
 
 Polyhedron::Polyhedron(int dim):
   A_(0, dim),
-  b_(0, 1) {}
+  b_(0, 1),
+  dd_representation_dirty_(true) {}
 Polyhedron::Polyhedron(Eigen::MatrixXd A, Eigen::VectorXd b):
     A_(A),
-    b_(b) {}
+    b_(b),
+    dd_representation_dirty_(true) {}
 void Polyhedron::setA(const Eigen::MatrixXd &A) {
   A_ = A;
   dd_representation_dirty_ = true;
