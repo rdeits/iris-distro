@@ -19,8 +19,6 @@ case $1 in
     exit 1 ;;
 esac
 
-pip install -r python_requirements.txt
-
 SUBDIRS="drake externals"
 for subdir in $SUBDIRS; do
   if [ -f $subdir/install_prereqs.sh ]; then
