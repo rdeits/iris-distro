@@ -2,11 +2,11 @@
 
 case $1 in
   ("homebrew")
-    brew install cmake pkg-config gmp ;;
+    brew install cmake pkg-config gmp openblas && easy_install pip ;;
   ("macports")
-    port install cmake gmp ;;
+    port install cmake gmp openblas && easy_install pip;;
   ("ubuntu")
-    apt-get install cmake build-essential libgmp-dev ;;
+    apt-get install cmake build-essential libgmp-dev python-pip liblapack-dev libblas-dev gfortran ;;
   ("cygwin")
     cygwin-setup -q -P make pkg-config libgmp-devel ;;
   (*)
@@ -18,6 +18,8 @@ case $1 in
     echo "  cygwin"
     exit 1 ;;
 esac
+
+pip install -r python_requirements.txt
 
 SUBDIRS="drake externals"
 for subdir in $SUBDIRS; do
