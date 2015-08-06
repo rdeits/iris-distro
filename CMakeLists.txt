@@ -5,16 +5,16 @@ if(APPLE)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-option(WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
-option(WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
-option(WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
+option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
+option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
+option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
 set(iris_dependencies)
 
-message("with eigen: " ${WITH_EIGEN})
-message("with cdd: " ${WITH_CDD})
-message("with mosek: " ${WITH_MOSEK})
+message("with eigen: " ${IRIS_WITH_EIGEN})
+message("with cdd: " ${IRIS_WITH_CDD})
+message("with mosek: " ${IRIS_WITH_MOSEK})
 
-if (WITH_EIGEN)
+if (IRIS_WITH_EIGEN)
 	ExternalProject_Add(eigen_project
 		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
@@ -27,7 +27,7 @@ if (WITH_EIGEN)
 		)
 	set(iris_dependencies ${iris_dependencies} eigen_project)
 endif()
-if (WITH_CDD)
+if (IRIS_WITH_CDD)
 	set(CDD_PROJECT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/cdd_project-prefix/src/cdd_project)
 	ExternalProject_Add(cdd_project
 		URL ftp://ftp.ifor.math.ethz.ch/pub/fukuda/cdd/cddlib-094h.tar.gz
@@ -38,10 +38,10 @@ if (WITH_CDD)
 	set(iris_dependencies ${iris_dependencies} cdd_project)
 endif()
 
-if (WITH_MOSEK)
+if (IRIS_WITH_MOSEK)
 	ExternalProject_Add(mosek_project
 	    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
-	    GIT_TAG a72594c4a7c8c5c026fd291148bcac76146634c2
+	    GIT_TAG 8e93c8ad6e8de0c1401b8e39d187370a3a0bd2dc
 	    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
 	    )
