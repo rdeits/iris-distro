@@ -11,7 +11,14 @@ options = p.Results;
 
 if exist('+iris/inflate_regionmex', 'file')
   if ~iscell(obstacles)
-    obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
+    obs_cell = cell(1, size(obstacles, 3));
+    for j = 1:size(obstacles, 3)
+      obs_cell{j} = obstacles(:,:,j);
+    end
+    obstacles = obs_cell;
+
+    % Note: could replace this with the following, but mat2cell is 100 times slower than the for loop
+    % obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
   end
 
   if nargout > 4
