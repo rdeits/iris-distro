@@ -10,8 +10,6 @@ p.parse(varargin{:});
 options = p.Results;
 
 if exist('+iris/inflate_regionmex', 'file')
-  disp('using c++ IRIS library')
-
   if ~iscell(obstacles)
     obstacles = mat2cell(obstacles, size(obstacles, 1), size(obstacles, 2), ones(1, size(obstacles, 3)));
   end
@@ -28,7 +26,6 @@ if exist('+iris/inflate_regionmex', 'file')
     [A, b, C, d] = inflate_regionmex(obstacles, A_bounds, b_bounds, start, options);
   end
 else
-  disp('falling back to Matlab-only library');
   if iscell(obstacles)
     padded = pad_obstacle_points(obstacles);
     obstacle_pts = cell2mat(reshape(padded, size(padded, 1), [], length(obstacles)));
