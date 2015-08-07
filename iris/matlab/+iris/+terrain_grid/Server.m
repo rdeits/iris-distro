@@ -21,7 +21,7 @@ classdef Server < handle
       p.addParamValue('plane_angle_tolerance', 10 * pi/180, @isnumeric);
       p.addParamValue('excluded_grid', []);
       p.addParamValue('debug', false);
-      p.addParamValue('error_on_infeas_start', true);
+      p.addParamValue('error_on_infeasible_start', true);
       p.parse(i0, yaw, collision_model, varargin{:});
       options = p.Results;
 
@@ -136,7 +136,7 @@ classdef Server < handle
       bounds.A = [bounds.A; options.xy_bounds.A];
       bounds.b = [bounds.b; options.xy_bounds.b];
       [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], ...
-        struct('require_containment', true, 'error_on_infeasible_start', options.error_on_infeas_start));
+        struct('require_containment', true, 'error_on_infeasible_start', options.error_on_infeasible_start));
 
       [A, iA] = unique(A, 'rows');
       b = b(iA);
@@ -218,7 +218,7 @@ classdef Server < handle
         end
 
         try
-          region = obj.getCSpaceRegionAtIndex(i0, yaw, collision_model, region_options, 'excluded_grid', excluded_grid, 'error_on_infeas_start', true);
+          region = obj.getCSpaceRegionAtIndex(i0, yaw, collision_model, region_options, 'excluded_grid', excluded_grid, 'error_on_infeasible_start', true);
         catch e
           if strcmp(e.identifier, 'IRIS:InfeasibleStart')
             excluded_grid(i0) = false;
