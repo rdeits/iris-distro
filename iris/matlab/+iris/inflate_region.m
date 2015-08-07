@@ -2,8 +2,8 @@ function [A, b, C, d, results] = inflate_region(obstacles, A_bounds, b_bounds, s
 import iris.*;
 
 p = inputParser();
-p.addOptional('require_containment', false, @(x) isnumeric(x) || islogical(x));
-p.addOptional('error_on_infeasible_start', false, @(x) isnumeric(x) || islogical(x));
+p.addOptional('require_containment', false, @isscalar);
+p.addOptional('error_on_infeasible_start', false, @isscalar);
 p.addOptional('termination_threshold', 2e-2, @(x) x > 0);
 p.addOptional('iter_limit', 100, @isnumeric);
 p.parse(varargin{:});
