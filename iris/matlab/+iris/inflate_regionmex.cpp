@@ -111,11 +111,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   std::shared_ptr<iris::IRISRegion> region;
   std::unique_ptr<iris::IRISDebugData> debug;
   // begin = std::chrono::high_resolution_clock::now();
-  if (nlhs > 4) {
-    debug.reset(new iris::IRISDebugData());
-    region = iris::inflate_region(problem, options, debug.get());
-  } else {
-    region = iris::inflate_region(problem, options);
+  try {
+    if (nlhs > 4) {
+      debug.reset(new iris::IRISDebugData());
+      region = iris::inflate_region(problem, options, debug.get());
+    } else {
+      region = iris::inflate_region(problem, options);
+    }
+  } catch (iris::InitialPointInfeasibleError &exception) {
+    mexErrMsgIdAndTxt("IRIS:InfeasibleStart", "Initial point is infeasible");
   }
   // end = std::chrono::high_resolution_clock::now();
   // elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);

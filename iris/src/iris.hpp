@@ -136,6 +136,12 @@ void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, con
 
 void getGenerators(const Eigen::MatrixXd &A, const Eigen::VectorXd &b, std::vector<Eigen::VectorXd> &points, std::vector<Eigen::VectorXd> &rays);
 
+class InitialPointInfeasibleError: public std::exception {
+  const char * what () const throw () {
+    return "Initial point is infeasible";
+  }
+};
+
 }
 
 #endif
