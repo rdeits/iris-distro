@@ -179,15 +179,14 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
     p_time += elapsed.count();
 
-    // std::cout << "A: " << std::endl << region->polyhedron.A << std::endl;
-    // std::cout << "b: " << region->polyhedron.b.transpose() << std::endl;
-
     if (options.error_on_infeasible_start && infeasible_start) {
-      throw(std::runtime_error("Error: initial point is infeasible\n"));
+      throw(InitialPointInfeasibleError());
     }
 
-
     new_poly.appendConstraints(problem.getBounds());
+
+    // std::cout << "A: " << std::endl << new_poly.getA() << std::endl;
+    // std::cout << "b: " << new_poly.getB().transpose() << std::endl;
 
     if (options.require_containment) {
       bool all_points_contained;

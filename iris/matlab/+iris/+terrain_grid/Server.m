@@ -135,8 +135,7 @@ classdef Server < handle
       end
       bounds.A = [bounds.A; options.xy_bounds.A];
       bounds.b = [bounds.b; options.xy_bounds.b];
-      [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], ...
-        struct('require_containment', true, 'error_on_infeasible_start', options.error_on_infeasible_start));
+      [A, b, C, d] = iris.inflate_region(c_obs, bounds.A, bounds.b, [x0; y0; yaw], 'require_containment', true, 'error_on_infeasible_start', options.error_on_infeasible_start);
 
       [A, iA] = unique(A, 'rows');
       b = b(iA);
