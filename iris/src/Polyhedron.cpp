@@ -10,14 +10,14 @@ Polyhedron::Polyhedron(Eigen::MatrixXd A, Eigen::VectorXd b):
     A_(A),
     b_(b),
     dd_representation_dirty_(true) {}
-void Polyhedron::setA(const Eigen::MatrixXd &A) {
+void Polyhedron::setA(Eigen::MatrixXd A) {
   A_ = A;
   dd_representation_dirty_ = true;
 }
 const Eigen::MatrixXd& Polyhedron::getA() const {
   return A_;
 }
-void Polyhedron::setB(const Eigen::VectorXd &b) {
+void Polyhedron::setB(Eigen::VectorXd b) {
   b_ = b;
   dd_representation_dirty_ = true;
 }

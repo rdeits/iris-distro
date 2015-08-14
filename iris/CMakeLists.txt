@@ -76,6 +76,7 @@ add_subdirectory(cvxgen)
 add_subdirectory(src)
 add_subdirectory(matlab/+iris)
 add_subdirectory(python)
+add_subdirectory(swig)
 
 # setup matlab pods-compliance
 pods_configure_matlab_paths()
