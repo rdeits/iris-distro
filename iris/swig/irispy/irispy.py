@@ -27,10 +27,6 @@ setattr(Ellipsoid, "default_color", "b")
 
 
 Polyhedron.__bases__ += (drawing.DrawDispatcher,)
-def Polyhedron_printGenerators(self):
-    print "printing generators from python"
-    print self.generatorPoints()
-setattr(Polyhedron, "printGenerators", Polyhedron_printGenerators)
 
 def Polyhedron_fromBounds(lb, ub):
     lb = np.asarray(lb, dtype=np.float64)
@@ -44,12 +40,3 @@ setattr(Polyhedron, "fromBounds", staticmethod(Polyhedron_fromBounds))
 def Polyhedron_getDrawingVertices(self):
     return np.hstack(self.generatorPoints()).T
 setattr(Polyhedron, "getDrawingVertices", Polyhedron_getDrawingVertices)
-
-
-# def inflate_region(*args, **kwargs):
-#     cpp_region = iris_wrapper.inflate_region(*args, **kwargs)
-#     print cpp_region
-#     region = IRISRegion(cpp_region.getPolyhedron().getDimension())
-#     region.this = cpp_region.this
-#     region.thisown = cpp_region.thisown
-#     return region

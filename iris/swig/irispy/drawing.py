@@ -31,7 +31,6 @@ class DrawDispatcher:
         return draw_3d_convhull(points, ax, **kwargs)
 
 def draw_2d_convhull(points, ax, **kwargs):
-    print points
     hull = scipy.spatial.ConvexHull(points)
     kwargs.setdefault("facecolor", "none")
     return [ax.add_patch(plt.Polygon(xy=points[hull.vertices],**kwargs))]
