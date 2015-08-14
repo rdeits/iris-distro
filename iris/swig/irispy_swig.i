@@ -23,3 +23,6 @@
 %eigen_typemaps(Eigen::MatrixXd)
 
 %include "iris.hpp"
+
+
+%template(VectorXdVector) std::vector<Eigen::VectorXd>;
