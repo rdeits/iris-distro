@@ -141,11 +141,18 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   return;
 }
 
-std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
+IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
+  std::cout << "running IRIS with the following inputs: " << std::endl;
+  std::cout << "bounds: " << std::endl << problem.getBounds().getA() << std::endl << problem.getBounds().getB() << std::endl;
+  std::cout << "obstacles: " << std::endl;
+  auto debug_obstacles = problem.getObstacles();
+  for (auto it = debug_obstacles.begin(); it != debug_obstacles.end(); ++it) {
+    std::cout << *it << std::endl;
+  }
 
-  std::shared_ptr<IRISRegion> region(new IRISRegion(problem.getDimension()));
-  region->ellipsoid->setC(problem.getSeed().getC());
-  region->ellipsoid->setD(problem.getSeed().getD());
+  IRISRegion region(problem.getDimension());
+  region.ellipsoid.setC(problem.getSeed().getC());
+  region.ellipsoid.setD(problem.getSeed().getD());
 
   double best_vol = pow(ELLIPSOID_C_EPSILON, problem.getDimension());
   double volume;
@@ -156,7 +163,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   if (debug) {
     // std::cout << "starting debug" << std::endl;
     debug->bounds = problem.getBounds();
-    debug->ellipsoid_history.push_back(*(region->ellipsoid));
+    debug->ellipsoid_history.push_back(region.ellipsoid);
     // std::cout << "pushing back obstacles" << std::endl;
     auto obstacles = problem.getObstacles();
     for (auto obs = obstacles.begin(); obs != obstacles.end(); ++obs) {
@@ -172,9 +179,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   while (1) {
     auto begin = std::chrono::high_resolution_clock::now();
     // std::cout << "calling hyperplanes with: " << std::endl;
-    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
-    // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
-    separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
+    // std::cout << "C: " << region.ellipsoid->getC() << std::endl;
+    // std::cout << "d: " << region.ellipsoid->getD() << std::endl;
+    separating_hyperplanes(problem.getObstacles(), region.ellipsoid, new_poly, infeasible_start);
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
     p_time += elapsed.count();
@@ -203,7 +210,7 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       }
 
       if (all_points_contained || infeasible_start) {
-        *(region->polyhedron) = new_poly;
+        region.polyhedron = new_poly;
         if (debug) {
           debug->polyhedron_history.push_back(new_poly);
         }
@@ -212,27 +219,27 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
         return region;
       }
     } else {
-      *(region->polyhedron) = new_poly;
+      region.polyhedron = new_poly;
       if (debug) {
         debug->polyhedron_history.push_back(new_poly);
       }
     }
 
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
-    // std::cout << "A: " << region->polyhedron->getA() << std::endl;
-    // std::cout << "b: " << region->polyhedron->getB() << std::endl;
+    // std::cout << "A: " << region.polyhedron->getA() << std::endl;
+    // std::cout << "b: " << region.polyhedron->getB() << std::endl;
     begin = std::chrono::high_resolution_clock::now();
-    volume = iris_mosek::inner_ellipsoid(*region->polyhedron, region->ellipsoid.get());
+    volume = iris_mosek::inner_ellipsoid(region.polyhedron, &region.ellipsoid);
     end = std::chrono::high_resolution_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
     e_time += elapsed.count();
 
     if (debug) {
-      debug->ellipsoid_history.push_back(*(region->ellipsoid));
+      debug->ellipsoid_history.push_back(region.ellipsoid);
     }
-    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
+    // std::cout << "C: " << region.ellipsoid->getC() << std::endl;
     // std::cout << "volume: " << volume << std::endl;
-    // std::cout << "det: " << region->ellipsoid->getC().determinant() << std::endl;
+    // std::cout << "det: " << region.ellipsoid->getC().determinant() << std::endl;
 
     const bool at_iter_limit = (options.iter_limit > 0) && (iter + 1 >= options.iter_limit);
     const bool insufficient_progress = (std::abs(volume - best_vol) / best_vol) < options.termination_threshold;

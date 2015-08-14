@@ -1,4 +1,4 @@
-%module irispy_swig
+%module(directors="1") irispy_swig
 
 %include <std_except.i>
 
@@ -24,5 +24,9 @@
 
 %include "iris.hpp"
 
+%feature("director") iris::Polyhedron;
+%feature("director") iris::Ellipsoid;
+%feature("director") iris::IRISProblem;
+%feature("director") iris::IRISRegion;
 
 %template(VectorXdVector) std::vector<Eigen::VectorXd>;

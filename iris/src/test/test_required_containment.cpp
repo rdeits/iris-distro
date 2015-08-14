@@ -27,7 +27,7 @@ int main() {
   options.required_containment_points = {Eigen::Vector2d(1.5, 1.5)};
 
   auto region = inflate_region(problem, options);
-  if (region->polyhedron->getNumberOfConstraints() > 0) {
+  if (region.polyhedron.getNumberOfConstraints() > 0) {
     throw std::runtime_error("polyhedron should be empty");
   }
 

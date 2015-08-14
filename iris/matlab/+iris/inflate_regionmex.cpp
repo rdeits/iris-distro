@@ -108,7 +108,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   // auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
   // std::cout << "pre-solve time: " << elapsed.count() << " s" << std::endl;
 
-  std::shared_ptr<iris::IRISRegion> region;
+  iris::IRISRegion region;
   std::unique_ptr<iris::IRISDebugData> debug;
   // begin = std::chrono::high_resolution_clock::now();
   try {
@@ -129,16 +129,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   // mexPrintf("ran iris\n");
 
   narg = 0;
-  if (nlhs > narg) plhs[narg] = eigenToMatlab(region->polyhedron->getA());
+  if (nlhs > narg) plhs[narg] = eigenToMatlab(region.polyhedron.getA());
   narg++;
 
-  if (nlhs > narg) plhs[narg] = eigenToMatlab(region->polyhedron->getB());
+  if (nlhs > narg) plhs[narg] = eigenToMatlab(region.polyhedron.getB());
   narg++;
 
-  if (nlhs > narg) plhs[narg] = eigenToMatlab(region->ellipsoid->getC());
+  if (nlhs > narg) plhs[narg] = eigenToMatlab(region.ellipsoid.getC());
   narg++;
 
-  if (nlhs > narg) plhs[narg] = eigenToMatlab(region->ellipsoid->getD());
+  if (nlhs > narg) plhs[narg] = eigenToMatlab(region.ellipsoid.getD());
   narg++;
 
   if (nlhs > narg) {

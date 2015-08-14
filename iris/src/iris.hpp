@@ -86,13 +86,21 @@ private:
 
 class IRISRegion {
 public:
-  std::shared_ptr<Polyhedron> polyhedron;
-  std::shared_ptr<Ellipsoid> ellipsoid;
+  Polyhedron polyhedron;
+  Ellipsoid ellipsoid;
 
-  IRISRegion(int dim=0) {
-    polyhedron.reset(new Polyhedron(dim));
-    ellipsoid.reset(new Ellipsoid(dim));
+  Polyhedron getPolyhedron() {
+    return polyhedron;
   }
+
+  Ellipsoid getEllipsoid() {
+    return ellipsoid;
+  }
+
+  IRISRegion(int dim=0):
+    polyhedron(dim),
+    ellipsoid(dim)
+    {}
 };
 
 struct IRISDebugData {
@@ -117,7 +125,9 @@ public:
   IRISProblem(int dim):
     bounds(dim),
     dim(dim),
-    seed(dim) {}
+    seed(dim) {
+      std::cout << "constructing problem" << std::endl;
+    }
 
   void setSeedPoint(Eigen::VectorXd point);
   void setSeedEllipsoid(Ellipsoid ellipsoid);
@@ -130,7 +140,7 @@ public:
 };
 
 
-std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
+IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
 
 void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polyhedron &polyhedron, bool &infeasible_start);
 
