@@ -193,13 +193,13 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       if (options.required_containment_points.size()) {
         all_points_contained = true;
         for (auto pt = options.required_containment_points.begin(); pt != options.required_containment_points.end(); ++pt) {
-          if (!new_poly.contains(*pt)) {
+          if (!new_poly.contains(*pt, 0.0)) {
             all_points_contained = false;
             break;
           }
         }
       } else {
-        all_points_contained = new_poly.contains(problem.getSeed().getD());
+        all_points_contained = new_poly.contains(problem.getSeed().getD(), 0.0);
       }
 
       if (all_points_contained || infeasible_start) {

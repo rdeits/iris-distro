@@ -2,6 +2,8 @@
 
 %include <std_except.i>
 
+%include <exception.i>
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include <Python.h>

@@ -49,7 +49,7 @@ public:
   void appendConstraints(const Polyhedron &other);
   std::vector<Eigen::VectorXd> generatorPoints();
   std::vector<Eigen::VectorXd> generatorRays();
-  bool contains(Eigen::VectorXd point, double tolerance=0.0);
+  bool contains(Eigen::VectorXd point, double tolerance);
 
 private:
   Eigen::MatrixXd A_;
