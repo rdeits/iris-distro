@@ -36,6 +36,7 @@
 %{
   #define SWIG_FILE_WITH_INIT
   #include "Eigen/Core"
+  #include <vector>
 %}
 
 %include "numpy.i"
@@ -191,14 +192,17 @@
   };
 
   template <class Derived>
-  void ConvertFromEigenToNumPyMatrix(PyObject** out, Eigen::MatrixBase<Derived>* in)
+  bool ConvertFromEigenToNumPyMatrix(PyObject** out, Eigen::MatrixBase<Derived>* in)
   {
     npy_intp dims[2] = {in->rows(), in->cols()};
     *out = PyArray_SimpleNew(2, dims, NumPyType<typename Derived::Scalar>());
+    if (!out)
+      return false;
     typename Derived::Scalar* data = static_cast<typename Derived::Scalar*>(PyArray_DATA(*out));
     for (int i = 0; i != dims[0]; ++i)
       for (int j = 0; j != dims[1]; ++j)
         data[i*dims[1]+j] = in->coeff(i,j);
+    return true;
   };
 
   template<> int NumPyType<double>() {return PyArray_DOUBLE;};
@@ -260,17 +264,20 @@
 // Out: (nothing: no constness)
 %typemap(out, fragment="Eigen_Fragments") CLASS
 {
-  ConvertFromEigenToNumPyMatrix<CLASS>(&$result, &$1);
+  if (!ConvertFromEigenToNumPyMatrix<CLASS>(&$result, &$1))
+    SWIG_fail;
 }
 // Out: const
 %typemap(out, fragment="Eigen_Fragments") CLASS const
 {
-  ConvertFromEigenToNumPyMatrix<CLASS>(&$result, &$1);
+  if (!ConvertFromEigenToNumPyMatrix<CLASS>(&$result, &$1))
+    SWIG_fail;
 }
 // Out: const&
 %typemap(out, fragment="Eigen_Fragments") CLASS const&
 {
-  ConvertFromEigenToNumPyMatrix<CLASS>(&$result, $1);
+  if (!ConvertFromEigenToNumPyMatrix<CLASS>(&$result, $1))
+    SWIG_fail;
 }
 // Out: & (not yet implemented)
 %typemap(out, fragment="Eigen_Fragments") CLASS &
@@ -291,4 +298,23 @@
   SWIG_fail;
 }
 
+%typemap(out, fragment="Eigen_Fragments") std::vector<CLASS>
+{
+  $result = PyList_New($1.size());
+  if (!$result)
+    SWIG_fail;
+  for (size_t i=0; i != $1.size(); ++i) {
+    PyObject *out;
+    if (!ConvertFromEigenToNumPyMatrix(&out, &$1[i]))
+      SWIG_fail;
+    if (PyList_SetItem($result, i, out) == -1)
+      SWIG_fail;
+  }
+  // if (PyList_SetItem($result, 0, PyInt_FromLong(0)) == -1)
+  //   SWIG_fail;
+  // if (PyList_SetItem($result, 1, PyInt_FromLong(1)) == -1)
+  //   SWIG_fail;
+  // if (PyList_SetItem($result, 2, PyInt_FromLong(2)) == -1)
+  //   SWIG_fail;
+}
 %enddef
