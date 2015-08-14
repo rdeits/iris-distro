@@ -1,4 +1,4 @@
-%module(directors="1") irispy_swig
+%module(directors="1") iris_wrapper
 
 %include <std_except.i>
 
