@@ -142,13 +142,13 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
 }
 
 IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
-  std::cout << "running IRIS with the following inputs: " << std::endl;
-  std::cout << "bounds: " << std::endl << problem.getBounds().getA() << std::endl << problem.getBounds().getB() << std::endl;
-  std::cout << "obstacles: " << std::endl;
-  auto debug_obstacles = problem.getObstacles();
-  for (auto it = debug_obstacles.begin(); it != debug_obstacles.end(); ++it) {
-    std::cout << *it << std::endl;
-  }
+  // std::cout << "running IRIS with the following inputs: " << std::endl;
+  // std::cout << "bounds: " << std::endl << problem.getBounds().getA() << std::endl << problem.getBounds().getB() << std::endl;
+  // std::cout << "obstacles: " << std::endl;
+  // auto debug_obstacles = problem.getObstacles();
+  // for (auto it = debug_obstacles.begin(); it != debug_obstacles.end(); ++it) {
+  //   std::cout << *it << std::endl;
+  // }
 
   IRISRegion region(problem.getDimension());
   region.ellipsoid.setC(problem.getSeed().getC());

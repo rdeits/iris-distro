@@ -40,9 +40,9 @@ public:
   ~Polyhedron() {
     // std::cout << "deleting polyhedron: " << this << std::endl;
   }
-  void setA(Eigen::MatrixXd A);
+  void setA(const Eigen::MatrixXd &A);
   const Eigen::MatrixXd& getA() const;
-  void setB(Eigen::VectorXd b);
+  void setB(const Eigen::VectorXd &b);
   const Eigen::VectorXd& getB() const;
   int getDimension() const;
   int getNumberOfConstraints() const;
