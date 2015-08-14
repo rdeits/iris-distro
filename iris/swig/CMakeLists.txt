@@ -21,19 +21,8 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../src )
 message("PYTHON_INCLUDE_DIRS" ${PYTHON_INCLUDE_DIRS})
 
 set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_SOURCE_DIR})
-set_source_files_properties(irispy_swig.i PROPERTIES CPLUSPLUS ON)
-swig_add_module(irispy_swig python ${CMAKE_CURRENT_SOURCE_DIR}/irispy_swig.i)
-swig_link_libraries(irispy_swig iris)
+set_source_files_properties(iris_wrapper.i PROPERTIES CPLUSPLUS ON)
+swig_add_module(iris_wrapper python ${CMAKE_CURRENT_SOURCE_DIR}/iris_wrapper.i)
+swig_link_libraries(iris_wrapper iris)
 message("real name: " ${SWIG_MODULE_irispy_swig_REAL_NAME})
-install(TARGETS ${SWIG_MODULE_irispy_swig_REAL_NAME} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
-
-# add_custom_command(OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/irispy_wrap.cxx
-#                    COMMAND swig -c++ -python -I
-
-# python_add_module( _irispycore ${CMAKE_CURRENT_SOURCE_DIR}/irispy_wrap.cxx )
-# if( APPLE )
-# 	set_target_properties( _irispycore PROPERTIES LINK_FLAGS "-undefined dynamic_lookup" )
-# else()
-# 	target_link_libraries( _irispycore ${PYTHON_LIBRARIES} )
-# endif()
-# target_link_libraries(_irispycore iris)
+install(TARGETS ${SWIG_MODULE_iris_wrapper_REAL_NAME} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR})
