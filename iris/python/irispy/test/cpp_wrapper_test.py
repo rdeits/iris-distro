@@ -9,8 +9,13 @@ def testCppWrapper():
     print p.contains(np.array([2.5, 5.5]), 0.0)
     try:
         print p.contains(5, 0.0)
+    except NotImplementedError as e:
+        print("(successfully threw the expected error)")
     except Exception as e:
-        print e
+        if str(e) == "The given input is not known as a NumPy array or matrix.":
+            print("(successfully threw the expected error)")
+        else:
+            raise e
 
     print p.generatorPoints()
     print p.generatorPoints()[0]

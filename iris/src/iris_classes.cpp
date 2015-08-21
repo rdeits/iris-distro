@@ -4,7 +4,7 @@ void IRISProblem::setSeedPoint(Eigen::VectorXd point) {
   if (point.size() != this->getDimension()) {
     throw(std::runtime_error("seed point must match dimension dim"));
   }
-  this->seed = *Ellipsoid::fromNSphere(point);
+  this->seed = Ellipsoid::fromNSphere(point);
 }
 void IRISProblem::setSeedEllipsoid(Ellipsoid ellipsoid){
   if (ellipsoid.getDimension() != this->getDimension()) {

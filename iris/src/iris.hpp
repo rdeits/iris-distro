@@ -76,7 +76,7 @@ public:
   void setD(const Eigen::VectorXd &d_);
   void setDEntry(Eigen::DenseIndex idx, double value);
   int getDimension() const;
-  static std::shared_ptr<Ellipsoid> fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
+  static Ellipsoid fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
   double getVolume() const;
 
 private:

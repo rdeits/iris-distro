@@ -1,5 +1,6 @@
 import iris_wrapper
-from iris_wrapper import IRISOptions, IRISRegion, IRISProblem, Ellipsoid, Polyhedron, inflate_region
+from iris_wrapper import IRISOptions, IRISRegion, IRISProblem, IRISDebugData, Ellipsoid, Polyhedron
+from iris_wrapper import inflate_region as c_inflate_region
 import drawing
 import numpy as np
 
@@ -36,7 +37,51 @@ def Polyhedron_fromBounds(lb, ub):
     p.setB(np.hstack((ub, -lb)))
     return p
 setattr(Polyhedron, "fromBounds", staticmethod(Polyhedron_fromBounds))
+setattr(Polyhedron, "from_bounds", staticmethod(Polyhedron_fromBounds))
 
 def Polyhedron_getDrawingVertices(self):
     return np.hstack(self.generatorPoints()).T
 setattr(Polyhedron, "getDrawingVertices", Polyhedron_getDrawingVertices)
+
+def inflate_region(obstacles,
+                   start_point_or_ellipsoid,
+                   bounds=None,
+                   require_containment=False,
+                   required_containment_points=[],
+                   error_on_infeasible_start=False,
+                   termination_threshold=2e-2,
+                   iter_limit=100,
+                   return_debug_data=False):
+    if not isinstance(start_point_or_ellipsoid, Ellipsoid):
+        # Assume it's a starting point instead
+
+        seed_ellipsoid = Ellipsoid.fromNSphere(start_point_or_ellipsoid)
+    else:
+        seed_ellipsoid = start_point_or_ellipsoid
+
+    dim = seed_ellipsoid.getDimension()
+    problem = IRISProblem(dim)
+    problem.setSeedEllipsoid(seed_ellipsoid)
+
+    for obs in obstacles:
+        problem.addObstacle(obs)
+
+    if bounds is not None:
+        problem.setBounds(bounds)
+
+    options = IRISOptions()
+    options.require_containment = require_containment
+    options.required_containment_points = required_containment_points
+    options.error_on_infeasible_start = error_on_infeasible_start
+    options.termination_threshold = termination_threshold
+    options.iter_limit = iter_limit
+
+    if return_debug_data:
+        debug = IRISDebugData()
+        region = c_inflate_region(problem, options, debug)
+        return region, debug
+    else:
+        region = c_inflate_region(problem, options)
+        return region
+
+

@@ -1,5 +1,7 @@
 %module(directors="1") iris_wrapper
 
+%include <std_except.i>
+
 %{
 #define SWIG_FILE_WITH_INIT
 #include <Python.h>

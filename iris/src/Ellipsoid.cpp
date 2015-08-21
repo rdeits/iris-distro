@@ -48,11 +48,11 @@ int Ellipsoid::getDimension() const {
 double Ellipsoid::getVolume() const {
   return C_.determinant() * nSphereVolume(this->getDimension(), 1.0);
 }
-std::shared_ptr<Ellipsoid> Ellipsoid::fromNSphere(Eigen::VectorXd &center, double radius) {
+Ellipsoid Ellipsoid::fromNSphere(Eigen::VectorXd &center, double radius) {
   const int dim = center.size();
   MatrixXd C = MatrixXd::Zero(dim, dim);
   C.diagonal().setConstant(radius);
-  std::shared_ptr<Ellipsoid> ellipsoid(new Ellipsoid(C, center));
+  Ellipsoid ellipsoid(C, center);
   return ellipsoid;
 }
 

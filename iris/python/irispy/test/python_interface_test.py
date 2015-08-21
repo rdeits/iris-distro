@@ -13,7 +13,7 @@ def testInterface(show=False):
     problem.setBounds(irispy.Polyhedron.fromBounds([-1,-1], [2,2]))
     problem.setSeedPoint(np.array([0.0, 0.0]))
     problem.addObstacle(np.array([[1.5, 2], [1.5, 2]]))
-    region = irispy.inflate_region(problem, irispy.IRISOptions())
+    region = irispy.c_inflate_region(problem, irispy.IRISOptions())
     print region
     print region.getPolyhedron().generatorPoints()
     print region.getEllipsoid().getC()
