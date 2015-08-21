@@ -5,7 +5,7 @@ from unittest import TestCase
 
 class EllipsoidTest(TestCase):
     def test_volume(self):
-        e = irispy.Ellipsoid.fromNSphere(center=[0, 0], radius=1)
+        e = irispy.Ellipsoid.fromNSphere(np.array([0., 0.]), 1.0)
         self.assertAlmostEqual(e.getVolume(), np.pi)
         self.assertAlmostEqual(e.getC()[0,0], 1)
         self.assertAlmostEqual(e.getC()[0,1], 0)
