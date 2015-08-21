@@ -1,4 +1,4 @@
-import iris_wrapper
+import irispy.iris_wrapper as iris_wrapper
 import numpy as np
 
 p = iris_wrapper.Polyhedron()
