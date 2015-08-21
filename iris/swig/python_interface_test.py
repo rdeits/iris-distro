@@ -5,7 +5,6 @@ p2 = irispy.Polyhedron()
 p2.setA(np.eye(2))
 p2.setB(np.array([3.0, 4.0]))
 print p2.contains(np.array([2.5, 5.5]), 0.0)
-p2.printGenerators()
 
 p3 = irispy.Polyhedron.fromBounds([-1,-1], [2,2])
 
