@@ -5,10 +5,10 @@ sudo: false
 notifications:
   email: false
 
-branches:
-  only:
-    - master
-    - stable
+# branches:
+#   only:
+#     - master
+#     - stable
 
 cache:
   pip: true
