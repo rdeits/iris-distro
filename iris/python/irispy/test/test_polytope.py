@@ -1,10 +1,10 @@
 import irispy
 import numpy as np
-from unittest import TestCase
+import unittest
 import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d as a3
 
-class PolyhedronTest(TestCase):
+class PolyhedronTest(unittest.TestCase):
     def test_constructor(self):
         p = irispy.Polyhedron()
         A = np.zeros((2,2))
@@ -23,7 +23,6 @@ class PolyhedronTest(TestCase):
         p.setA(A)
         p.setB(b)
         points = p.generatorPoints()
-        # print points
 
         expected = [np.array([1.1, 1.2]),
                     np.array([-1.3, 1.2]),
@@ -33,9 +32,8 @@ class PolyhedronTest(TestCase):
 
         for point in points:
             for i, ex in enumerate(expected):
-                if np.all(np.abs(point - ex) < 1e-3):
+                if np.all(np.abs(point.T - ex) < 1e-3):
                     found_expected[i] = True
-                    # print "found: ", ex
         self.assertTrue(all(found_expected))
 
     def test_plotting(self):
@@ -65,5 +63,8 @@ class PolyhedronTest(TestCase):
         ax.relim()
         ax.autoscale_view()
         # plt.show()
+
+if __name__ == '__main__':
+    unittest.main()
 
 

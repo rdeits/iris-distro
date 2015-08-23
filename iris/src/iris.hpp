@@ -143,7 +143,6 @@ public:
     bounds(dim),
     dim(dim),
     seed(dim) {
-      std::cout << "constructing problem" << std::endl;
     }
 
   void setSeedPoint(Eigen::VectorXd point);
