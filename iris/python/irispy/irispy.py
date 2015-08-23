@@ -104,14 +104,11 @@ def IRISDebugData_animate(self, fig=None, pause=0.5, show=True, repeat_delay=2.0
             ax = plt.gca()
 
     bounding_pts = np.hstack(self.boundingPoints()).T
-    print "bounding_pts:", bounding_pts
     if bounding_pts.size > 0:
         lb = bounding_pts.min(axis=0)
         ub = bounding_pts.max(axis=0)
         assert(lb.size == dim)
         assert(ub.size == dim)
-        print "lb:", lb
-        print "ub:", ub
         width = ub - lb
         ax.set_xlim(lb[0] - 0.1 * width[0], ub[0] + 0.1 * width[0])
         ax.set_ylim(lb[1] - 0.1 * width[1], ub[1] + 0.1 * width[1])
