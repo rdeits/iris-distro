@@ -24,7 +24,8 @@ int main() {
 
   iris::IRISOptions options;
   options.require_containment = true;
-  options.required_containment_points = {Eigen::Vector2d(1.5, 1.5)};
+  std::vector<Eigen::VectorXd> required_containment_points = {Eigen::Vector2d(1.5, 1.5)};
+  options.setRequiredContainmentPoints(required_containment_points);
 
   auto region = inflate_region(problem, options);
   if (region.polyhedron.getNumberOfConstraints() > 0) {

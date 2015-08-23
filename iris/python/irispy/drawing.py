@@ -30,6 +30,15 @@ class DrawDispatcher:
         kwargs.setdefault("facecolor", self.default_color)
         return draw_3d_convhull(points, ax, **kwargs)
 
+def draw_convhull(points, ax, **kwargs):
+    dim = points.shape[1]
+    if dim == 2:
+        return draw_2d_convhull(points, ax, **kwargs)
+    elif dim == 3:
+        return draw_3d_convhull(points, ax, **kwargs)
+    else:
+        raise NotImplementedError("not implemented for dimension < 2 or > 3")
+
 def draw_2d_convhull(points, ax, **kwargs):
     hull = scipy.spatial.ConvexHull(points)
     kwargs.setdefault("facecolor", "none")

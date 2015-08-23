@@ -20,10 +20,15 @@ public:
   // If require_containment is false, then required_containment_points has no 
   // effect. 
   bool require_containment;
-  std::vector<Eigen::VectorXd> required_containment_points;
   bool error_on_infeasible_start;
   double termination_threshold;
   int iter_limit;
+  void setRequiredContainmentPoints(std::vector<Eigen::VectorXd> pts) {
+    required_containment_points = pts;
+  }
+  std::vector<Eigen::VectorXd> getRequiredContainmentPoints() const {
+    return required_containment_points;
+  }
 
   IRISOptions():
     require_containment(false),
@@ -31,6 +36,9 @@ public:
     error_on_infeasible_start(false),
     termination_threshold(2e-2),
     iter_limit(100) {};
+
+private: 
+  std::vector<Eigen::VectorXd> required_containment_points;
 };
 
 class Polyhedron {
@@ -103,15 +111,24 @@ public:
     {}
 };
 
-struct IRISDebugData {
+class IRISDebugData {
+public:
+  IRISDebugData() {};
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polyhedron> polyhedron_history;
   std::vector<Eigen::MatrixXd> obstacles;
+  std::vector<Eigen::MatrixXd> getObstacles() const {
+    return obstacles;
+  }
   Polyhedron bounds;
   // Eigen::VectorXd ellipsoid_times;
   // Eigen::VectorXd polyhedron_times;
   // double total_time;
   int iters;
+
+  std::vector<Eigen::VectorXd> boundingPoints() {
+    return bounds.generatorPoints();
+  }
 };
 
 class IRISProblem {
