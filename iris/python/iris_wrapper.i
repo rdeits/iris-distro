@@ -5,7 +5,8 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include <Python.h>
-#include "iris.hpp"
+#include "iris/iris.h"
+#include "iris/geometry.h"
 %}
 
 %include <typemaps.i>
@@ -21,8 +22,9 @@
 %eigen_typemaps(Eigen::MatrixXd)
 %eigen_typemaps(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>)
 
+%include "iris/geometry.h"
+%include "iris/iris.h"
 
-%include "iris.hpp"
 
 %feature("director") iris::Polyhedron;
 %feature("director") iris::Ellipsoid;

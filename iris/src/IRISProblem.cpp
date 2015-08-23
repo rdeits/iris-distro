@@ -1,3 +1,5 @@
+#include "iris.h"
+
 namespace iris {
 
 void IRISProblem::setSeedPoint(Eigen::VectorXd point) {

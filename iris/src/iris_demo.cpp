@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Eigen/Core>
-#include "iris/iris.hpp"
+#include "iris/iris.h"
 
 int main(int argc, char** argv) {
   iris::IRISProblem problem(2);

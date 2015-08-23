@@ -1,15 +1,11 @@
+#include "iris.h"
 #include <stdexcept>
 #include <iostream>
 #include <numeric>
 #include <Eigen/LU>
 #include <Eigen/StdVector>
-#include "iris.hpp"
+#include "iris/iris_mosek.h"
 #include "iris/cvxgen_ldp.hpp"
-#include "Polyhedron.cpp"
-#include "Ellipsoid.cpp"
-#include "iris_classes.cpp"
-#include "iris_mosek.cpp"
-#include "iris_cdd.cpp"
 
 #include <chrono>
 
