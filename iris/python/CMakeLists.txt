@@ -9,5 +9,9 @@ add_swig_python_module(TARGET iris_wrapper
                        INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../src
                        LINK_LIBRARIES iris
                        SWIG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/../swigmake/swig
-                       DESTINATION ${python_install_dir}/irispy)
+                       DESTINATION ${python_install_dir}/irispy ${CMAKE_CURRENT_SOURCE_DIR}/irispy)
 pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR})
+
+add_test(NAME python_tests
+	COMMAND nosetests --nocapture irispy 
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
