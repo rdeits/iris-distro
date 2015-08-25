@@ -75,7 +75,7 @@ def inflate_region(obstacles,
 
     options = IRISOptions()
     options.require_containment = require_containment
-    options.required_containment_points = required_containment_points
+    options.set_required_containment_points(required_containment_points)
     options.error_on_infeasible_start = error_on_infeasible_start
     options.termination_threshold = termination_threshold
     options.iter_limit = iter_limit

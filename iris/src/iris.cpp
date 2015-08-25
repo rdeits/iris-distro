@@ -190,10 +190,9 @@ IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options
 
     if (options.require_containment) {
       bool all_points_contained;
-      const std::vector<Eigen::VectorXd> & required_containment_points = options.getRequiredContainmentPoints();
-      if (required_containment_points.size()) {
+      if (options.required_containment_points.size()) {
         all_points_contained = true;
-        for (auto pt = required_containment_points.begin(); pt != required_containment_points.end(); ++pt) {
+        for (auto pt = options.required_containment_points.begin(); pt != options.required_containment_points.end(); ++pt) {
           if (!new_poly.contains(*pt, 0.0)) {
             all_points_contained = false;
             break;

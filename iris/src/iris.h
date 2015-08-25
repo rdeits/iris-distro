@@ -21,11 +21,11 @@ public:
   bool error_on_infeasible_start;
   double termination_threshold;
   int iter_limit;
-  void setRequiredContainmentPoints(std::vector<Eigen::VectorXd> pts) {
+  std::vector<Eigen::VectorXd> required_containment_points;
+
+  // Adding a setter makes things easier when wrapping this with SWIG
+  void set_required_containment_points(std::vector<Eigen::VectorXd> pts) {
     required_containment_points = pts;
-  }
-  std::vector<Eigen::VectorXd> getRequiredContainmentPoints() const {
-    return required_containment_points;
   }
 
   IRISOptions():
@@ -34,9 +34,6 @@ public:
     error_on_infeasible_start(false),
     termination_threshold(2e-2),
     iter_limit(100) {};
-
-private: 
-  std::vector<Eigen::VectorXd> required_containment_points;
 };
 
 class IRISRegion {

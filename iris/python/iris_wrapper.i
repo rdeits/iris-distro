@@ -25,7 +25,6 @@
 %include "iris/geometry.h"
 %include "iris/iris.h"
 
-
 %feature("director") iris::Polyhedron;
 %feature("director") iris::Ellipsoid;
 %feature("director") iris::IRISProblem;
