@@ -320,15 +320,16 @@
   }
 }
 
-%typemap(in, fragment="Eigen_Fragments") std::vector<CLASS >
+%typemap(in, fragment="Eigen_Fragments") std::vector<CLASS > (std::vector<CLASS > temp)
 {
   if (!PyList_Check($input))
     SWIG_fail;
-  $1.resize(PyList_Size($input));
+  temp.resize(PyList_Size($input));
   for (size_t i=0; i != PyList_Size($input); ++i) {
-    if (!ConvertFromNumpyToEigenMatrix<CLASS >(&$1[i], PyList_GetItem($input, i)))
+    if (!ConvertFromNumpyToEigenMatrix<CLASS >(&(temp[i]), PyList_GetItem($input, i)))
       SWIG_fail;
   }
+  $1 = temp;
 }
 
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
