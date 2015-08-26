@@ -340,4 +340,18 @@
     $1 = is_array($input);
   }
 
+%typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
+  std::vector<CLASS >
+  {
+    $1 = PyList_Check($input) && ((PyList_Size($input) == 0) || is_array(PyList_GetItem($input, 0)));
+  }
+
+%typemap(in, fragment="Eigen_Fragments") const Eigen::Ref<const CLASS >& (CLASS temp)
+{
+  if (!ConvertFromNumpyToEigenMatrix<CLASS >(&temp, $input))
+    SWIG_fail;
+  Eigen::Ref<const CLASS > temp_ref(temp);
+  $1 = &temp_ref;
+}
+
 %enddef
