@@ -1,4 +1,5 @@
 #include "iris.h"
+#include <stdexcept>
 
 namespace iris {
 
