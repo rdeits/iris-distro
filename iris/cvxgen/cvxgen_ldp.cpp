@@ -1,9 +1,5 @@
 #include <stdexcept>
-#include "cvxgen_ldp.hpp"
-
-extern "C" {
-  #include "cvxgen_ldp.h"
-}
+#include "cvxgen_ldp.h"
 
 using namespace Eigen;
 

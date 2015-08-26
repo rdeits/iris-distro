@@ -1,7 +1,7 @@
 #include <mex.h>
 #include <Eigen/Core>
 #include <chrono>
-#include "iris/iris.hpp"
+#include "iris/iris.h"
 
 using namespace Eigen;
 

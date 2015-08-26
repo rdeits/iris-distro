@@ -1,6 +1,6 @@
 #include <Eigen/Core>
-#include "iris/iris.hpp"
-#include "test_util.hpp"
+#include "iris/iris.h"
+#include "test_util.h"
 
 int main() {
   // A simple example with a sphere centered at the origin

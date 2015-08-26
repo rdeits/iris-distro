@@ -1,6 +1,6 @@
-#include "test_util.hpp"
+#include "test_util.h"
 #include <Eigen/Core>
-#include "iris/iris.hpp"
+#include "iris/iris.h"
 
 int main () {
 

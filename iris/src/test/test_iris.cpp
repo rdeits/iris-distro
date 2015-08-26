@@ -1,5 +1,5 @@
-#include "test_util.hpp"
-#include "iris/iris.hpp"
+#include "test_util.h"
+#include "iris/iris.h"
 
 int main() {
   iris::IRISProblem problem(2);

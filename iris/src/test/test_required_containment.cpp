@@ -1,5 +1,5 @@
-#include "test_util.hpp"
-#include "iris/iris.hpp"
+#include "test_util.h"
+#include "iris/iris.h"
 
 int main() {
   // Run IRIS with the required_containment_points including a point which is outside the feasible set, which should result in an empty polyhedron
@@ -25,7 +25,7 @@ int main() {
   iris::IRISOptions options;
   options.require_containment = true;
   std::vector<Eigen::VectorXd> required_containment_points = {Eigen::Vector2d(1.5, 1.5)};
-  options.setRequiredContainmentPoints(required_containment_points);
+  options.required_containment_points = required_containment_points;
 
   auto region = inflate_region(problem, options);
   if (region.polyhedron.getNumberOfConstraints() > 0) {

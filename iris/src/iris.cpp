@@ -6,7 +6,7 @@
 #include <Eigen/LU>
 #include <Eigen/StdVector>
 #include "iris/iris_mosek.h"
-#include "iris/cvxgen_ldp.hpp"
+#include "iris/cvxgen_ldp.h"
 
 namespace iris {
 

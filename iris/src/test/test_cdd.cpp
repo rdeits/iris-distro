@@ -1,6 +1,6 @@
 #include <iostream>
-#include "iris/iris.hpp"
-#include "test_util.hpp"
+#include "iris/iris.h"
+#include "test_util.h"
 
 using namespace Eigen;
 
