@@ -2,9 +2,9 @@
 
 case $1 in
   ("homebrew")
-    brew install cmake pkg-config gmp openblas && easy_install pip && pip install -r python_requirements.txt ;;
+    brew install cmake pkg-config gmp openblas swig && easy_install pip && pip install -r python_requirements.txt ;;
   ("ubuntu")
-    apt-get install cmake build-essential libgmp-dev python-pip liblapack-dev libblas-dev gfortran python-scipy python-numpy python-matplotlib python-nose ;;
+    apt-get install cmake build-essential libgmp-dev python-pip liblapack-dev libblas-dev gfortran python-scipy python-numpy python-matplotlib python-nose swig ;;
   (*)
     echo "Usage: ./install_prereqs.sh package_manager"
     echo "where package_manager is one of the following: "
