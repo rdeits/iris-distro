@@ -8,6 +8,9 @@ import matplotlib.animation as animation
 class PolyhedronExtension:
     @classmethod
     def fromBounds(cls, lb, ub):
+        """
+        Return a new Polyhedron representing an n-dimensional box spanning from [lb] to [ub]
+        """
         lb = np.asarray(lb, dtype=np.float64)
         ub = np.asarray(ub, dtype=np.float64)
         p = cls()

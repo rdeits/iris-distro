@@ -22,6 +22,8 @@
 %eigen_typemaps(Eigen::MatrixXd)
 %eigen_typemaps(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>)
 
+%feature("autodoc", "1");
+
 %include "iris/geometry.h"
 %include "iris/iris.h"
 
