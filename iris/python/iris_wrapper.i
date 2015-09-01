@@ -1,4 +1,4 @@
-%module(directors="1") iris_wrapper
+%module iris_wrapper
 
 %include <std_except.i>
 
@@ -26,11 +26,6 @@
 
 %include "iris/geometry.h"
 %include "iris/iris.h"
-
-%feature("director") iris::Polyhedron;
-%feature("director") iris::Ellipsoid;
-%feature("director") iris::IRISProblem;
-%feature("director") iris::IRISRegion;
 
 %pythoncode %{
 import drawing
