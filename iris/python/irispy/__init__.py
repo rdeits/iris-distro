@@ -1,1 +1,1 @@
-from irispy import Polyhedron, Ellipsoid, IRISRegion, IRISOptions, IRISProblem, inflate_region, c_inflate_region
+from irispy import inflate_region, Polyhedron, Ellipsoid, IRISRegion, IRISOptions, IRISProblem

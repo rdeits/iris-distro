@@ -30,3 +30,13 @@
 %feature("director") iris::IRISProblem;
 %feature("director") iris::IRISRegion;
 
+%pythoncode %{
+import drawing
+import extensions
+Polyhedron.__bases__ += (drawing.DrawDispatcher, extensions.PolyhedronExtension)
+Ellipsoid.__bases__ += (drawing.DrawDispatcher, extensions.EllipsoidExtension)
+IRISDebugData.__bases__ += (extensions.IRISDebugDataExtension,)
+setattr(Ellipsoid, "default_color", "b")
+%}
+
+
