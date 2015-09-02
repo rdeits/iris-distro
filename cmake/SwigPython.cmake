@@ -26,6 +26,7 @@
 
 include(CMakeParseArguments)
 
+
 function(add_swig_python_module)
 	# Parse our arguments and make sure we got the required ones
 	set(options CPLUSPLUS)
@@ -60,7 +61,9 @@ function(add_swig_python_module)
 	endif()
 
 	# Load the swig macros
-	find_package(SWIG REQUIRED)
+	if (NOT SWIG_EXECUTABLE)
+		find_package(SWIG REQUIRED)
+	endif()
 	include(UseSWIG)
 
 	# Find the numpy header paths and include them. This calls the FindNumPy.cmake file included in this repo. 
