@@ -108,6 +108,5 @@ function(add_swig_matlab_module)
 
 	foreach(dir IN LISTS swigmat_DESTINATION)
 		install(TARGETS ${SWIG_MODULE_${swigmat_TARGET}_REAL_NAME} DESTINATION ${dir})
-		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${swigmat_TARGET}.py DESTINATION ${dir})
 	endforeach(dir)
 endfunction()
