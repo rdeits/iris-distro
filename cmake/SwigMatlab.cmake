@@ -26,32 +26,27 @@
 
 include(CMakeParseArguments)
 
-# We have to grab this value *outside* the function call, see: http://stackoverflow.com/a/12854575/641846
-set(PATH_TO_SWIG_MATLAB ${CMAKE_CURRENT_LIST_DIR})
-
-function(add_swig_matlab_module)
+function(add_swig_matlab_module target i_file)
 	# Parse our arguments and make sure we got the required ones
 	set(options CPLUSPLUS)
-	set(oneValueArgs SWIG_I_FILE MODULE DESTINATION )
+	set(oneValueArgs DESTINATION )
 	set(multiValueArgs INCLUDE_DIRS LINK_LIBRARIES SWIG_INCLUDE_DIRS)
 	cmake_parse_arguments(swigmat "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-	if (NOT swigmat_MODULE)
-		message(FATAL_ERROR "Error using add_swig_matlab_module: Please provide the SWIG module name with 'MODULE modulename'")
+	if (NOT target)
+		message(FATAL_ERROR "Error using add_swig_matlab_module: Please provide a unique cmake target name as the first argument")
 	endif()
-	if (NOT swigmat_SWIG_I_FILE)
-		message(FATAL_ERROR "Error using add_swig_matlab_module: Please provide the full path to your .i file with 'SWIG_I_FILE filepath'")
+	if (NOT i_file)
+		message(FATAL_ERROR "Error using add_swig_matlab_module: Please provide the path to your .i file as the second argument")
 	endif()
 
 	if (NOT MATLAB_ROOT)
 		message(FATAL_ERROR "Please run 'mex_setup(REQUIRED)' which is provided by mex.cmake in https://github.com/RobotLocomotion/cmake before using this macro.")
 	endif()
 
-	include_directories(${MATLAB_ROOT}/extern/include ${MATLAB_ROOT}/simulink/include )
-
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
 		find_package(SWIG REQUIRED)
-		include(UseSWIGMatlab)
+		include(DrakeUseSWIG)
 	endif()
 
 	# Include any source directories that swig will need to find our c++ header files
@@ -65,7 +60,7 @@ function(add_swig_matlab_module)
 	else()
 		set(CPLUSPLUS OFF)
 	endif()
-	set_source_files_properties(${swigmat_SWIG_I_FILE} PROPERTIES
+	set_source_files_properties(${i_file} PROPERTIES
 		CPLUSPLUS ${CPLUSPLUS}
 		)
 
@@ -78,39 +73,15 @@ function(add_swig_matlab_module)
 	if (swigmat_DESTINATION)
 		set(CMAKE_SWIG_OUTDIR ${swigmat_DESTINATION})
 	endif()
-	swig_add_module(${swigmat_MODULE} matlab ${swigmat_SWIG_I_FILE} ${PATH_TO_SWIG_MATLAB}/Matlabdef.def)
-	swig_link_libraries(${swigmat_MODULE} ${swigmat_LINK_LIBRARIES})
+	swig_add_module(${target} matlab ${i_file})
+	swig_link_libraries(${target} ${swigmat_LINK_LIBRARIES})
 
-	# add_definitions(/DMATLAB_MEX_FILE) #define matlab macros
-	# add_definitions(/DMX_COMPAT_32)
-
-	# if(WIN32) # 32-bit or 64-bit mex
-	# 	if (CMAKE_CL_64)
-	# 	    SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES PREFIX "" SUFFIX .mexw64)
-	# 	else()
-	# 	    SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES SUFFIX .mexw32)
-	# 	endif()
-	# else()
-	# 	if (APPLE)
-	# 	    if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-	# 	        SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES PREFIX "" SUFFIX .mexmaci64 PREFIX "")
-	# 	    elseif((${BITNESS} EQUAL "64"))
-	# 	        SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES PREFIX "" SUFFIX .mexmaci32 PREFIX "")
-	# 	    endif()
-	# 	else()
-	# 	    if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-	# 	        SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES PREFIX "" SUFFIX .mexa64 PREFIX "")
-	# 	    else()
-	# 	        SET_TARGET_PROPERTIES(${swigmat_MODULE} PROPERTIES PREFIX "" SUFFIX .mexglx PREFIX "")
-	# 	    endif()
-	# 	endif()
-	# endif()
-
-
-	# Set a variable in the scope of the cmake file that called this function so that it can be referenced later (for example, to 
-	set(SWIG_MODULE_${swigmat_MODULE}_REAL_NAME ${SWIG_MODULE_${swigmat_MODULE}_REAL_NAME} PARENT_SCOPE)
+	set_target_properties(${SWIG_MODULE_${target}_REAL_NAME} PROPERTIES OUTPUT_NAME ${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename})
 
 	if (swigmat_DESTINATION)
-		install(TARGETS ${SWIG_MODULE_${swigmat_MODULE}_REAL_NAME} DESTINATION ${swigmat_DESTINATION})
+		install(TARGETS ${SWIG_MODULE_${target}_REAL_NAME} DESTINATION ${swigmat_DESTINATION})
+		# foreach(file IN LISTS swig_extra_generated_files)
+		# 	install(FILES ${file} DESTINATION ${swigmat_DESTINATION})
+		# endforeach(file)
 	endif()
 endfunction()
