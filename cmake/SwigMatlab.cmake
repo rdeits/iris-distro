@@ -32,7 +32,7 @@ set(PATH_TO_SWIG_MATLAB ${CMAKE_CURRENT_LIST_DIR})
 function(add_swig_matlab_module)
 	# Parse our arguments and make sure we got the required ones
 	set(options CPLUSPLUS)
-	set(oneValueArgs SWIG_I_FILE TARGET DESTINATION )
+	set(oneValueArgs SWIG_I_FILE MODULE DESTINATION )
 	set(multiValueArgs INCLUDE_DIRS LINK_LIBRARIES SWIG_INCLUDE_DIRS)
 	cmake_parse_arguments(swigmat "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 	if (NOT swigmat_MODULE)

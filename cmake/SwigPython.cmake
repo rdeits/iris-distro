@@ -30,7 +30,7 @@ include(CMakeParseArguments)
 function(add_swig_python_module)
 	# Parse our arguments and make sure we got the required ones
 	set(options CPLUSPLUS)
-	set(oneValueArgs SWIG_I_FILE TARGET )
+	set(oneValueArgs SWIG_I_FILE MODULE )
 	set(multiValueArgs INCLUDE_DIRS LINK_LIBRARIES SWIG_INCLUDE_DIRS DESTINATION)
 	cmake_parse_arguments(swigpy "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 	if (NOT swigpy_MODULE)
