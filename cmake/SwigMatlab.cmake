@@ -76,7 +76,11 @@ function(add_swig_matlab_module target i_file)
 	swig_add_module(${target} matlab ${i_file})
 	swig_link_libraries(${target} ${swigmat_LINK_LIBRARIES})
 
-	set_target_properties(${SWIG_MODULE_${target}_REAL_NAME} PROPERTIES OUTPUT_NAME ${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename})
+	set_target_properties(${SWIG_MODULE_${target}_REAL_NAME} PROPERTIES 
+			OUTPUT_NAME ${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}
+	        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+	        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+		)
 
 	if (swigmat_DESTINATION)
 		install(TARGETS ${SWIG_MODULE_${target}_REAL_NAME} DESTINATION ${swigmat_DESTINATION})
