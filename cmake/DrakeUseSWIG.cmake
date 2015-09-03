@@ -131,6 +131,28 @@ macro(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
     set(${outfiles} ${${outfiles}}
       "${generatedpath}/${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename}.${it}")
   endforeach()
+
+endmacro()
+
+macro(SWIG_GET_PACKAGE_NAME package_name infile)
+  # Look up the package name for the resulting module
+  get_source_file_property(SWIG_GET_PACKAGE_NAME_package_name ${infile} SWIG_PACKAGE_NAME)
+  if (SWIG_GET_PACKAGE_NAME_package_name STREQUAL "NOTFOUND")
+    # Package name isn't a property on the infile, so let's try to look it up by regex (now we have two problems?)
+    if ( EXISTS ${infile} )
+      file ( STRINGS ${infile} _PACKAGE_NAME REGEX "[ ]*%module[ ]*\\(.*package=\\\"[a-zA-Z0-9_\\.]+\\\".*\\)[ ]*[a-zA-Z0-9_]+.*" )
+    endif ()
+    if (_PACKAGE_NAME)
+      string ( REGEX REPLACE "[ ]*%module[ ]*\\(.*package=\\\"([a-zA-Z0-9_\\.]+)\\\".*\\)[ ]*[a-zA-Z0-9_]+.*" "\\1" _PACKAGE_NAME "${_PACKAGE_NAME}" )
+      set(SWIG_GET_PACKAGE_NAME_package_name "${_PACKAGE_NAME}")
+    else()
+      set(SWIG_GET_PACKAGE_NAME_package_name "")
+    endif()
+  else()
+    set(SWIG_GET_PACKAGE_NAME_package_name "")
+  endif()
+
+  set(${package_name} "${SWIG_GET_PACKAGE_NAME_package_name}")
 endmacro()
 
 #
@@ -159,6 +181,7 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     "${swig_source_file_fullname}")
   set(swig_generated_file_fullname
     "${swig_outdir}/${swig_source_file_name_we}")
+  SWIG_GET_PACKAGE_NAME(swig_package_name "${swig_source_file_fullname}")
   # add the language into the name of the file (i.e. TCL_wrap)
   # this allows for the same .i file to be wrapped into different languages
   set(swig_generated_file_fullname

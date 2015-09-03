@@ -27,17 +27,17 @@
 include(CMakeParseArguments)
 
 
-function(add_swig_python_module)
+function(add_swig_python_module target i_file)
 	# Parse our arguments and make sure we got the required ones
 	set(options CPLUSPLUS)
-	set(oneValueArgs SWIG_I_FILE MODULE )
+	set(oneValueArgs)
 	set(multiValueArgs INCLUDE_DIRS LINK_LIBRARIES SWIG_INCLUDE_DIRS DESTINATION)
 	cmake_parse_arguments(swigpy "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
-	if (NOT swigpy_MODULE)
-		message(FATAL_ERROR "Error using add_swig_python_module: Please provide the swig module name with 'MODULE modulename'")
+	if (NOT target)
+		message(FATAL_ERROR "Error using add_swig_python_module: Please provide a target name as the first argument")
 	endif()
-	if (NOT swigpy_SWIG_I_FILE)
-		message(FATAL_ERROR "Error using add_swig_python_module: Please provide the full path to your .i file with 'SWIG_I_FILE filepath'")
+	if (NOT i_file)
+		message(FATAL_ERROR "Error using add_swig_python_module: Please provide the path to your .i file as the second argument")
 	endif()
 
 	# Find python and get its version number
@@ -63,7 +63,7 @@ function(add_swig_python_module)
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
 		find_package(SWIG REQUIRED)
-		include(UseSWIG)
+		include(DrakeUseSWIG)
 	endif()
 
 	# Find the numpy header paths and include them. This calls the FindNumPy.cmake file included in this repo. 
@@ -86,12 +86,12 @@ function(add_swig_python_module)
 		set(CPLUSPLUS OFF)
 	endif()
 	if (PYTHON_VERSION_MAJOR GREATER 2)
-		set_source_files_properties(${swigpy_SWIG_I_FILE} PROPERTIES
+		set_source_files_properties(${i_file} PROPERTIES
 			CPLUSPLUS ${CPLUSPLUS}
 			SWIG_FLAGS "-py3"
 			)
 	else()
-		set_source_files_properties(${swigpy_SWIG_I_FILE} PROPERTIES 
+		set_source_files_properties(${i_file} PROPERTIES 
 			CPLUSPLUS ${CPLUSPLUS})
 	endif()
 
@@ -101,14 +101,19 @@ function(add_swig_python_module)
 	endforeach(dir)
 
 	# Tell swig to build python bindings for our target library and link them against the C++ library. 
-	swig_add_module(${swigpy_MODULE} python ${swigpy_SWIG_I_FILE})
-	swig_link_libraries(${swigpy_MODULE} ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
+	swig_add_module(${target} python ${i_file})
+	swig_link_libraries(${target} ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
 
-	# Set a variable in the scope of the cmake file that called this function so that it can be referenced later (for example, to 
-	set(SWIG_MODULE_${swigpy_MODULE}_REAL_NAME ${SWIG_MODULE_${swigpy_MODULE}_REAL_NAME} PARENT_SCOPE)
+	# Make sure the resulting library has the correct name, even if the cmake target has a different name
+	set_target_properties(${SWIG_MODULE_${target}_REAL_NAME} PROPERTIES OUTPUT_NAME _${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename})
+
+	# Automatically install to the correct subfolder if the swig module has a "package" declared
+	string(REGEX REPLACE "\\." "/" swigpy_package_path ${swig_package_name})
 
 	foreach(dir IN LISTS swigpy_DESTINATION)
-		install(TARGETS ${SWIG_MODULE_${swigpy_MODULE}_REAL_NAME} DESTINATION ${dir})
-		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${swigpy_MODULE}.py DESTINATION ${dir})
+		install(TARGETS ${SWIG_MODULE_${target}_REAL_NAME} DESTINATION ${dir}/${swigpy_package_path})
+		foreach(file IN LISTS swig_extra_generated_files)
+			install(FILES ${file} DESTINATION ${dir}/${swigpy_package_path})
+		endforeach(file)
 	endforeach(dir)
 endfunction()
