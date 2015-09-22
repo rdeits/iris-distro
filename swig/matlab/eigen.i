@@ -193,6 +193,14 @@
     SWIG_fail;
   $1 = &temp;
 }
+// In: MatrixBase const&
+%typemap(in, fragment="Eigen_Fragments") Eigen::MatrixBase< CLASS > const& (CLASS temp)
+{
+  // In: MatrixBase const&
+  if (!ConvertFromMatlabToEigenMatrix<CLASS >(&temp, $input))
+    SWIG_fail;
+  $1 = &temp;
+}
 // In: & (not yet implemented)
 %typemap(in, fragment="Eigen_Fragments") CLASS & (CLASS temp)
 {
@@ -284,6 +292,9 @@
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
     CLASS,
     const CLASS &,
+    CLASS const &,
+    Eigen::MatrixBase< CLASS >,
+    const Eigen::MatrixBase< CLASS > &,
     CLASS &
   {
     $1 = mxIsNumeric($input);
