@@ -116,4 +116,7 @@ function(add_swig_python_module target i_file)
 			install(FILES ${file} DESTINATION ${dir}/${swigpy_package_path})
 		endforeach(file)
 	endforeach(dir)
+
+	# Clean up
+	set_source_files_properties(${i_file} PROPERTIES SWIG_FLAGS "")
 endfunction()
