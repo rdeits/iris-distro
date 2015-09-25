@@ -71,7 +71,7 @@ function(add_swig_matlab_module target i_file)
 
 	# Tell swig to build matlab bindings for our target library and link them against the C++ library. 
 	if (swigmat_DESTINATION)
-		set(CMAKE_SWIG_OUTDIR ${swigmat_DESTINATION})
+		set(CMAKE_SWIG_OUTDIR ${CMAKE_INSTALL_PREFIX}/${swigmat_DESTINATION})
 	endif()
 	swig_add_module(${target} matlab ${i_file})
 	swig_link_libraries(${target} ${swigmat_LINK_LIBRARIES})
