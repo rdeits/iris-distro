@@ -1,6 +1,5 @@
 function run_system_tests()
 iris.test.test_c_space_3d();
-iris.test.test_ellipsoid(5);
 iris.test.test_grid_2d();
 iris.test.test_grid_segmentation();
 iris.test.test_points_2d;
