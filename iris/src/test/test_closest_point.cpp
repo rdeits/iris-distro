@@ -1,8 +1,8 @@
 #include <Eigen/Core>
-#include "iris/iris.hpp"
-#include "iris/iris_mosek.hpp"
-#include "iris/cvxgen_ldp.hpp"
-#include "test_util.hpp"
+#include "iris/iris.h"
+#include "iris/iris_mosek.h"
+#include "iris/cvxgen_ldp.h"
+#include "test_util.h"
 
 int main() {
   Eigen::MatrixXd points(2, 4);

@@ -1,19 +1,12 @@
+#include "iris.h"
 #include <stdexcept>
 #include <iostream>
 #include <numeric>
+#include <chrono>
 #include <Eigen/LU>
 #include <Eigen/StdVector>
-#include "iris.hpp"
-#include "iris/cvxgen_ldp.hpp"
-#include "Polyhedron.cpp"
-#include "Ellipsoid.cpp"
-#include "iris_classes.cpp"
-#include "iris_mosek.cpp"
-#include "iris_cdd.cpp"
-
-#include <chrono>
-
-using namespace Eigen;
+#include "iris/iris_mosek.h"
+#include "iris/cvxgen_ldp.h"
 
 namespace iris {
 
@@ -25,18 +18,18 @@ std::vector<size_t> arg_sort(const std::vector<T> &vec) {
   return idx;
 }
 
-typedef std::pair<VectorXd, double> hyperplane;
+typedef std::pair<Eigen::VectorXd, double> hyperplane;
 
-hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const MatrixXd &Cinv2, const VectorXd &x) {
-  VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.getD())).normalized();
-  std::pair<VectorXd, double> plane(nhat,
+hyperplane tangent_plane_through_point(const Ellipsoid &ellipsoid, const Eigen::MatrixXd &Cinv2, const Eigen::VectorXd &x) {
+  Eigen::VectorXd nhat = (2 * Cinv2 * (x - ellipsoid.getD())).normalized();
+  std::pair<Eigen::VectorXd, double> plane(nhat,
                                     nhat.transpose() * x);
   // std::cout << "tangent plane through point: " << x.transpose() << std::endl;
   // std::cout << plane.first.transpose() << " | " << plane.second << std::endl;
   return plane;
 }
 
-void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKenv_t &env) {
+void choose_closest_point_solver(const Eigen::MatrixXd &Points, Eigen::VectorXd &result, MSKenv_t &env) {
   // std::cout << "points: " << std::endl << Points << std::endl;
   if (Points.rows() <= IRIS_CVXGEN_LDP_MAX_ROWS && Points.cols() <= IRIS_CVXGEN_LDP_MAX_COLS) {
     iris_cvxgen::closest_point_in_convex_hull(Points, result);
@@ -50,29 +43,29 @@ void choose_closest_point_solver(const MatrixXd &Points, VectorXd &result, MSKen
   // std::cout << "closest point: " << result.transpose() << std::endl;
 }
 
-void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polyhedron &polyhedron, bool &infeasible_start) {
+void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polyhedron &polyhedron, bool &infeasible_start) {
 
   int dim = ellipsoid.getDimension();
   infeasible_start = false;
   int n_obs = obstacle_pts.size();
 
   if (n_obs == 0) {
-    polyhedron.setA(MatrixXd::Zero(0, dim));
-    polyhedron.setB(VectorXd::Zero(0));
+    polyhedron.setA(Eigen::MatrixXd::Zero(0, dim));
+    polyhedron.setB(Eigen::VectorXd::Zero(0));
     return;
   }
 
-  MatrixXd Cinv = ellipsoid.getC().inverse();
-  MatrixXd Cinv2 = Cinv * Cinv.transpose();
+  Eigen::MatrixXd Cinv = ellipsoid.getC().inverse();
+  Eigen::MatrixXd Cinv2 = Cinv * Cinv.transpose();
 
-  Matrix<bool, Dynamic, 1> uncovered_obstacles = Matrix<bool, Dynamic, 1>::Constant(n_obs, true);
+  Eigen::Matrix<bool, Eigen::Dynamic, 1> uncovered_obstacles = Eigen::Matrix<bool, Eigen::Dynamic, 1>::Constant(n_obs, true);
 
-  std::vector<MatrixXd> image_pts(n_obs);
+  std::vector<Eigen::MatrixXd> image_pts(n_obs);
   for (int i=0; i < n_obs; i++) {
     image_pts[i] = Cinv * (obstacle_pts[i].colwise() - ellipsoid.getD());
   }
 
-  std::vector<VectorXd> image_squared_dists(n_obs);
+  std::vector<Eigen::VectorXd> image_squared_dists(n_obs);
   for (int i=0; i < n_obs; i++) {
     image_squared_dists[i] = image_pts[i].colwise().squaredNorm();
   }
@@ -83,7 +76,7 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   }
   std::vector<size_t> obs_sort_idx = arg_sort(obs_min_squared_image_dists);
 
-  std::vector<std::pair<VectorXd, double>> planes;
+  std::vector<std::pair<Eigen::VectorXd, double>> planes;
 
   MSKenv_t env = NULL;
   for (auto it = obs_sort_idx.begin(); it != obs_sort_idx.end(); ++it) {
@@ -91,14 +84,14 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     if (!uncovered_obstacles(i)) {
       continue;
     }
-    DenseIndex idx;
+    Eigen::DenseIndex idx;
     image_squared_dists[i].minCoeff(&idx);
     hyperplane plane = tangent_plane_through_point(ellipsoid, Cinv2, obstacle_pts[i].col(idx));
     if ((((plane.first.transpose() * obstacle_pts[i]).array() - plane.second) >= 0).all()) {
       // nhat already separates the ellipsoid from obstacle i, so we can skip the optimization
       planes.push_back(plane);
     } else {
-      VectorXd ystar(dim);
+      Eigen::VectorXd ystar(dim);
       choose_closest_point_solver(image_pts[i], ystar, env);
 
       if (ystar.squaredNorm() < 1e-6) {
@@ -107,7 +100,7 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
         infeasible_start = true;
         planes.emplace_back(-plane.first, -plane.first.transpose() * obstacle_pts[i].col(idx));
       } else {
-        VectorXd xstar = ellipsoid.getC() * ystar + ellipsoid.getD();
+        Eigen::VectorXd xstar = ellipsoid.getC() * ystar + ellipsoid.getD();
         planes.push_back(tangent_plane_through_point(ellipsoid, Cinv2, xstar));
       }
     }
@@ -124,12 +117,12 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
     }
   }
 
-  // MatrixXd A = polyhedron.getA();
-  // VectorXd b = polyhedron.getB();
+  // Eigen::MatrixXd A = polyhedron.getA();
+  // Eigen::VectorXd b = polyhedron.getB();
   // A.resize(planes.size(), dim);
   // b.resize(planes.size(), 1);
-  MatrixXd A(planes.size(), dim);
-  VectorXd b(planes.size());
+  Eigen::MatrixXd A(planes.size(), dim);
+  Eigen::VectorXd b(planes.size());
 
   for (auto it = planes.begin(); it != planes.end(); ++it) {
     A.row(it - planes.begin()) = it->first.transpose();
@@ -141,11 +134,18 @@ void separating_hyperplanes(const std::vector<MatrixXd> obstacle_pts, const Elli
   return;
 }
 
-std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
+IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug) {
+  // std::cout << "running IRIS with the following inputs: " << std::endl;
+  // std::cout << "bounds: " << std::endl << problem.getBounds().getA() << std::endl << problem.getBounds().getB() << std::endl;
+  // std::cout << "obstacles: " << std::endl;
+  // auto debug_obstacles = problem.getObstacles();
+  // for (auto it = debug_obstacles.begin(); it != debug_obstacles.end(); ++it) {
+  //   std::cout << *it << std::endl;
+  // }
 
-  std::shared_ptr<IRISRegion> region(new IRISRegion(problem.getDimension()));
-  region->ellipsoid->setC(problem.getSeed().getC());
-  region->ellipsoid->setD(problem.getSeed().getD());
+  IRISRegion region(problem.getDimension());
+  region.ellipsoid.setC(problem.getSeed().getC());
+  region.ellipsoid.setD(problem.getSeed().getD());
 
   double best_vol = pow(ELLIPSOID_C_EPSILON, problem.getDimension());
   double volume;
@@ -156,14 +156,14 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   if (debug) {
     // std::cout << "starting debug" << std::endl;
     debug->bounds = problem.getBounds();
-    debug->ellipsoid_history.push_back(*(region->ellipsoid));
+    debug->ellipsoid_history.push_back(region.ellipsoid);
     // std::cout << "pushing back obstacles" << std::endl;
     auto obstacles = problem.getObstacles();
     for (auto obs = obstacles.begin(); obs != obstacles.end(); ++obs) {
       // std::cout << "pushing back obstacle: " << *obs << std::endl;
       debug->obstacles.push_back(*obs);
     }
-    // debug->obstacles = std::vector<MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
+    // debug->obstacles = std::vector<Eigen::MatrixXd>(problem.getObstacles().begin(), problem.getObstacles().end());
   }
 
   float p_time = 0;
@@ -172,9 +172,9 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
   while (1) {
     auto begin = std::chrono::high_resolution_clock::now();
     // std::cout << "calling hyperplanes with: " << std::endl;
-    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
-    // std::cout << "d: " << region->ellipsoid->getD() << std::endl;
-    separating_hyperplanes(problem.getObstacles(), *region->ellipsoid, new_poly, infeasible_start);
+    // std::cout << "C: " << region.ellipsoid->getC() << std::endl;
+    // std::cout << "d: " << region.ellipsoid->getD() << std::endl;
+    separating_hyperplanes(problem.getObstacles(), region.ellipsoid, new_poly, infeasible_start);
     auto end = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
     p_time += elapsed.count();
@@ -193,17 +193,17 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
       if (options.required_containment_points.size()) {
         all_points_contained = true;
         for (auto pt = options.required_containment_points.begin(); pt != options.required_containment_points.end(); ++pt) {
-          if (!new_poly.contains(*pt)) {
+          if (!new_poly.contains(*pt, 0.0)) {
             all_points_contained = false;
             break;
           }
         }
       } else {
-        all_points_contained = new_poly.contains(problem.getSeed().getD());
+        all_points_contained = new_poly.contains(problem.getSeed().getD(), 0.0);
       }
 
       if (all_points_contained || infeasible_start) {
-        *(region->polyhedron) = new_poly;
+        region.polyhedron = new_poly;
         if (debug) {
           debug->polyhedron_history.push_back(new_poly);
         }
@@ -212,27 +212,27 @@ std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRI
         return region;
       }
     } else {
-      *(region->polyhedron) = new_poly;
+      region.polyhedron = new_poly;
       if (debug) {
         debug->polyhedron_history.push_back(new_poly);
       }
     }
 
     // std::cout << "calling inner_ellipsoid with: " << std::endl;
-    // std::cout << "A: " << region->polyhedron->getA() << std::endl;
-    // std::cout << "b: " << region->polyhedron->getB() << std::endl;
+    // std::cout << "A: " << region.polyhedron->getA() << std::endl;
+    // std::cout << "b: " << region.polyhedron->getB() << std::endl;
     begin = std::chrono::high_resolution_clock::now();
-    volume = iris_mosek::inner_ellipsoid(*region->polyhedron, region->ellipsoid.get());
+    volume = iris_mosek::inner_ellipsoid(region.polyhedron, &region.ellipsoid);
     end = std::chrono::high_resolution_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - begin);
     e_time += elapsed.count();
 
     if (debug) {
-      debug->ellipsoid_history.push_back(*(region->ellipsoid));
+      debug->ellipsoid_history.push_back(region.ellipsoid);
     }
-    // std::cout << "C: " << region->ellipsoid->getC() << std::endl;
+    // std::cout << "C: " << region.ellipsoid->getC() << std::endl;
     // std::cout << "volume: " << volume << std::endl;
-    // std::cout << "det: " << region->ellipsoid->getC().determinant() << std::endl;
+    // std::cout << "det: " << region.ellipsoid->getC().determinant() << std::endl;
 
     const bool at_iter_limit = (options.iter_limit > 0) && (iter + 1 >= options.iter_limit);
     const bool insufficient_progress = (std::abs(volume - best_vol) / best_vol) < options.termination_threshold;

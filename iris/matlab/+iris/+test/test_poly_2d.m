@@ -19,7 +19,7 @@ b_bounds = [-lb; ub];
 start = 0.5 * (ub + lb);
 
 % profile on
-[A,b,C,d,results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start, []);
+[A,b,C,d,results] = inflate_region(obstacle_pts, A_bounds, b_bounds, start);
 % profile viewer
 if n_obs < 1e4
   animate_results(results, record);

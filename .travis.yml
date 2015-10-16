@@ -5,10 +5,10 @@ sudo: false
 notifications:
   email: false
 
-branches:
-  only:
-    - master
-    - stable
+# branches:
+#   only:
+#     - master
+#     - stable
 
 cache:
   pip: true
@@ -31,6 +31,7 @@ addons:
       - liblapack-dev
       - clang
       - python-virtualenv
+      - swig
 
 compiler:
   - gcc
@@ -55,9 +56,11 @@ before_install:
   - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
   - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
 
-script:
+install:
   - mkdir build
   - make
+
+script:
   - source build/config/pods_setup_all.sh
   - source venv/bin/activate
   - CTEST_OUTPUT_ON_FAILURE=1 make test

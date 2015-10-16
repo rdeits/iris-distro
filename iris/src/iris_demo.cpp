@@ -1,6 +1,6 @@
 #include <iostream>
 #include <Eigen/Core>
-#include "iris/iris.hpp"
+#include "iris/iris.h"
 
 int main(int argc, char** argv) {
   iris::IRISProblem problem(2);
@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
   problem.addObstacle(obs);
 
   iris::IRISOptions options;
-  std::shared_ptr<iris::IRISRegion> region = inflate_region(problem, options);
+  iris::IRISRegion region = inflate_region(problem, options);
 
-  std::cout << "C: " << region->ellipsoid->getC() << std::endl;
-  std::cout << "d: " << region->ellipsoid->getD() << std::endl;
+  std::cout << "C: " << region.ellipsoid.getC() << std::endl;
+  std::cout << "d: " << region.ellipsoid.getD() << std::endl;
   return 0;
 }

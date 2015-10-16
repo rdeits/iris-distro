@@ -5,11 +5,9 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-
+#include "iris/geometry.h"
 
 namespace iris {
-
-const double ELLIPSOID_C_EPSILON = 1e-4;
 
 class IRISOptions {
 public:
@@ -20,10 +18,15 @@ public:
   // If require_containment is false, then required_containment_points has no 
   // effect. 
   bool require_containment;
-  std::vector<Eigen::VectorXd> required_containment_points;
   bool error_on_infeasible_start;
   double termination_threshold;
   int iter_limit;
+  std::vector<Eigen::VectorXd> required_containment_points;
+
+  // Adding a setter makes things easier when wrapping this with SWIG
+  void set_required_containment_points(std::vector<Eigen::VectorXd> pts) {
+    required_containment_points = pts;
+  }
 
   IRISOptions():
     require_containment(false),
@@ -33,77 +36,43 @@ public:
     iter_limit(100) {};
 };
 
-class Polyhedron {
-public:
-  Polyhedron(int dim=0);
-  Polyhedron(Eigen::MatrixXd A, Eigen::VectorXd b);
-  ~Polyhedron() {
-    // std::cout << "deleting polyhedron: " << this << std::endl;
-  }
-  void setA(const Eigen::MatrixXd &A);
-  const Eigen::MatrixXd& getA() const;
-  void setB(const Eigen::VectorXd &b);
-  const Eigen::VectorXd& getB() const;
-  int getDimension() const;
-  int getNumberOfConstraints() const;
-  void appendConstraints(const Polyhedron &other);
-  std::vector<Eigen::VectorXd> generatorPoints();
-  std::vector<Eigen::VectorXd> generatorRays();
-  bool contains(Eigen::VectorXd point, double tolerance=0.0);
-
-private:
-  Eigen::MatrixXd A_;
-  Eigen::VectorXd b_;
-  bool dd_representation_dirty_;
-  std::vector<Eigen::VectorXd> generator_points_;
-  std::vector<Eigen::VectorXd> generator_rays_;
-  void updateDDRepresentation();
-};
-
-
-
-class Ellipsoid {
-public:
-  Ellipsoid(int dim=0);
-  Ellipsoid(Eigen::MatrixXd C, Eigen::VectorXd d);
-  ~Ellipsoid() {
-    // std::cout << "deleting ellipsoid: " << this << std::endl;
-  }
-  const Eigen::MatrixXd& getC() const;
-  const Eigen::VectorXd& getD() const;
-  void setC(const Eigen::MatrixXd &C_);
-  void setCEntry(Eigen::DenseIndex row, Eigen::DenseIndex col, double value);
-  void setD(const Eigen::VectorXd &d_);
-  void setDEntry(Eigen::DenseIndex idx, double value);
-  int getDimension() const;
-  static std::shared_ptr<Ellipsoid> fromNSphere(Eigen::VectorXd &center, double radius=ELLIPSOID_C_EPSILON);
-  double getVolume() const;
-
-private:
-  Eigen::MatrixXd C_;
-  Eigen::VectorXd d_;
-};
-
 class IRISRegion {
 public:
-  std::shared_ptr<Polyhedron> polyhedron;
-  std::shared_ptr<Ellipsoid> ellipsoid;
+  Polyhedron polyhedron;
+  Ellipsoid ellipsoid;
 
-  IRISRegion(int dim=0) {
-    polyhedron.reset(new Polyhedron(dim));
-    ellipsoid.reset(new Ellipsoid(dim));
+  Polyhedron getPolyhedron() {
+    return polyhedron;
   }
+
+  Ellipsoid getEllipsoid() {
+    return ellipsoid;
+  }
+
+  IRISRegion(int dim=0):
+    polyhedron(dim),
+    ellipsoid(dim)
+    {}
 };
 
-struct IRISDebugData {
+class IRISDebugData {
+public:
+  IRISDebugData() {};
   std::vector<Ellipsoid> ellipsoid_history;
   std::vector<Polyhedron> polyhedron_history;
   std::vector<Eigen::MatrixXd> obstacles;
+  std::vector<Eigen::MatrixXd> getObstacles() const {
+    return obstacles;
+  }
   Polyhedron bounds;
   // Eigen::VectorXd ellipsoid_times;
   // Eigen::VectorXd polyhedron_times;
   // double total_time;
   int iters;
+
+  std::vector<Eigen::VectorXd> boundingPoints() {
+    return bounds.generatorPoints();
+  }
 };
 
 class IRISProblem {
@@ -117,7 +86,8 @@ public:
   IRISProblem(int dim):
     bounds(dim),
     dim(dim),
-    seed(dim) {}
+    seed(dim) {
+    }
 
   void setSeedPoint(Eigen::VectorXd point);
   void setSeedEllipsoid(Ellipsoid ellipsoid);
@@ -129,8 +99,7 @@ public:
   Polyhedron getBounds() const;
 };
 
-
-std::shared_ptr<IRISRegion> inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
+IRISRegion inflate_region(const IRISProblem &problem, const IRISOptions &options, IRISDebugData *debug=NULL);
 
 void separating_hyperplanes(const std::vector<Eigen::MatrixXd> obstacle_pts, const Ellipsoid &ellipsoid, Polyhedron &polyhedron, bool &infeasible_start);
 

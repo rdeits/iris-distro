@@ -36,7 +36,7 @@ class IRISTest(TestCase):
                      np.array([[0.0, 0.0],
                                [1.0, 0.0]])
                      ]
-        start = [0.1, 0.1]
+        start = np.array([0.1, 0.1])
 
         region = irispy.inflate_region(obstacles, start)
 
@@ -56,7 +56,7 @@ def test_debug_data():
     bounds = irispy.Polyhedron()
     bounds.setA(np.vstack((np.eye(2), -np.eye(2))))
     bounds.setB(np.array([2.0, 2, 2, 2]))
-    start = [0.1, -0.05]
+    start = np.array([0.1, -0.05])
 
     # print "running with debug"
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)

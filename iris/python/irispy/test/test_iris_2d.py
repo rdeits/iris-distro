@@ -11,7 +11,7 @@ def test_random_obstacles_2d(show=False):
         pts = pts - np.mean(pts, axis=1)[:,np.newaxis]
         pts = scale * pts + center[:,np.newaxis]
         obstacles.append(pts)
-        start = [0.5, 0.5]
+        start = np.array([0.5, 0.5])
 
     region, debug = irispy.inflate_region(obstacles, start, bounds=bounds, return_debug_data=True)
 

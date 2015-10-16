@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "ppl.hh"
-#include "iris/iris.hpp"
+#include "iris/iris.h"
 
 // Note: this test is no longer in use (and never really worked anyway). I'm just keeping it around in case I ever want to try again with PPL. 
 

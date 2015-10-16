@@ -1,4 +1,4 @@
-#include "iris_mosek.hpp"
+#include "iris_mosek.h"
 
 #include <cstdio>
 #include <iostream>

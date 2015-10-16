@@ -1,5 +1,5 @@
-#include "test_util.hpp"
-#include "iris/iris.hpp"
+#include "test_util.h"
+#include "iris/iris.h"
 
 int main() {
   iris::IRISProblem problem(2);
@@ -27,8 +27,8 @@ int main() {
   C_expected << 0.5, 0, 
                 0, 0.5;
   d_expected << 0.5, 0.5;
-  valuecheckMatrix(region->ellipsoid->getC(), C_expected, 1e-3);
-  valuecheckMatrix(region->ellipsoid->getD(), d_expected, 1e-3);
+  valuecheckMatrix(region.ellipsoid.getC(), C_expected, 1e-3);
+  valuecheckMatrix(region.ellipsoid.getD(), d_expected, 1e-3);
 
   return 0;
 }
