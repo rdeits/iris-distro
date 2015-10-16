@@ -42,7 +42,7 @@ b_bounds = reshape(b_bounds,[],1);
 start = 0.5 * (ub + lb);
 
 % profile on
-[A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start, []);
+[A,b,C,d,results] = inflate_region(obstacles, A_bounds, b_bounds, start);
 % profile viewer
 
 animate_results(results, record);
