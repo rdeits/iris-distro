@@ -63,8 +63,8 @@ function(add_swig_python_module target i_file)
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
 		find_package(SWIG REQUIRED)
-		include(DrakeUseSWIG)
 	endif()
+	include(DrakeUseSWIG)
 
 	# Find the numpy header paths and include them. This calls the FindNumPy.cmake file included in this repo. 
 	find_package(NumPy REQUIRED)
