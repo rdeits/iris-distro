@@ -248,10 +248,10 @@
     SWIG_fail;
   $1 = &temp;
 }
-// In: const&
+// In: MatrixBase const&
 %typemap(in, fragment="Eigen_Fragments") Eigen::MatrixBase< CLASS > const& (CLASS temp)
 {
-  // In: const&
+  // In: MatrixBase const&
   if (!ConvertFromNumpyToEigenMatrix<CLASS >(&temp, $input))
     SWIG_fail;
   $1 = &temp;
