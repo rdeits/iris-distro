@@ -108,7 +108,9 @@ function(add_swig_python_module target i_file)
 	set_target_properties(${SWIG_MODULE_${target}_REAL_NAME} PROPERTIES OUTPUT_NAME _${SWIG_GET_EXTRA_OUTPUT_FILES_module_basename})
 
 	# Automatically install to the correct subfolder if the swig module has a "package" declared
-	string(REGEX REPLACE "\\." "/" swigpy_package_path ${swig_package_name})
+	if (swigpy_package_name)
+		string(REGEX REPLACE "\\." "/" swigpy_package_path ${swig_package_name})
+	endif()
 
 	foreach(dir IN LISTS swigpy_DESTINATION)
 		install(TARGETS ${SWIG_MODULE_${target}_REAL_NAME} DESTINATION ${dir}/${swigpy_package_path})
