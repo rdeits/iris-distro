@@ -59,3 +59,5 @@ ExternalProject_Add_Step(iris_project forceconfigure
  		DEPENDEES update
  		DEPENDERS configure
  		ALWAYS 1)
+
+install(FILES)
