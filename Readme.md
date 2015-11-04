@@ -70,7 +70,7 @@ By default, IRIS will build its external dependencies as part of the build proce
 
 which will edit the `externals_config.cmake` file to set those options automatically. If you've already built IRIS, you'll need to do a `make clean` first.
 
-If you're using IRIS as part of another project with cmake, you can just set the CMAKE_CACHE_ARGS to include `-DWITH_EIGEN:BOOL=OFF` etc. For more information, see: <http://www.cmake.org/cmake/help/v3.0/module/ExternalProject.html>.
+If you're using IRIS as part of another project with cmake, you can just set the CMAKE_CACHE_ARGS to include `-DIRIS_WITH_EIGEN:BOOL=OFF` etc. For more information, see: <http://www.cmake.org/cmake/help/v3.0/module/ExternalProject.html>.
 
 Example Usage
 =============
