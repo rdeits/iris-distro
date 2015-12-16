@@ -2,6 +2,7 @@
 
 case $1 in
   ("homebrew")
+    brew tap homebrew/science
     brew install cmake pkg-config gmp openblas swig && easy_install pip && pip install -r python_requirements.txt ;;
   ("macports")
     port install cmake gmp openblas swig python27 py-pip py-scipy py-numpy py-matplotlib py-nose ;;
