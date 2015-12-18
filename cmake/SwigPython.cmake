@@ -88,7 +88,7 @@ function(add_swig_python_module target i_file)
 	if (PYTHON_VERSION_MAJOR GREATER 2)
 		set_source_files_properties(${i_file} PROPERTIES
 			CPLUSPLUS ${CPLUSPLUS}
-			SWIG_FLAGS "-py3"
+			SWIG_FLAGS "-py3 -DSWIGPYTHON3"
 			)
 	else()
 		set_source_files_properties(${i_file} PROPERTIES 
