@@ -85,14 +85,9 @@ function(add_swig_python_module target i_file)
 	else()
 		set(CPLUSPLUS OFF)
 	endif()
+	set_source_files_properties(${i_file} PROPERTIES CPLUSPLUS ${CPLUSPLUS})
 	if (PYTHON_VERSION_MAJOR GREATER 2)
-		set_source_files_properties(${i_file} PROPERTIES
-			CPLUSPLUS ${CPLUSPLUS}
-			SWIG_FLAGS "-py3 -DSWIGPYTHON3"
-			)
-	else()
-		set_source_files_properties(${i_file} PROPERTIES 
-			CPLUSPLUS ${CPLUSPLUS})
+		set_property(SOURCE ${i_file} APPEND PROPERTY SWIG_FLAGS "-py3" "-DSWIGPYTHON3")
 	endif()
 
 	# Tell swig to also look for .i interface files in these folders
