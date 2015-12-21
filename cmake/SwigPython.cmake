@@ -95,6 +95,12 @@ function(add_swig_python_module target i_file)
 		set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-I${dir}")
 	endforeach(dir)
 
+	# Use "modern" python classes to resolve
+	# https://github.com/casadi/casadi/issues/1364 
+	# This loses compatibility with python versions <= 2.2, but we're almost
+	# certainly not compatible with them anyway.
+	set(CMAKE_SWIG_FLAGS ${CMAKE_SWIG_FLAGS} "-modern")
+
 	# Tell swig to build python bindings for our target library and link them against the C++ library. 
 	swig_add_module(${target} python ${i_file})
 	swig_link_libraries(${target} ${swigpy_LINK_LIBRARIES} ${PYTHON_LIBRARIES})
