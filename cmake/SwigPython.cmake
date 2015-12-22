@@ -45,20 +45,24 @@ function(add_swig_python_module target i_file)
 	set(PYVERSION "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}")
 
 	if(APPLE)
-		# Overload the PYTHON_INCLUDE_DIR and PYTHON_LIBRARY because, on OSX with a homebrew-provided python, cmake latches on to an old Apple-provided python install. 
+		# Overload the PYTHON_INCLUDE_DIRS and PYTHON_LIBRARIES because, on OSX with a homebrew-provided python, cmake latches on to an old Apple-provided python install. 
 		execute_process(COMMAND python${PYTHON_VERSION_MAJOR}-config --prefix
 			OUTPUT_VARIABLE PYTHON_PREFIX
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 			)
 		if (PYTHON_VERSION_MAJOR GREATER 2)
-			set(PYTHON_INCLUDE_DIR ${PYTHON_PREFIX}/include/python${PYVERSION}m)
+			set(PYTHON_INCLUDE_DIRS ${PYTHON_PREFIX}/include/python${PYVERSION}m)
 		else()
-			set(PYTHON_INCLUDE_DIR ${PYTHON_PREFIX}/include/python${PYVERSION})
+			set(PYTHON_INCLUDE_DIRS ${PYTHON_PREFIX}/include/python${PYVERSION})
 		endif()
 
-		set(PYTHON_LIBRARY ${PYTHON_PREFIX}/lib/libpython${PYVERSION}.dylib)
+		set(PYTHON_LIBRARIES ${PYTHON_PREFIX}/lib/libpython${PYVERSION}.dylib)
 		# These variable settings will affect the behavior of find_package(PythonLibs)
+	else()
+		# Find the python libraries so that we can link against them.
+		find_package( PythonLibs REQUIRED )
 	endif()
+	include_directories( ${PYTHON_INCLUDE_DIRS} )
 
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
@@ -69,10 +73,6 @@ function(add_swig_python_module target i_file)
 	# Find the numpy header paths and include them. This calls the FindNumPy.cmake file included in this repo. 
 	find_package(NumPy REQUIRED)
 	include_directories(${NUMPY_INCLUDE_DIRS})
-
-	# Find the python libraries so that we can link against them.
-	find_package( PythonLibs REQUIRED )
-	include_directories( ${PYTHON_INCLUDE_DIRS} )
 
 	# Include any source directories that swig will need to find our c++ header files
 	foreach(dir IN LISTS swigpy_INCLUDE_DIRS)
