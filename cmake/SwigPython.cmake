@@ -58,8 +58,30 @@ function(add_swig_python_module target i_file)
 
 		set(PYTHON_LIBRARIES ${PYTHON_PREFIX}/lib/libpython${PYVERSION}.dylib)
 		# These variable settings will affect the behavior of find_package(PythonLibs)
+	elseif(WIN32)
+		# Finding python libraries on Windows is totally broken, too. See: 
+		# https://cmake.org/Bug/view.php?id=12869
+		# https://cmake.org/pipermail/cmake/2009-May/029285.html
+		# https://cmake.org/pipermail/cmake/2011-November/047820.html
+		# https://cmake.org/pipermail/cmake/2013-May/054931.html
+		#
+		# So instead, we're going to grab the library location by asking the
+		# python interpreter. This is taken directly from
+		# https://cmake.org/pipermail/cmake/2011-November/047793.html
+		# 
+		# Note that it requires numpy to be installed, but that's already necessary for Drake. 
+
+		execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import sys;from distutils.sysconfig import get_python_inc;sys.stdout.write(get_python_inc())"
+		OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
+		ERROR_VARIABLE ERROR_FINDING_INCLUDES)
+
+		execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "import sys;from numpy.distutils.numpy_distribution import NumpyDistribution;from numpy.distutils.command.build_ext import build_ext;a=build_ext(NumpyDistribution());a.ensure_finalized();sys.stdout.write(';'.join(a.library_dirs))"
+		OUTPUT_VARIABLE PYTHON_LIBRARIES_DIR
+		ERROR_VARIABLE ERROR_FINDING_LIBRARIES)
+		set(PYTHON_LIBRARIES ${PYTHON_LIBRARIES_DIR}/python${PYVERSION}.lib)
+
 	else()
-		# Find the python libraries so that we can link against them.
+		# Linux is sane. 
 		find_package( PythonLibs REQUIRED )
 	endif()
 	include_directories( ${PYTHON_INCLUDE_DIRS} )
