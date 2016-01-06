@@ -88,7 +88,7 @@ function(add_swig_python_module target i_file)
 
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
-		find_package(SWIG REQUIRED)
+		find_package(SWIG)
 	endif()
 	include(DrakeUseSWIG)
 

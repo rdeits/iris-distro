@@ -45,7 +45,7 @@ function(add_swig_matlab_module target i_file)
 
 	# Load the swig macros
 	if (NOT SWIG_EXECUTABLE)
-		find_package(SWIG REQUIRED)
+		find_package(SWIG)
 		include(DrakeUseSWIG)
 	endif()
 
