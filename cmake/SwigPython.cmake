@@ -46,7 +46,7 @@ function(add_swig_python_module target i_file)
 
 	if(APPLE)
 		# Overload the PYTHON_INCLUDE_DIRS and PYTHON_LIBRARIES because, on OSX with a homebrew-provided python, cmake latches on to an old Apple-provided python install. 
-		execute_process(COMMAND python${PYTHON_VERSION_MAJOR}-config --prefix
+		execute_process(COMMAND ${PYTHON_EXECUTABLE}${PYTHON_VERSION_MAJOR}-config --prefix
 			OUTPUT_VARIABLE PYTHON_PREFIX
 			OUTPUT_STRIP_TRAILING_WHITESPACE
 			)
