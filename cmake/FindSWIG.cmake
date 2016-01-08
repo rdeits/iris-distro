@@ -73,7 +73,7 @@ if(SWIG_EXECUTABLE)
 
   message("SWIG_EXECUTABLE: ${SWIG_EXECUTABLE}")
   execute_process(COMMAND ${SWIG_EXECUTABLE} -E -matlab dummy.i
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
                   RESULT_VARIABLE swig_matlab_return_code
                   OUTPUT_QUIET
                   ERROR_QUIET)
@@ -87,7 +87,7 @@ if(SWIG_EXECUTABLE)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(SWIG  REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
                                         VERSION_VAR SWIG_VERSION )
 
