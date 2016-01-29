@@ -214,6 +214,7 @@
   };
 
   template<> int NumPyType<double>() {return NPY_DOUBLE;};
+  template<> int NumPyType<int>() {return NPY_INT;};
 %}
 
 // ----------------------------------------------------------------------------
@@ -243,6 +244,14 @@
 %typemap(in, fragment="Eigen_Fragments") CLASS const& (CLASS temp)
 {
   // In: const&
+  if (!ConvertFromNumpyToEigenMatrix<CLASS >(&temp, $input))
+    SWIG_fail;
+  $1 = &temp;
+}
+// In: MatrixBase const&
+%typemap(in, fragment="Eigen_Fragments") Eigen::MatrixBase< CLASS > const& (CLASS temp)
+{
+  // In: MatrixBase const&
   if (!ConvertFromNumpyToEigenMatrix<CLASS >(&temp, $input))
     SWIG_fail;
   $1 = &temp;
@@ -335,6 +344,9 @@
 %typecheck(SWIG_TYPECHECK_DOUBLE_ARRAY)
     CLASS,
     const CLASS &,
+    CLASS const &,
+    Eigen::MatrixBase< CLASS >,
+    const Eigen::MatrixBase< CLASS > &,
     CLASS &
   {
     $1 = is_array($input);
