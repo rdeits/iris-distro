@@ -1,0 +1,20 @@
+diff -p --exclude=.DS_Store -r cddlib-094h 2/src-gmp/Makefile.in cddlib-094h/src-gmp/Makefile.in
+*** cddlib-094h 2/src-gmp/Makefile.in	2012-03-23 04:51:54.000000000 -0400
+--- cddlib-094h/src-gmp/Makefile.in	2016-02-18 13:37:52.000000000 -0500
+*************** testlp1_gmp_SOURCES = testlp1.c
+*** 255,261 ****
+  testlp2_gmp_SOURCES = testlp2.c
+  testlp3_gmp_SOURCES = testlp3.c
+  # cddmathlink_SOURCES                = cddmathlink.c cddmlio.h cddmlio.c
+! LDADD = ../lib-src-gmp/libcddgmp.la
+  AM_LDFLAGS = -L$(gmplibdir)
+  INCLUDES = -I../lib-src-gmp -I$(gmpincludedir)
+  AM_CPPFLAGS = -DGMPRATIONAL
+--- 255,261 ----
+  testlp2_gmp_SOURCES = testlp2.c
+  testlp3_gmp_SOURCES = testlp3.c
+  # cddmathlink_SOURCES                = cddmathlink.c cddmlio.h cddmlio.c
+! LDADD = ../lib-src-gmp/libcddgmp.la -lgmp
+  AM_LDFLAGS = -L$(gmplibdir)
+  INCLUDES = -I../lib-src-gmp -I$(gmpincludedir)
+  AM_CPPFLAGS = -DGMPRATIONAL
