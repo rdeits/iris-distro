@@ -27,7 +27,7 @@ safe_regions = struct('A', {}, 'b', {}, 'C', {}, 'd', {}, 'point', {});
 
 for j = 1:size(initial_seeds, 2)
   seed = initial_seeds(:,j);
-  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeasible_start', false));
+  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, 'require_containment', true, 'error_on_infeasible_start', false);
   safe_regions(end+1) = struct('A', A, 'b', b, 'C', C, 'd', d, 'point', seed);
   done = callback(safe_regions(end), seed);
   if done
@@ -42,7 +42,7 @@ while length(safe_regions) < num_regions
   [subs{:}] = ind2sub(size(dists), idx);
   subs = cell2mat(subs)';
   seed = (subs - 1) .* step_size + lb;
-  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, struct('require_containment', true, 'error_on_infeasible_start', false));
+  [A, b, C, d] = iris.inflate_region(obstacle_pts, A_bounds, b_bounds, seed, 'require_containment', true, 'error_on_infeasible_start', false);
   safe_regions(end+1) = struct('A', A, 'b', b, 'C', C, 'd', d, 'point', seed);
   done = callback(safe_regions(end), seed);
   if done
