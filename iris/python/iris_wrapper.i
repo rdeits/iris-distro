@@ -1,6 +1,15 @@
 %module iris_wrapper
 
-%include <std_except.i>
+%include "exception.i"
+%exception {
+  try {
+    $action
+  } catch (const std::exception& e) {
+    SWIG_exception(SWIG_RuntimeError, e.what());
+  } catch (...) {
+    SWIG_exception(SWIG_RuntimeError, "Unknown error");
+  }
+}
 
 %{
 #define SWIG_FILE_WITH_INIT

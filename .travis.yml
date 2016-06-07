@@ -55,6 +55,7 @@ before_install:
   - pip install --upgrade pip
   - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
   - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
+  - pip install jupyter --cache-dir=$HOME/.pip-cache
 
 install:
   - mkdir build
