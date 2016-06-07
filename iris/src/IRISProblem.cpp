@@ -5,13 +5,13 @@ namespace iris {
 
 void IRISProblem::setSeedPoint(Eigen::VectorXd point) {
   if (point.size() != this->getDimension()) {
-    throw(std::runtime_error("seed point must match dimension dim"));
+    throw(std::runtime_error("The dimension of the seed point must match the dimension of the problem"));
   }
   this->seed = Ellipsoid::fromNSphere(point);
 }
 void IRISProblem::setSeedEllipsoid(Ellipsoid ellipsoid){
   if (ellipsoid.getDimension() != this->getDimension()) {
-    throw std::runtime_error("seed ellipsoid must match dimension dim");
+    throw std::runtime_error("The dimension of the seed ellipsoid must match the dimension of the problem");
   }
   this->seed = ellipsoid;
 }
@@ -23,15 +23,13 @@ Ellipsoid IRISProblem::getSeed() const {
 }
 void IRISProblem::setBounds(Polyhedron new_bounds) {
   if (new_bounds.getDimension() != this->getDimension()) {
-    throw std::runtime_error("bounds must match dimension dim");
+    throw std::runtime_error("The dimension of the bounds must match the dimension of the problem");
   }
   this->bounds = new_bounds;
 }
 void IRISProblem::addObstacle(Eigen::MatrixXd new_obstacle_vertices) {
-  // std::cout << "adding obstacle: " << new_obstacle_vertices << std::endl;
-  // std::cout << "dim: " << this->getDimension() << std::endl;
   if (new_obstacle_vertices.rows() != this->getDimension()) {
-    throw std::runtime_error("new_obstacle_vertices must have dim rows");
+    throw std::runtime_error("The matrix of obstacle vertices must have the same number of row as the dimension of the problem");
   }
   this->obstacle_pts.push_back(new_obstacle_vertices);
 }
