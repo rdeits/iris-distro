@@ -5,3 +5,4 @@ pod-build
 *.pyc
 build/
 externals_config.cmake
+iris_wrapper.py
