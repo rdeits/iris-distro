@@ -42,20 +42,8 @@ pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
 
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
 
-pods_find_pkg_config(eigen3 3.2)
-
-if (eigen3_FOUND)
-   pods_use_pkg_config_includes( eigen3 )
-else()
-  # then use the traditional approach to finding Eigen3
-  find_package( Eigen3 )
-  if (EIGEN3_FOUND)
-    set(eigen3_FOUND 1)
-    include_directories( ${EIGEN3_INCLUDE_DIR} )
-  else()
-    message(FATAL_ERROR "Could not find eigen, which is a required depedency")
-  endif()
-endif()
+find_package(Eigen3 REQUIRED)
+include_directories( ${EIGEN3_INCLUDE_DIR} )
 
 add_subdirectory(cvxgen)
 add_subdirectory(src)
@@ -66,4 +54,3 @@ add_subdirectory(python)
 pods_configure_matlab_paths()
 pods_install_matlab_path(iris)
 pods_install_bash_setup(iris "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages:\$PYTHONPATH")
-
