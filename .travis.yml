@@ -9,32 +9,6 @@ os:
   - linux
   - osx
 
-# cache:
-#   pip: true
-#   directories:
-#     - "$HOME/.pip-cache"
-#     - "$HOME/build/rdeits/iris-distro/venv"
-
-
-# addons:
-#   apt:
-#     sources:
-#       - ubuntu-toolchain-r-test
-#     packages:
-#       - cmake
-#       - pkg-config
-#       - libgmp-dev
-#       - gfortran
-#       - libblas-dev
-#       - liblapack-dev
-#       - clang
-#       - python-virtualenv
-#       - swig
-
-# compiler:
-#   - gcc
-#   - clang
-
 python:
   - '2.7'
 
@@ -47,12 +21,6 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_b279d3ed6718_key -iv $encrypted_b279d3ed6718_iv -in lic.enc -out lic -d
   - mkdir -p $HOME/mosek
   - mv lic $HOME/mosek/mosek.lic
-  # - virtualenv venv
-  # - source venv/bin/activate
-  # - pip install --upgrade pip
-  # - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
-  # - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
-  # - pip install jupyter --cache-dir=$HOME/.pip-cache
   - pip install -r requirements.txt
   - pip install jupyter
 
@@ -62,5 +30,4 @@ install:
 
 script:
   - source build/config/pods_setup_all.sh
-  # - source venv/bin/activate
   - CTEST_OUTPUT_ON_FAILURE=1 make test
