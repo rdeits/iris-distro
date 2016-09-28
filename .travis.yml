@@ -14,7 +14,7 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y cmake pkg-config libgmp-dev swig; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python cmake pkg-config gmp; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
