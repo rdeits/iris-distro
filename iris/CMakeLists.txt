@@ -7,7 +7,8 @@ endif()
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_CURRENT_SOURCE_DIR}/swigmake/cmake ${CMAKE_MODULE_PATH} )
 include(mex)
 mex_setup()
-enable_testing()
+
+include(CTest)
 
 # pull in the pods macros. See cmake/pods.cmake for documentation
 set(POD_NAME iris)
