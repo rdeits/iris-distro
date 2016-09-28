@@ -1,20 +1,20 @@
 language: python
 
-dist: trusty
-
 notifications:
   email: false
 
-os:
-  - linux
-  - osx
-
-python:
-  - '2.7'
+matrix:
+  include:
+    - os: linux
+      sudo: required
+      dist: trusty
+      python: "2.7"
+    - os: osx
+      language: generic
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y cmake pkg-config libgmp-dev gfortran libblas-dev liblapack-dev swig; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake pkg-config gmp gfortran; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python cmake pkg-config gmp gfortran; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
