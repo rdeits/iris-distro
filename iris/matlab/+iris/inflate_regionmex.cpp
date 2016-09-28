@@ -27,6 +27,7 @@ mxArray* eigenToMatlab(const MatrixXd &m)
   return pm;
 }
 
+DLL_EXPORT_SYM
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   // auto begin = std::chrono::high_resolution_clock::now();
 
