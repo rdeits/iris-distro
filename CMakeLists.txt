@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.0)
 include(ExternalProject)
 
-if(APPLE)
+if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
