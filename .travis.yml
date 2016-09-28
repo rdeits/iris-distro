@@ -1,61 +1,57 @@
-language: cpp
-
-sudo: false
+language: python
 
 notifications:
   email: false
 
-# branches:
-#   only:
-#     - master
-#     - stable
+os:
+  - linux
+  - osx
 
-cache:
-  pip: true
-  directories:
-    - "$HOME/.pip-cache"
-    - "$HOME/build/rdeits/iris-distro/venv"
+# cache:
+#   pip: true
+#   directories:
+#     - "$HOME/.pip-cache"
+#     - "$HOME/build/rdeits/iris-distro/venv"
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - cmake
-      - pkg-config
-      - libgmp-dev
-      # - gcc-4.8
-      # - g++-4.8
-      - gfortran
-      - libblas-dev
-      - liblapack-dev
-      - clang
-      - python-virtualenv
-      - swig
 
-compiler:
-  - gcc
-  - clang
+# addons:
+#   apt:
+#     sources:
+#       - ubuntu-toolchain-r-test
+#     packages:
+#       - cmake
+#       - pkg-config
+#       - libgmp-dev
+#       - gfortran
+#       - libblas-dev
+#       - liblapack-dev
+#       - clang
+#       - python-virtualenv
+#       - swig
+
+# compiler:
+#   - gcc
+#   - clang
 
 python:
   - '2.7'
 
-# install:
-#   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-
 before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository ubuntu-toolchain-r-test && sudo apt-get install -y cmake pkg-config libgmp-dev gfortran libblas-dev liblapack-dev swig; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake pkg-config gmp gfortran; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
   - openssl aes-256-cbc -K $encrypted_b279d3ed6718_key -iv $encrypted_b279d3ed6718_iv -in lic.enc -out lic -d
   - mkdir -p $HOME/mosek
   - mv lic $HOME/mosek/mosek.lic
-  - virtualenv venv
-  - source venv/bin/activate
-  - pip install --upgrade pip
-  - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
-  - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
-  - pip install jupyter --cache-dir=$HOME/.pip-cache
+  # - virtualenv venv
+  # - source venv/bin/activate
+  # - pip install --upgrade pip
+  # - pip install --upgrade distribute --cache-dir=$HOME/.pip-cache
+  # - pip install --upgrade -r python_requirements.txt --cache-dir=$HOME/.pip-cache
+  # - pip install jupyter --cache-dir=$HOME/.pip-cache
+  - pip install jupyter
 
 install:
   - mkdir build
@@ -63,5 +59,5 @@ install:
 
 script:
   - source build/config/pods_setup_all.sh
-  - source venv/bin/activate
+  # - source venv/bin/activate
   - CTEST_OUTPUT_ON_FAILURE=1 make test
