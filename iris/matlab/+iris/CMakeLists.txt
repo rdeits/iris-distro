@@ -1,4 +1,6 @@
-if(MATLAB_FOUND)
-	add_mex(inflate_regionmex inflate_regionmex.cpp)
-	target_link_libraries(inflate_regionmex iris)
-endif()
+matlab_add_mex(NAME inflate_regionmex SRC inflate_regionmex.cpp)
+target_link_libraries(inflate_regionmex iris)
+set_target_properties(inflate_regionmex PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")

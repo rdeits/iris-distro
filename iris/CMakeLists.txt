@@ -1,18 +1,26 @@
 cmake_minimum_required(VERSION 2.8.0)
 
-if(APPLE)
+if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_CURRENT_SOURCE_DIR}/swigmake/cmake ${CMAKE_MODULE_PATH} )
-include(mex)
-mex_setup()
-enable_testing()
+
+if(CMAKE_VERSION VERSION_LESS 3.7)
+  set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/3.7" ${CMAKE_MODULE_PATH})
+endif()
+
+include(CTest)
 
 # pull in the pods macros. See cmake/pods.cmake for documentation
 set(POD_NAME iris)
 include(pods)
-include(matlab_pods)
+
+find_package(Matlab COMPONENTS MEX_COMPILER MX_LIBRARY)
+
+if(Matlab_FOUND)
+  include(matlab_pods)
+endif()
 
 if (CMAKE_COMPILER_IS_GNUCC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wreturn-type -Wuninitialized -Wunused-variable") # -Wunused-parameter")
@@ -47,10 +55,14 @@ include_directories( ${EIGEN3_INCLUDE_DIR} )
 
 add_subdirectory(cvxgen)
 add_subdirectory(src)
-add_subdirectory(matlab/+iris)
-add_subdirectory(python)
 
-# setup matlab pods-compliance
-pods_configure_matlab_paths()
-pods_install_matlab_path(iris)
+if(Matlab_FOUND)
+  add_subdirectory(matlab/+iris)
+
+  # setup matlab pods-compliance
+  pods_configure_matlab_paths()
+  pods_install_matlab_path(iris)
+endif()
+
+add_subdirectory(python)
 pods_install_bash_setup(iris "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages:\$PYTHONPATH")

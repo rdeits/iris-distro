@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 2.8.0)
 include(ExternalProject)
 
-if(APPLE)
+if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+option(BUILD_TESTING "Build the testing tree." ON)
 option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
 option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
 option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
@@ -51,7 +52,11 @@ endif()
 
 ExternalProject_Add(iris_project
 	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/iris
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      -DBUILD_TESTING=${BUILD_TESTING}
+      -DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
     DEPENDS ${iris_dependencies}
     )

@@ -10,6 +10,8 @@ add_subdirectory(irispy)
 
 pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/irispy)
 
-add_test(NAME python_tests
-	COMMAND nosetests --nocapture ${CMAKE_INSTALL_PREFIX}/lib/python${PYVERSION}/dist-packages/irispy
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+if(BUILD_TESTING)
+  add_test(NAME python_tests
+	      COMMAND nosetests --nocapture ${CMAKE_INSTALL_PREFIX}/lib/python${PYVERSION}/dist-packages/irispy
+          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
