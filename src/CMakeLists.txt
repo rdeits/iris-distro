@@ -43,10 +43,13 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
-
 find_package(Eigen3 REQUIRED)
-include_directories( ${EIGEN3_INCLUDE_DIR} )
-
+include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${CMAKE_INSTALL_PREFIX}/include)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 add_subdirectory(cxx)
 add_subdirectory(python)
+
+if(WITH_MATLAB)
+  add_subdirectory(matlab)
+endif()

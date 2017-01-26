@@ -65,4 +65,4 @@ while true
 end
 
 results.iters = iter;
-results.total_time = toc(t_start)
+results.total_time = toc(t_start);

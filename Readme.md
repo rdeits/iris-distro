@@ -10,6 +10,11 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
 
 [![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris-distro)
 
+MATLAB Support
+==============
+
+A pure-MATLAB implementation of IRIS is also included in `src/matlab`. This will be slower and less flexible than the Python and C++ versions, but may be useful for legacy code.
+
 Requirements
 ============
 

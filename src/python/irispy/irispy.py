@@ -6,28 +6,28 @@ from .iris_wrapper import IRISOptions, IRISRegion, IRISProblem
 
 from .iris_wrapper import IRISDebugData, Ellipsoid, Polyhedron
 from .iris_wrapper import inflate_region as c_inflate_region
+from .extensions import ellipsoid
+from .extensions import polyhedron
+from .extensions import irisdebugdata
 from . import drawing
-from . import extensions
 
 
-Polyhedron.fromBounds = classmethod(extensions.PolyhedronExtension.fromBounds)
+Polyhedron.fromBounds = classmethod(polyhedron.fromBounds)
 Polyhedron.from_bounds = Polyhedron.fromBounds
-Polyhedron.getDrawingVertices = \
-    extensions.PolyhedronExtension.getDrawingVertices
+Polyhedron.getDrawingVertices = polyhedron.getDrawingVertices
 Polyhedron.default_color = "r"
-Polyhedron.draw = drawing.DrawDispatcher.draw
-Polyhedron.draw2d = drawing.DrawDispatcher.draw2d
-Polyhedron.draw3d = drawing.DrawDispatcher.draw3d
+Polyhedron.draw = drawing.draw
+Polyhedron.draw2d = drawing.draw2d
+Polyhedron.draw3d = drawing.draw3d
 
-Ellipsoid.getDrawingVertices = \
-    extensions.EllipsoidExtension.getDrawingVertices
+Ellipsoid.getDrawingVertices = ellipsoid.getDrawingVertices
 Ellipsoid.default_color = "r"
-Ellipsoid.draw = drawing.DrawDispatcher.draw
-Ellipsoid.draw2d = drawing.DrawDispatcher.draw2d
-Ellipsoid.draw3d = drawing.DrawDispatcher.draw3d
+Ellipsoid.draw = drawing.draw
+Ellipsoid.draw2d = drawing.draw2d
+Ellipsoid.draw3d = drawing.draw3d
 
-IRISDebugData.animate = extensions.IRISDebugDataExtension.animate
-IRISDebugData.iterRegions = extensions.IRISDebugDataExtension.iterRegions
+IRISDebugData.animate = irisdebugdata.animate
+IRISDebugData.iterRegions = irisdebugdata.iterRegions
 
 
 def inflate_region(obstacles,
