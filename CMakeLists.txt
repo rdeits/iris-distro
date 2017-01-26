@@ -17,12 +17,8 @@ if (IRIS_WITH_EIGEN)
 		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 		)
-	ExternalProject_Get_Property(eigen_project BINARY_DIR)
-	ExternalProject_Add_Step(eigen_project install_pc_file
-		COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig && cp ${BINARY_DIR}/eigen3.pc ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/eigen3.pc
-		DEPENDEES install
-		COMMENT "installing eigen3.pc file for pkg-config"
-		)
+	ExternalProject_Get_Property(eigen_project SOURCE_DIR)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SOURCE_DIR}/CMAKE)
 	set(iris_dependencies ${iris_dependencies} eigen_project)
 endif()
 if (IRIS_WITH_CDD)
@@ -62,6 +58,7 @@ ExternalProject_Add(iris_project
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
       -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
+      -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
       -DBUILD_TESTING=${BUILD_TESTING}
       -DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}
       -DSWIG_EXECUTABLE=${SWIG_EXECUTABLE}
