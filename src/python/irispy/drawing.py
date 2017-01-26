@@ -7,30 +7,27 @@ from matplotlib.colors import colorConverter
 import mpl_toolkits.mplot3d as a3
 
 
-class DrawDispatcher:
-    default_color = "r"
+def draw(self, ax=None, **kwargs):
+    if self.getDimension() == 2:
+        return self.draw2d(ax=ax, **kwargs)
+    elif self.getDimension() == 3:
+        return self.draw3d(ax=ax, **kwargs)
+    else:
+        raise NotImplementedError("drawing for objects of dimension <2 or >3 not implemented yet")
 
-    def draw(self, ax=None, **kwargs):
-        if self.getDimension() == 2:
-            return self.draw2d(ax=ax, **kwargs)
-        elif self.getDimension() == 3:
-            return self.draw3d(ax=ax, **kwargs)
-        else:
-            raise NotImplementedError("drawing for objects of dimension <2 or >3 not implemented yet")
+def draw2d(self, ax=None, **kwargs):
+    if ax is None:
+        ax = plt.gca()
+    points = self.getDrawingVertices()
+    kwargs.setdefault("edgecolor", self.default_color)
+    return draw_2d_convhull(points, ax, **kwargs)
 
-    def draw2d(self, ax=None, **kwargs):
-        if ax is None:
-            ax = plt.gca()
-        points = self.getDrawingVertices()
-        kwargs.setdefault("edgecolor", self.default_color)
-        return draw_2d_convhull(points, ax, **kwargs)
-
-    def draw3d(self, ax=None, **kwargs):
-        if ax is None:
-            ax = a3.Axes3D(plt.gcf())
-        points = self.getDrawingVertices()
-        kwargs.setdefault("facecolor", self.default_color)
-        return draw_3d_convhull(points, ax, **kwargs)
+def draw3d(self, ax=None, **kwargs):
+    if ax is None:
+        ax = a3.Axes3D(plt.gcf())
+    points = self.getDrawingVertices()
+    kwargs.setdefault("facecolor", self.default_color)
+    return draw_3d_convhull(points, ax, **kwargs)
 
 def draw_convhull(points, ax, **kwargs):
     dim = points.shape[1]
