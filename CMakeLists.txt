@@ -10,6 +10,7 @@ option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this alread
 option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
 option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
 option(IRIS_WITH_PYBIND11 "binding generator for python based on c++11. Only disable if you have this already." ON)
+option(IRIS_WITH_MATLAB "install pure-MATLAB version of IRIS" OFF)
 set(iris_dependencies)
 
 if (IRIS_WITH_EIGEN)
@@ -19,7 +20,6 @@ if (IRIS_WITH_EIGEN)
 		)
 	ExternalProject_Get_Property(eigen_project SOURCE_DIR)
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SOURCE_DIR}/cmake)
-  message("setting module path to include ${SOURCE_DIR}/cmake")
 	set(iris_dependencies ${iris_dependencies} eigen_project)
 endif()
 if (IRIS_WITH_CDD)
@@ -45,6 +45,7 @@ if (IRIS_WITH_MOSEK)
 	    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
 	    GIT_TAG 21b046d424f98ad150c9eeb2e798b0411bf2fbce
 	    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DWITH_MATLAB:BOOL=${IRIS_WITH_MATLAB}
 	    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
 	    )
 	set(iris_dependencies ${iris_dependencies} mosek_project)
@@ -67,6 +68,7 @@ ExternalProject_Add(iris_project
       -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
       -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
       -DBUILD_TESTING=${BUILD_TESTING}
+      -DWITH_MATLAB=${IRIS_WITH_MATLAB}
       -DPYBIND11_PYTHON_VERSION=${PYBIND11_PYTHON_VERSION}
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
     DEPENDS ${iris_dependencies}

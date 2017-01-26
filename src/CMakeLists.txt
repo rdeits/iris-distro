@@ -49,3 +49,7 @@ include_directories(${CMAKE_INSTALL_PREFIX}/include)
 link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 add_subdirectory(cxx)
 add_subdirectory(python)
+
+if(WITH_MATLAB)
+  add_subdirectory(matlab)
+endif()
