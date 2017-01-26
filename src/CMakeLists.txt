@@ -4,7 +4,11 @@ if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-include(CTest)
+if(BUILD_TESTING)
+  include(CTest)
+  enable_testing()
+endif()
+
 find_package(pybind11 REQUIRED)
 
 # Set RPATH for installed binaries

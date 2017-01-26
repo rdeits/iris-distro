@@ -21,8 +21,8 @@ matrix:
       language: generic
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y cmake pkg-config libgmp-dev swig; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python swig; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -y cmake pkg-config libgmp-dev ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python ; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
@@ -34,8 +34,10 @@ before_install:
 
 install:
   - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release
   - make
 
 script:
-  - source build/config/pods_setup_all.sh
-  - CTEST_OUTPUT_ON_FAILURE=1 make test
+  - cd iris_project-prefix/src/iris_project-build
+  - ctest --output-on-failure
