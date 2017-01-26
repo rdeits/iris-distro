@@ -13,6 +13,10 @@ matrix:
       sudo: required
       dist: trusty
       python: "2.7"
+    - os: linux
+      sudo: required
+      dist: trusty
+      python: "3.5"
     - os: osx
       language: generic
 
