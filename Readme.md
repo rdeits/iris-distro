@@ -1,7 +1,7 @@
 Introduction
 ============
 
-This package contains the IRIS algorithm for iterative convex regional inflation by semidefinite programming, implemented in C++ with bindings for MATLAB and Python. It is designed to take an environment containing many (convex) obstacles and a start point, and to compute a large convex obstacle-free region. This region can then be used to define linear constraints for some other objective function which the user might want to optimize over the obstacle-free space. The algorithm is described in:
+This package contains the IRIS algorithm for iterative convex regional inflation by semidefinite programming, implemented in C++ with bindings for Python. It is designed to take an environment containing many (convex) obstacles and a start point, and to compute a large convex obstacle-free region. This region can then be used to define linear constraints for some other objective function which the user might want to optimize over the obstacle-free space. The algorithm is described in:
 
 R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regions of
   obstacle-free space through semidefinite programming,&rdquo; <em>Workshop on the Algorithmic Fundamentals of Robotics</em>, Istanbul, Aug. 2014.
@@ -39,36 +39,25 @@ Or you can install the `liblapack-dev`, `libblas-dev`, and `gfortran` packages f
 
 You'll also need a license for the Mosek optimization toolbox <https://www.mosek.com/> (this package includes a downloader for the Mosek code, but you have to get your own license). Mosek has free licenses available for academic use.
 
-Optionally, you can install the `cddmex` package for Matlab to speed up some functions (specifically, converting polytopes from an inequality representation to a set of vertices). The easiest way to get it is through [tbxmanager](http://tbxmanager.com/). If you're not planning on using the Matlab bindings, then you won't need it.
-
 Installation
 ============
 
-This project is distributed in accordance with the Pods guidelines: <http://sourceforge.net/p/pods/home/Home/>. If you've used pods before, then it should be easy to integrate IRIS along with your other Pods projects. If you haven't, then don't worry: Pods are designed to make it easy to build and run software like this without forcing you to install anything globally. You'll just have to do a few things:
-
-First, you'll need to make a `build` folder where IRIS will be installed:
+This project is configured as a standard CMake project, so the general build process is:
 
 	mkdir build
-
-Then build and install IRIS and its dependencies to that folder:
-
+	cd build
+	cmake ..
 	make
-
-To be able to use IRIS, you'll also need to update your `PATH`, `LD_LIBRARY_PATH`, `PYTHONPATH`, etc. The easiest way to do that is to add the following to your shell's startup file (for most Mac and Linux systems, that's `~/.bashrc`):
-
-	source /wherever/you/put/iris-distro/build/config/pods_setup_all.sh
-
-If you want to use the Matlab bindings, you'll also have to add the folder `wherever/you/put/iris-distro/build/matlab` to Matlab's path.
 
 ------------------------------
 Installation without externals
 ------------------------------
 By default, IRIS will build its external dependencies as part of the build process. If you want to turn any or all of them off, you can set the `WITH_EIGEN`, `WITH_CDD`, and `WITH_MOSEK` options to `OFF` using cmake. The easiest way to do that is to run:
 
-    make configure-no-externals
-    make
+    cd build
+    ccmake .
 
-which will edit the `externals_config.cmake` file to set those options automatically. If you've already built IRIS, you'll need to do a `make clean` first.
+which will launch a terminal-based GUI to let you change those options. 
 
 If you're using IRIS as part of another project with cmake, you can just set the CMAKE_CACHE_ARGS to include `-DIRIS_WITH_EIGEN:BOOL=OFF` etc. For more information, see: <http://www.cmake.org/cmake/help/v3.0/module/ExternalProject.html>.
 
@@ -79,12 +68,6 @@ Python wrapper
 --------------
 
 	python -m irispy.test.test_iris_2d
-
-Matlab wrapper
---------------
-
-	>>> addpath_iris
-	>>> iris.test.test_poly_2d();
 
 C++ library
 -----------

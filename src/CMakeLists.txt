@@ -39,15 +39,10 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
-# install all python files in the python/ subdirectory
-# pods_install_python_packages(${CMAKE_CURRENT_SOURCE_DIR}/python)
-
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
 
 find_package(Eigen3 REQUIRED)
 include_directories( ${EIGEN3_INCLUDE_DIR} )
 
-add_subdirectory(src)
-
+add_subdirectory(cxx)
 add_subdirectory(python)
-# pods_install_bash_setup(iris "export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages:\$PYTHONPATH")
