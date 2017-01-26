@@ -7,5 +7,6 @@ tar zxvf cmake-3.5.2-Linux-x86_64.tar.gz
 rm cmake-3.5.2-Linux-x86_64.tar.gz
 cd cmake-3.5.2-Linux-x86_64/bin
 export PATH=`pwd`:$PATH
+cd -
 
 sudo apt-get install -y pkg-config libgmp-dev
