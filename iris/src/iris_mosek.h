@@ -3,7 +3,7 @@
 
 #include <exception>
 #include "mosek/mosek.h"
-#include "iris/geometry.h"
+#include "geometry.h"
 
 namespace iris_mosek {
 

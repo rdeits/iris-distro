@@ -9,6 +9,7 @@ option(BUILD_TESTING "Build the testing tree." ON)
 option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
 option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
 option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
+option(IRIS_WITH_PYBIND11 "binding generator for python based on c++11. Only disable if you have this already." ON)
 set(iris_dependencies)
 
 message("with eigen: " ${IRIS_WITH_EIGEN})
@@ -43,11 +44,20 @@ endif()
 if (IRIS_WITH_MOSEK)
 	ExternalProject_Add(mosek_project
 	    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
-	    GIT_TAG 8e93c8ad6e8de0c1401b8e39d187370a3a0bd2dc
+	    GIT_TAG 21b046d424f98ad150c9eeb2e798b0411bf2fbce
 	    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 	    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
 	    )
 	set(iris_dependencies ${iris_dependencies} mosek_project)
+endif()
+
+if (IRIS_WITH_PYBIND11)
+  ExternalProject_Add(pybind11_project
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG 7830e8509f2adc97ce9ee32bf99cd4b82089cc4c
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DPYBIND11_TEST=OFF
+    )
+  set(iris_dependencies ${iris_dependencies} pybind11_project)
 endif()
 
 ExternalProject_Add(iris_project

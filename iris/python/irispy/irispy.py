@@ -1,5 +1,7 @@
-from iris_wrapper import IRISOptions, IRISRegion, IRISProblem, IRISDebugData, Ellipsoid, Polyhedron
-from iris_wrapper import inflate_region as c_inflate_region
+from __future__ import absolute_import
+
+from .iris_wrapper import IRISOptions, IRISRegion, IRISProblem, IRISDebugData, Ellipsoid, Polyhedron
+from .iris_wrapper import inflate_region as c_inflate_region
 
 import numpy as np
 

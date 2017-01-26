@@ -5,8 +5,8 @@
 #include <chrono>
 #include <Eigen/LU>
 #include <Eigen/StdVector>
-#include "iris/iris_mosek.h"
-#include "iris/cvxgen_ldp.h"
+#include "iris_mosek.h"
+#include "cvxgen/cvxgen_ldp.h"
 
 namespace iris {
 

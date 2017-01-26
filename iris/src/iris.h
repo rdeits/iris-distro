@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
-#include "iris/geometry.h"
+#include "geometry.h"
 
 namespace iris {
 
