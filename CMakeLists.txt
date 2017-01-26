@@ -57,6 +57,7 @@ ExternalProject_Add(iris_project
       -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
       -DBUILD_TESTING=${BUILD_TESTING}
       -DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}
+      -DSWIG_EXECUTABLE=${SWIG_EXECUTABLE}
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
     DEPENDS ${iris_dependencies}
     )
