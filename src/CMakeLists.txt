@@ -43,9 +43,6 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
-set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/lib)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_INSTALL_PREFIX}/share/cmake)
-
 find_package(Eigen3 REQUIRED)
 include_directories( ${EIGEN3_INCLUDE_DIR} )
 
