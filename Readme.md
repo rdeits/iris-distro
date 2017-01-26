@@ -10,6 +10,15 @@ R.&nbsp;L.&nbsp;H. Deits and R.&nbsp;Tedrake, &ldquo;Computing large convex regi
 
 [![Build Status](https://travis-ci.org/rdeits/iris-distro.svg)](https://travis-ci.org/rdeits/iris-distro)
 
+MATLAB Support
+==============
+
+MATLAB support has been dropped from the current version of IRIS, because it was too hard for me to test and support. However, you can always use an older version of IRIS in MATLAB. Just clone this repository and then do:
+
+	git checkout matlab
+
+and follow the instructions in the Readme.md file. 
+
 Requirements
 ============
 
