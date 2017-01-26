@@ -31,6 +31,12 @@ if (IRIS_WITH_CDD)
     BUILD_COMMAND make
     BUILD_IN_SOURCE 1
     )
+  ExternalProject_Get_Property(cdd_project SOURCE_DIR)
+  ExternalProject_Add_Step(cdd_project install_setoper_header
+    COMMAND cp ${SOURCE_DIR}/lib-src/setoper.h ${CMAKE_INSTALL_PREFIX}/include
+    DEPENDEES install
+    COMMENT "installing setoper.h header manually"
+  )
 	set(iris_dependencies ${iris_dependencies} cdd_project)
 endif()
 
