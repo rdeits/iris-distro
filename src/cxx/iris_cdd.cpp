@@ -1,6 +1,6 @@
 #include <stdexcept>
-#include "setoper.h"
-#include "cdd.h"
+#include <setoper.h>
+#include <cdd.h>
 
 using namespace Eigen;
 
