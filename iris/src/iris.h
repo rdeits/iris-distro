@@ -23,11 +23,6 @@ public:
   int iter_limit;
   std::vector<Eigen::VectorXd> required_containment_points;
 
-  // Adding a setter makes things easier when wrapping this with SWIG
-  void set_required_containment_points(std::vector<Eigen::VectorXd> pts) {
-    required_containment_points = pts;
-  }
-
   IRISOptions():
     require_containment(false),
     required_containment_points({}),

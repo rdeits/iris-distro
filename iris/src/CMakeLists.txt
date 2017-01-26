@@ -34,6 +34,6 @@ install(TARGETS iris iris_geometry iris_mosek
 
 
 pybind11_add_module(iris_wrapper iris_wrapper.cpp)
-target_link_libraries(iris_wrapper iris iris_geometry iris_cvxgen_ldp iris_cvxgen_ldp_cpp)
+target_link_libraries(iris_wrapper PRIVATE iris iris_geometry iris_cvxgen_ldp iris_cvxgen_ldp_cpp)
 install(TARGETS iris_wrapper DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/irispy)
 

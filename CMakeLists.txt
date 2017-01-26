@@ -12,10 +12,6 @@ option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only d
 option(IRIS_WITH_PYBIND11 "binding generator for python based on c++11. Only disable if you have this already." ON)
 set(iris_dependencies)
 
-message("with eigen: " ${IRIS_WITH_EIGEN})
-message("with cdd: " ${IRIS_WITH_CDD})
-message("with mosek: " ${IRIS_WITH_MOSEK})
-
 if (IRIS_WITH_EIGEN)
 	ExternalProject_Add(eigen_project
 		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
