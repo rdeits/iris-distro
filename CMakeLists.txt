@@ -9,23 +9,17 @@ option(BUILD_TESTING "Build the testing tree." ON)
 option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
 option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
 option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
+option(IRIS_WITH_PYBIND11 "binding generator for python based on c++11. Only disable if you have this already." ON)
+option(IRIS_WITH_MATLAB "install pure-MATLAB version of IRIS" OFF)
 set(iris_dependencies)
-
-message("with eigen: " ${IRIS_WITH_EIGEN})
-message("with cdd: " ${IRIS_WITH_CDD})
-message("with mosek: " ${IRIS_WITH_MOSEK})
 
 if (IRIS_WITH_EIGEN)
 	ExternalProject_Add(eigen_project
 		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
 		)
-	ExternalProject_Get_Property(eigen_project BINARY_DIR)
-	ExternalProject_Add_Step(eigen_project install_pc_file
-		COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig && cp ${BINARY_DIR}/eigen3.pc ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/eigen3.pc
-		DEPENDEES install
-		COMMENT "installing eigen3.pc file for pkg-config"
-		)
+	ExternalProject_Get_Property(eigen_project SOURCE_DIR)
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SOURCE_DIR}/cmake)
 	set(iris_dependencies ${iris_dependencies} eigen_project)
 endif()
 if (IRIS_WITH_CDD)
@@ -37,27 +31,45 @@ if (IRIS_WITH_CDD)
     BUILD_COMMAND make
     BUILD_IN_SOURCE 1
     )
+  ExternalProject_Get_Property(cdd_project SOURCE_DIR)
+  ExternalProject_Add_Step(cdd_project install_setoper_header
+    COMMAND cp ${SOURCE_DIR}/lib-src/setoper.h ${CMAKE_INSTALL_PREFIX}/include
+    DEPENDEES install
+    COMMENT "installing setoper.h header manually"
+  )
 	set(iris_dependencies ${iris_dependencies} cdd_project)
 endif()
 
 if (IRIS_WITH_MOSEK)
 	ExternalProject_Add(mosek_project
 	    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
-	    GIT_TAG 8e93c8ad6e8de0c1401b8e39d187370a3a0bd2dc
+	    GIT_TAG 21b046d424f98ad150c9eeb2e798b0411bf2fbce
 	    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DWITH_MATLAB:BOOL=${IRIS_WITH_MATLAB}
 	    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
 	    )
 	set(iris_dependencies ${iris_dependencies} mosek_project)
 endif()
 
+if (IRIS_WITH_PYBIND11)
+  ExternalProject_Add(pybind11_project
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG 7830e8509f2adc97ce9ee32bf99cd4b82089cc4c
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DPYBIND11_TEST=OFF
+    )
+  set(iris_dependencies ${iris_dependencies} pybind11_project)
+endif()
+
 ExternalProject_Add(iris_project
-	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/iris
+	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src
     CMAKE_ARGS
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
       -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+      -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
+      -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
       -DBUILD_TESTING=${BUILD_TESTING}
-      -DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}
-      -DSWIG_EXECUTABLE=${SWIG_EXECUTABLE}
+      -DWITH_MATLAB=${IRIS_WITH_MATLAB}
+      -DPYBIND11_PYTHON_VERSION=${PYBIND11_PYTHON_VERSION}
     INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
     DEPENDS ${iris_dependencies}
     )

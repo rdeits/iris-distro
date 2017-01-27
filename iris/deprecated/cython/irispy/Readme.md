@@ -1,5 +1,0 @@
-# Requirements
-
-	pycddlib
-	numpy
-	matplotlib
