@@ -26,7 +26,6 @@ matrix:
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source travis/linux.sh ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install python ; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
