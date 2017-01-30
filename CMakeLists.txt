@@ -60,7 +60,7 @@ if (IRIS_WITH_PYBIND11)
   set(iris_dependencies ${iris_dependencies} pybind11_project)
 endif()
 
-list(INSERT CMAKE_PREFIX_PATH 0 "${CMAKE_INSTALL_PREFIX})
+list(INSERT CMAKE_PREFIX_PATH 0 "${CMAKE_INSTALL_PREFIX}")
 
 set(IRIS_CMAKE_ARGS 
       -DBUILD_TESTING=${BUILD_TESTING}
