@@ -7,4 +7,4 @@ target_link_libraries(iris_cvxgen_ldp_cpp iris_cvxgen_ldp)
 install(TARGETS iris_cvxgen_ldp_cpp iris_cvxgen_ldp
         LIBRARY DESTINATION lib)
 
-# pods_install_headers(cvxgen_ldp.h DESTINATION iris)
+install(FILES cvxgen_ldp.h DESTINATION include/iris)
