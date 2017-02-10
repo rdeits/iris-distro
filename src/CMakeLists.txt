@@ -9,7 +9,18 @@ if(BUILD_TESTING)
   enable_testing()
 endif()
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+
 find_package(pybind11 REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(Mosek REQUIRED)
+find_package(NumPy REQUIRED)
+
+include_directories(${NUMPY_INCLUDE_DIRS})
+include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${CMAKE_INSTALL_PREFIX}/include)
+link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 
 # Set RPATH for installed binaries
 set(CMAKE_INSTALL_RPATH
@@ -43,10 +54,6 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
-find_package(Eigen3 REQUIRED)
-include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
 add_subdirectory(cxx)
 add_subdirectory(python)
 
