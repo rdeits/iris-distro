@@ -1,8 +1,5 @@
 add_subdirectory(cvxgen)
 
-find_package(PkgConfig REQUIRED)
-find_package(Mosek REQUIRED)
-
 add_library(iris_geometry SHARED geometry.cpp)
 set_target_properties(iris_geometry PROPERTIES PUBLIC_HEADER "geometry.h")
 target_link_libraries(iris_geometry cdd)
