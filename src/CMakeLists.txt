@@ -17,6 +17,18 @@ find_package(Eigen3 REQUIRED)
 find_package(Mosek REQUIRED)
 find_package(NumPy REQUIRED)
 
+find_library(CDD_LIBRARY NAMES cdd)
+
+if(NOT CDD_LIBRARY)
+  message(FATAL_ERROR "Could NOT find cdd")
+endif()
+
+find_path(CDD_INCLUDE_DIR NAMES cdd.h)
+
+if(NOT CDD_INCLUDE_DIR)
+  message(FATAL_ERROR "Could NOT find cdd.h")
+endif()
+
 include_directories(${NUMPY_INCLUDE_DIRS})
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${CMAKE_INSTALL_PREFIX}/include)
