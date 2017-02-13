@@ -7,7 +7,10 @@ add_library(iris_cvxgen_ldp_cpp SHARED cvxgen_ldp.cpp)
 target_include_directories(iris_cvxgen_ldp_cpp PUBLIC "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(iris_cvxgen_ldp_cpp iris_cvxgen_ldp)
 
+export(TARGETS iris_cvxgen_ldp iris_cvxgen_ldp_cpp APPEND FILE iris-targets.cmake)
+
 install(TARGETS iris_cvxgen_ldp iris_cvxgen_ldp_cpp
+  EXPORT iris-targets
   LIBRARY DESTINATION ${IRIS_LIBRARY_DIR}
   PUBLIC_HEADER DESTINATION ${IRIS_INCLUDE_DIR}/iris
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

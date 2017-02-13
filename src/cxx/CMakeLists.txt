@@ -18,11 +18,29 @@ set_target_properties(iris PROPERTIES PUBLIC_HEADER iris/iris.h)
 target_include_directories(iris PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(iris iris_cvxgen_ldp_cpp iris_geometry iris_mosek)
 
+export(TARGETS iris iris_geometry iris_mosek APPEND FILE iris-targets.cmake)
+
 install(TARGETS iris iris_geometry iris_mosek
+  EXPORT iris-targets
   INCLUDES DESTINATION ${IRIS_INCLUDE_DIR}
   LIBRARY DESTINATION ${IRIS_LIBRARY_DIR}
   PUBLIC_HEADER DESTINATION ${IRIS_INCLUDE_DIR}/iris
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+configure_file(iris.pc.in iris.pc @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iris.pc"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+configure_package_config_file(iris-config.cmake.in iris-config.cmake
+  INSTALL_DESTINATION ${IRIS_DIR}
+  PATH_VARS IRIS_INCLUDE_DIR IRIS_LIBRARY_DIR
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO)
+
+install(EXPORT iris-targets DESTINATION ${IRIS_DIR})
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iris-config.cmake"
+  DESTINATION ${IRIS_DIR})
 
 if(BUILD_TESTING)
   add_executable(irisDemo iris_demo.cpp)
@@ -35,6 +53,7 @@ endif()
 pybind11_add_module(iris_wrapper iris_wrapper.cpp)
 target_include_directories(iris_wrapper PRIVATE "${NUMPY_INCLUDE_DIRS}")
 target_link_libraries(iris_wrapper PRIVATE iris iris_geometry iris_cvxgen_ldp iris_cvxgen_ldp_cpp)
+
 install(TARGETS iris_wrapper
   LIBRARY DESTINATION ${IRIS_PYTHON_DIR}/irispy
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
