@@ -4,6 +4,7 @@ set_target_properties(iris_cvxgen_ldp PROPERTIES PUBLIC_HEADER iris/cvxgen_ldp.h
 target_include_directories(iris_cvxgen_ldp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 add_library(iris_cvxgen_ldp_cpp SHARED cvxgen_ldp.cpp)
+target_include_directories(iris_cvxgen_ldp_cpp PUBLIC "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(iris_cvxgen_ldp_cpp iris_cvxgen_ldp)
 
 install(TARGETS iris_cvxgen_ldp iris_cvxgen_ldp_cpp
