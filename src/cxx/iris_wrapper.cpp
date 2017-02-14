@@ -2,8 +2,8 @@
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
 
-#include "geometry.h"
-#include "iris.h"
+#include "iris/geometry.h"
+#include "iris/iris.h"
 
 namespace py = pybind11;
 

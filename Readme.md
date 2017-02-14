@@ -66,6 +66,17 @@ which will launch a terminal-based GUI to let you change those options.
 
 If you're using IRIS as part of another project with cmake, you can just set the CMAKE_CACHE_ARGS to include `-DIRIS_WITH_EIGEN:BOOL=OFF` etc. For more information, see: <http://www.cmake.org/cmake/help/v3.0/module/ExternalProject.html>.
 
+-----
+Bazel
+-----
+Add the directory containing `mosek.pc` to the `PKG_CONFIG_PATH`:
+
+	export PKG_CONFIG_PATH=/path/to/lib/pkgconfig:$PKG_CONFIG_PATH
+
+Build CDD, Eigen, and IRIS:
+
+	bazel build ...
+
 Example Usage
 =============
 
