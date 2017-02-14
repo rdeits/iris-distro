@@ -25,7 +25,7 @@ endif()
 if (IRIS_WITH_CDD)
 	set(CDD_PROJECT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/cdd_project-prefix/src/cdd_project)
 	ExternalProject_Add(cdd_project
-		URL https://s3.amazonaws.com/drake-provisioning/cddlib-094h.tar.gz
+		URL http://terminator.robots.inf.ed.ac.uk/public/cddlib-094h.tar.gz
 		PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch
     CONFIGURE_COMMAND ${CDD_PROJECT_SRC_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
     BUILD_COMMAND make
