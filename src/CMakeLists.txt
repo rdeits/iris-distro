@@ -29,11 +29,6 @@ if(NOT CDD_INCLUDE_DIR)
   message(FATAL_ERROR "Could NOT find cdd.h")
 endif()
 
-include_directories(${NUMPY_INCLUDE_DIRS})
-include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
-
 # Set RPATH for installed binaries
 set(CMAKE_INSTALL_RPATH
   ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}
