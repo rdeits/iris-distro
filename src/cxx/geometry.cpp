@@ -1,8 +1,8 @@
-#include "geometry.h"
+#include "iris/geometry.h"
 #include <Eigen/Core>
 #include <Eigen/LU>
 #include <iostream>
-#include "iris_cdd.cpp"
+#include "iris_cdd.h"
 
 namespace iris {
 

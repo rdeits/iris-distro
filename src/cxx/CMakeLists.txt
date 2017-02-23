@@ -1,20 +1,26 @@
 add_subdirectory(cvxgen)
 
-add_library(iris_geometry SHARED geometry.cpp)
-set_target_properties(iris_geometry PROPERTIES PUBLIC_HEADER "geometry.h")
+add_library(iris_geometry SHARED geometry.cpp
+  iris/geometry.h iris_cdd.h)
+set_target_properties(iris_geometry PROPERTIES PUBLIC_HEADER iris/geometry.h)
+target_include_directories(iris_geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 target_link_libraries(iris_geometry cdd)
 
-add_library(iris_mosek SHARED iris_mosek.cpp)
-set_target_properties(iris_mosek PROPERTIES PUBLIC_HEADER "iris_mosek.h")
+add_library(iris_mosek SHARED iris_mosek.cpp
+  iris/iris_mosek.h)
+set_target_properties(iris_mosek PROPERTIES PUBLIC_HEADER iris/iris_mosek.h)
 target_link_libraries(iris_geometry cdd)
+target_include_directories(iris_mosek PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 target_link_libraries(iris_mosek mosek)
 target_link_libraries(iris_mosek iris_geometry)
 
 add_library(iris SHARED iris.cpp IRISProblem.cpp)
-set_target_properties(iris PROPERTIES PUBLIC_HEADER "iris.h")
+set_target_properties(iris PROPERTIES PUBLIC_HEADER iris/iris.h)
+target_include_directories(iris PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 target_link_libraries(iris iris_cvxgen_ldp_cpp iris_mosek)
 
 install(TARGETS iris iris_geometry iris_mosek
+  INCLUDES DESTINATION include
   LIBRARY DESTINATION lib
   PUBLIC_HEADER DESTINATION include/iris)
 

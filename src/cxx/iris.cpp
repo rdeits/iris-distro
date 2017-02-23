@@ -1,12 +1,12 @@
-#include "iris.h"
+#include "iris/iris.h"
 #include <stdexcept>
 #include <iostream>
 #include <numeric>
 #include <chrono>
 #include <Eigen/LU>
 #include <Eigen/StdVector>
-#include "iris_mosek.h"
-#include "cvxgen/cvxgen_ldp.h"
+#include "iris/iris_mosek.h"
+#include "cvxgen/iris/cvxgen_ldp.h"
 
 namespace iris {
 
