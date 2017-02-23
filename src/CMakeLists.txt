@@ -5,6 +5,7 @@ if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+include(CMakePackageConfigHelpers)
 include(CTest)
 include(GNUInstallDirs)
 
@@ -59,6 +60,7 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
 
+set(IRIS_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/iris)
 set(IRIS_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
 set(IRIS_LIBRARY_DIR ${CMAKE_INSTALL_LIBDIR})
 set(IRIS_PYTHON_DIR ${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages)
