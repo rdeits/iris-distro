@@ -4,12 +4,12 @@ add_library(iris_geometry SHARED geometry.cpp
   iris/geometry.h iris_cdd.h)
 set_target_properties(iris_geometry PROPERTIES PUBLIC_HEADER iris/geometry.h)
 target_include_directories(iris_geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-target_link_libraries(iris_geometry cdd)
+target_include_directories(iris_geometry PRIVATE "${CDD_INCLUDE_DIR}")
+target_link_libraries(iris_geometry "${CDD_LIBRARY}")
 
 add_library(iris_mosek SHARED iris_mosek.cpp
   iris/iris_mosek.h)
 set_target_properties(iris_mosek PROPERTIES PUBLIC_HEADER iris/iris_mosek.h)
-target_link_libraries(iris_geometry cdd)
 target_include_directories(iris_mosek PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 target_link_libraries(iris_mosek mosek)
 target_link_libraries(iris_mosek iris_geometry)
