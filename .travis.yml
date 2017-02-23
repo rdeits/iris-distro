@@ -4,7 +4,7 @@ notifications:
   email: false
 
 branches:
-  only: 
+  only:
     - master
 
 matrix:
@@ -13,34 +13,42 @@ matrix:
       sudo: required
       dist: trusty
       python: "2.7"
-      env: 
+      env:
+        - IRIS_BUILD=bazel
+    - os: linux
+      sudo: required
+      dist: trusty
+      python: "2.7"
+      env:
+        - IRIS_BUILD=cmake
         - PYBIND11_PYTHON_VERSION=2.7
     - os: linux
       sudo: required
       dist: trusty
       python: "3.5"
       env:
+        - IRIS_BUILD=cmake
         - PYBIND11_PYTHON_VERSION=3.5
     - os: osx
       language: generic
+      env:
+        - IRIS_BUILD=bazel
+    - os: osx
+      language: generic
+      env:
+        - IRIS_BUILD=cmake
 
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source travis/linux.sh ; fi
-  - mkdir -p $HOME/.config/matplotlib
-  - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
-  - export MATPLOTLIBRC=$HOME/.config/matplotlib
-  - openssl aes-256-cbc -K $encrypted_b279d3ed6718_key -iv $encrypted_b279d3ed6718_iv -in lic.enc -out lic -d
-  - mkdir -p $HOME/mosek
-  - mv lic $HOME/mosek/mosek.lic
-  - pip install -r requirements.txt
-  - pip install jupyter
+addons:
+  apt:
+    sources:
+      - sourceline: "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8"
+        key_url: https://bazel.build/bazel-release.pub.gpg
+    packages:
+      - bazel
 
 install:
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=install -DCMAKE_BUILD_TYPE=Release -DPYBIND11_PYTHON_VERSION=$PYBIND11_PYTHON_VERSION
-  - make
+  - source travis/$TRAVIS_OS_NAME.sh
+  - source travis/common.sh
 
 script:
-  - cd iris_project-prefix/src/iris_project-build
-  - ctest --output-on-failure
+  - source travis/$IRIS_BUILD.sh
