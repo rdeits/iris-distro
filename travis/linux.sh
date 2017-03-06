@@ -1,13 +1,13 @@
 set -e
-
-mkdir -p ~/tools
-pushd ~/tools
-
-wget https://cmake.org/files/v3.5/cmake-3.5.2-Linux-x86_64.tar.gz
-tar zxvf cmake-3.5.2-Linux-x86_64.tar.gz
-rm cmake-3.5.2-Linux-x86_64.tar.gz
-cd cmake-3.5.2-Linux-x86_64/bin
-export PATH=`pwd`:$PATH
+CMAKE_VERSION_MAJOR=3
+CMAKE_VERSION_MINOR=7
+CMAKE_VERSION_PATCH=2
+CMAKE_VERSION=$CMAKE_VERSION_MAJOR.$CMAKE_VERSION_MINOR.$CMAKE_VERSION_PATCH
+pushd $HOME
+curl -LO https://cmake.org/files/v$CMAKE_VERSION_MAJOR.$CMAKE_VERSION_MINOR/cmake-$CMAKE_VERSION-Linux-x86_64.tar.gz
+shasum -c $TRAVIS_BUILD_DIR/travis/cmake-$CMAKE_VERSION-Linux-x86_64.tar.gz.sha256
+tar xf cmake-$CMAKE_VERSION-Linux-x86_64.tar.gz
+rm -f cmake-$CMAKE_VERSION-Linux-x86_64.tar.gz
 popd
-
-sudo apt-get install -y pkg-config libgmp-dev
+export PATH=$HOME/cmake-$CMAKE_VERSION-Linux-x86_64/bin:$PATH
+set +e

@@ -1,0 +1,3 @@
+set -e
+bazel test ...
+set +e

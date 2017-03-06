@@ -1,0 +1,296 @@
+# -*- mode: python -*-
+# vi: set ft=python :
+
+licenses(["notice"])
+
+cc_library(
+    name = "iris_cvxgen_ldp",
+    srcs = [
+        "cxx/cvxgen/cvxgen_ldp.c",
+        "cxx/cvxgen/ldl.c",
+        "cxx/cvxgen/matrix_support.c",
+        "cxx/cvxgen/solver.c",
+        "cxx/cvxgen/solver.h",
+        "cxx/cvxgen/util.c",
+    ],
+    hdrs = ["cxx/cvxgen/iris/cvxgen_ldp.h"],
+    includes = ["cxx/cvxgen"],
+)
+
+cc_library(
+    name = "iris_cvxgen_ldp_cpp",
+    deps = [
+        ":iris_cvxgen_ldp",
+        "@eigen//:eigen",
+    ],
+    srcs = ["cxx/cvxgen/cvxgen_ldp.cpp"],
+)
+
+cc_library(
+    name = "iris_geometry",
+    deps = [
+        "@cdd//:cdd",
+        "@eigen//:eigen",
+    ],
+    srcs = [
+        "cxx/iris_cdd.h",
+        "cxx/geometry.cpp",
+    ],
+    hdrs = ["cxx/iris/geometry.h"],
+    includes = ["cxx"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "iris_mosek",
+    deps = [
+        ":iris_geometry",
+        "@mosek//:mosek",
+    ],
+    srcs = ["cxx/iris_mosek.cpp"],
+    hdrs = ["cxx/iris/iris_mosek.h"],
+    includes = ["cxx"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "iris",
+    deps = [
+        ":iris_geometry",
+        ":iris_mosek",
+        ":iris_cvxgen_ldp_cpp",
+        "@eigen//:eigen",
+    ],
+    srcs = [
+        "cxx/iris.cpp",
+        "cxx/IRISProblem.cpp",
+    ],
+    hdrs = ["cxx/iris/iris.h"],
+    includes = ["cxx"],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "test_util",
+    deps = ["@eigen//:eigen"],
+    hdrs = ["cxx/test/test_util.h"],
+    linkstatic = 1,
+    testonly = 1,
+)
+
+cc_test(
+    name = "cc_test_iris_demo",
+    deps = [":iris"],
+    srcs = ["cxx/iris_demo.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_append_polyhedron",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_append_polyhedron.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_cdd",
+    deps = [
+      ":iris",
+      ":test_util",
+    ],
+    srcs = ["cxx/test/test_cdd.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_closest_point",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_closest_point.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_for_thin_mosek_ellipsoid_bug",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_for_thin_mosek_ellipsoid_bug.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_infeasible_ellipsoid",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_infeasible_ellipsoid.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_iris",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_iris.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_mosek_ellipsoid",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_mosek_ellipsoid.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_required_containment",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_required_containment.cpp"],
+    size = "small",
+)
+
+cc_test(
+    name = "cc_test_separating_hyperplanes",
+    deps = [
+      ":iris",
+      ":test_util",
+      "@eigen//:eigen",
+    ],
+    srcs = ["cxx/test/test_separating_hyperplanes.cpp"],
+    size = "small",
+)
+
+cc_binary(
+    name = "python/irispy/iris_wrapper.so",
+    deps = [
+        ":iris",
+        "@pybind11//:pybind11",
+    ],
+    srcs = ["cxx/iris_wrapper.cpp"],
+    linkshared = 1,
+    linkstatic = 1,
+)
+
+py_library(
+    name = "irispy",
+    srcs = [
+        "python/irispy/__init__.py",
+        "python/irispy/cspace.py",
+        "python/irispy/drawing.py",
+        "python/irispy/irispy.py",
+        "python/irispy/extensions/__init__.py",
+        "python/irispy/extensions/ellipsoid.py",
+        "python/irispy/extensions/irisdebugdata.py",
+        "python/irispy/extensions/polyhedron.py",
+    ],
+    data = [":python/irispy/iris_wrapper.so"],
+    imports = ["python"],
+    srcs_version = "PY2AND3",
+    visibility = ["//visibility:public"],
+)
+
+# TODO: Needs Matplotlib, NumPy, and SciPy to be added the Bazel build.
+
+# py_test(
+#     name = "py_test_cpp_wrapper",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/cpp_wrapper_test.py"],
+#     main = "python/irispy/test/cpp_wrapper_test.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_python_interface",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/python_interface_test.py"],
+#     main = "python/irispy/test/python_interface_test.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_cpp_exception",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_cpp_exception.py"],
+#     main = "python/irispy/test/test_cpp_exception.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_ellipsoid",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_ellipsoid.py"],
+#     main = "python/irispy/test/test_ellipsoid.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_iris_2d",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_iris_2d.py"],
+#     main = "python/irispy/test/test_iris_2d.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_iris_3d",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_iris_3d.py"],
+#     main = "python/irispy/test/test_iris_3d.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_iris",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_iris.py"],
+#     main = "python/irispy/test/test_iris.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_polytope",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_polytope.py"],
+#     main = "python/irispy/test/test_polytope.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )
+#
+# py_test(
+#     name = "py_test_required_containment",
+#     deps = [":irispy"],
+#     srcs = ["python/irispy/test/test_required_containment.py"],
+#     main = "python/irispy/test/test_required_containment.py",
+#     size = "small",
+#     srcs_version = "PY2AND3",
+# )

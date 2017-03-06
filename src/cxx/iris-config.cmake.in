@@ -1,0 +1,12 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(mosek)
+
+set(IRIS_FOUND TRUE)
+set_and_check(IRIS_INCLUDE_DIRS "@PACKAGE_IRIS_INCLUDE_DIR@")
+set_and_check(IRIS_LIBRARY_DIRS "@PACKAGE_IRIS_LIBRARY_DIR@")
+set(IRIS_LIBRARIES iris)
+
+include("${CMAKE_CURRENT_LIST_DIR}/iris-targets.cmake")
