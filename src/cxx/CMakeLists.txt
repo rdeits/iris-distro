@@ -28,13 +28,13 @@ install(TARGETS iris iris_geometry iris_mosek
 # pods_install_headers(iris.h iris_mosek.h geometry.h DESTINATION iris)
 # pods_install_libraries(iris iris_geometry iris_mosek)
 
-# if(BUILD_TESTING)
-#   add_executable(irisDemo iris_demo.cpp)
-#   target_link_libraries(irisDemo iris)
-#   add_test(irisDemo ${CMAKE_BINARY_DIR}/bin/irisDemo)
+if(BUILD_TESTING)
+  add_executable(irisDemo iris_demo.cpp)
+  target_link_libraries(irisDemo iris)
+  add_test(NAME irisDemo COMMAND irisDemo)
 
-#   add_subdirectory(test)
-# endif()
+  add_subdirectory(test)
+endif()
 
 
 pybind11_add_module(iris_wrapper iris_wrapper.cpp)
