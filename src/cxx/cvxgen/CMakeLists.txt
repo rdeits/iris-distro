@@ -1,10 +1,13 @@
-add_library(iris_cvxgen_ldp SHARED solver.c matrix_support.c ldl.c util.c cvxgen_ldp.c)
-# pods_install_headers(cvxgen_ldp.h DESTINATION iris)
+add_library(iris_cvxgen_ldp SHARED solver.c matrix_support.c ldl.c util.c cvxgen_ldp.c
+  iris/cvxgen_ldp.h solver.h)
+target_include_directories(iris_cvxgen_ldp
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+set_target_properties(iris_cvxgen_ldp PROPERTIES PUBLIC_HEADER iris/cvxgen_ldp.h)
 
 add_library(iris_cvxgen_ldp_cpp SHARED cvxgen_ldp.cpp)
+target_include_directories(iris_cvxgen_ldp_cpp PUBLIC "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(iris_cvxgen_ldp_cpp iris_cvxgen_ldp)
 
-install(TARGETS iris_cvxgen_ldp_cpp iris_cvxgen_ldp
-        LIBRARY DESTINATION lib)
-
-install(FILES cvxgen_ldp.h DESTINATION include/iris)
+install(TARGETS iris_cvxgen_ldp iris_cvxgen_ldp_cpp
+  LIBRARY DESTINATION lib
+  PUBLIC_HEADER DESTINATION include/iris)

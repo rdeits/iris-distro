@@ -1,7 +1,7 @@
 function(add_iris_test base_name)
 	add_executable(${base_name} ${base_name}.cpp)
 	target_link_libraries(${base_name} iris)
-	add_test(${base_name} ${CMAKE_BINARY_DIR}/bin/${base_name})
+	add_test(NAME ${base_name} COMMAND ${base_name})
 endfunction()
 
 add_iris_test(test_cdd)

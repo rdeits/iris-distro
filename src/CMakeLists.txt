@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 2.8.12)
+project(iris)
 
 if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
@@ -13,14 +14,20 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
 find_package(pybind11 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(PkgConfig REQUIRED)
 find_package(Mosek REQUIRED)
 find_package(NumPy REQUIRED)
 
-include_directories(${NUMPY_INCLUDE_DIRS})
-include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(${CMAKE_INSTALL_PREFIX}/include)
-link_directories(${CMAKE_INSTALL_PREFIX}/lib)
+find_library(CDD_LIBRARY NAMES cdd)
+
+if(NOT CDD_LIBRARY)
+  message(FATAL_ERROR "Could NOT find cdd")
+endif()
+
+find_path(CDD_INCLUDE_DIR NAMES cdd.h)
+
+if(NOT CDD_INCLUDE_DIR)
+  message(FATAL_ERROR "Could NOT find cdd.h")
+endif()
 
 # Set RPATH for installed binaries
 set(CMAKE_INSTALL_RPATH
