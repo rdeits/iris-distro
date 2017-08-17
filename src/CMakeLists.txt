@@ -14,7 +14,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
 find_package(pybind11 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(PkgConfig REQUIRED)
 find_package(Mosek REQUIRED)
 find_package(NumPy REQUIRED)
 
