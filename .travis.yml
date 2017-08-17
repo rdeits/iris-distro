@@ -33,6 +33,7 @@ before_install:
   - mkdir -p $HOME/mosek
   - mv lic $HOME/mosek/mosek.lic
   - pip install -r requirements.txt
+  - pip install IPython==5.0
   - pip install jupyter
 
 install:
