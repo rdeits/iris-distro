@@ -3,7 +3,8 @@ add_subdirectory(cvxgen)
 add_library(iris_geometry SHARED geometry.cpp
   iris/geometry.h iris_cdd.h)
 set_target_properties(iris_geometry PROPERTIES PUBLIC_HEADER iris/geometry.h)
-target_link_libraries(iris_geometry cdd)
+target_include_directories(iris_geometry PRIVATE "${CDD_INCLUDE_DIR}")
+target_link_libraries(iris_geometry "${CDD_LIBRARY}")
 
 add_library(iris_mosek SHARED iris_mosek.cpp
   iris/iris_mosek.h)
