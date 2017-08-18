@@ -9,5 +9,6 @@ target_include_directories(iris_cvxgen_ldp_cpp PUBLIC "${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(iris_cvxgen_ldp_cpp iris_cvxgen_ldp)
 
 install(TARGETS iris_cvxgen_ldp iris_cvxgen_ldp_cpp
-  LIBRARY DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/iris)
+  LIBRARY DESTINATION ${IRIS_LIBRARY_DIR}
+  PUBLIC_HEADER DESTINATION ${IRIS_INCLUDE_DIR}/iris
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
