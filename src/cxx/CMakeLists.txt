@@ -26,6 +26,11 @@ install(TARGETS iris iris_geometry iris_mosek
   PUBLIC_HEADER DESTINATION ${IRIS_INCLUDE_DIR}/iris
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+configure_file(iris.pc.in iris.pc @ONLY)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iris.pc"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
 if(BUILD_TESTING)
   add_executable(irisDemo iris_demo.cpp)
   target_link_libraries(irisDemo iris)
@@ -37,6 +42,7 @@ endif()
 pybind11_add_module(iris_wrapper iris_wrapper.cpp)
 target_include_directories(iris_wrapper PRIVATE "${NUMPY_INCLUDE_DIRS}")
 target_link_libraries(iris_wrapper PRIVATE iris iris_geometry iris_cvxgen_ldp iris_cvxgen_ldp_cpp)
+
 install(TARGETS iris_wrapper
   LIBRARY DESTINATION ${IRIS_PYTHON_DIR}/irispy
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
