@@ -5,10 +5,8 @@ if(APPLE AND POLICY CMP0042)
   cmake_policy(SET CMP0042 NEW)
 endif()
 
-if(BUILD_TESTING)
-  include(CTest)
-  enable_testing()
-endif()
+include(CTest)
+include(GNUInstallDirs)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
@@ -60,6 +58,10 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996") # disable sprintf security warning
 endif()
+
+set(IRIS_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+set(IRIS_LIBRARY_DIR ${CMAKE_INSTALL_LIBDIR})
+set(IRIS_PYTHON_DIR ${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages)
 
 add_subdirectory(cxx)
 add_subdirectory(python)

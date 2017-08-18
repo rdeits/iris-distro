@@ -21,12 +21,10 @@ target_include_directories(iris
 target_link_libraries(iris iris_cvxgen_ldp_cpp iris_geometry iris_mosek)
 
 install(TARGETS iris iris_geometry iris_mosek
-  INCLUDES DESTINATION include
-  LIBRARY DESTINATION lib
-  PUBLIC_HEADER DESTINATION include/iris)
-
-# pods_install_headers(iris.h iris_mosek.h geometry.h DESTINATION iris)
-# pods_install_libraries(iris iris_geometry iris_mosek)
+  INCLUDES DESTINATION ${IRIS_INCLUDE_DIR}
+  LIBRARY DESTINATION ${IRIS_LIBRARY_DIR}
+  PUBLIC_HEADER DESTINATION ${IRIS_INCLUDE_DIR}/iris
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 if(BUILD_TESTING)
   add_executable(irisDemo iris_demo.cpp)
@@ -36,8 +34,9 @@ if(BUILD_TESTING)
   add_subdirectory(test)
 endif()
 
-
 pybind11_add_module(iris_wrapper iris_wrapper.cpp)
 target_include_directories(iris_wrapper PRIVATE "${NUMPY_INCLUDE_DIRS}")
 target_link_libraries(iris_wrapper PRIVATE iris iris_geometry iris_cvxgen_ldp iris_cvxgen_ldp_cpp)
-install(TARGETS iris_wrapper DESTINATION lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/dist-packages/irispy)
+install(TARGETS iris_wrapper
+  LIBRARY DESTINATION ${IRIS_PYTHON_DIR}/irispy
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
