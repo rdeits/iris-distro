@@ -4,95 +4,185 @@ project(iris_distro)
 include(ExternalProject)
 
 if(APPLE AND POLICY CMP0042)
+  # MACOSX_RPATH is enabled by default.
   cmake_policy(SET CMP0042 NEW)
 endif()
 
+# Set the default build type.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING
+    "Choose the type of build; options are Debug Release RelWithDebInfo MinSizeRel."
+    FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    Debug Release RelWithDebInfo MinSizeRel)
+endif()
+
+# Set the default installation prefix.
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE STRING
+    "TODO" FORCE)
+endif()
+
 option(BUILD_TESTING "Build the testing tree." ON)
-option(IRIS_WITH_EIGEN "c++ matrix library. Only disable if you have this already." ON)
-option(IRIS_WITH_MOSEK "convex optimization solver; free for academics. Only disable if you have this already." ON)
-option(IRIS_WITH_CDD   "tool for converting representations of polytopes. Only disable if you have this already." ON)
-option(IRIS_WITH_PYBIND11 "binding generator for python based on c++11. Only disable if you have this already." ON)
-option(IRIS_WITH_MATLAB "install pure-MATLAB version of IRIS" OFF)
-set(iris_dependencies)
+option(IRIS_WITH_EIGEN
+  "C++ matrix library. Only disable if you have this already." ON)
+option(IRIS_WITH_MOSEK
+  "Convex optimization solver; free for academics. Only disable if you have this already."
+  ON)
+option(IRIS_WITH_CDD
+  "Tool for converting representations of polytopes. Only disable if you have this already."
+  ON)
+option(IRIS_WITH_PYBIND11
+  "Binding generator for Python based on C++11. Only disable if you have this already."
+  ON)
+option(IRIS_WITH_MATLAB "Install the pure-MATLAB version of IRIS" OFF)
 
-if (IRIS_WITH_EIGEN)
-	ExternalProject_Add(eigen_project
-		URL http://bitbucket.org/eigen/eigen/get/3.2.4.tar.bz2
-		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-		)
-	ExternalProject_Get_Property(eigen_project SOURCE_DIR)
-  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${SOURCE_DIR}/cmake)
-	set(iris_dependencies ${iris_dependencies} eigen_project)
+set(IRIS_DEPENDENCIES)
+
+if(IRIS_WITH_EIGEN)
+  ExternalProject_Add(eigen3
+    DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen3-download"
+    URL https://bitbucket.org/eigen/eigen/get/3.3.3.tar.gz
+    URL_HASH SHA256=94878cbfa27b0d0fbc64c00d4aafa137f678d5315ae62ba4aecddbd4269ae75f
+    TLS_VERIFY 1
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen3-src"
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      "-DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}"
+      "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+      "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
+      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+      -DEIGEN_TEST_NO_OPENGL=ON
+      -DEIGEN_TEST_NOQT=ON
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/eigen3-build")
+  ExternalProject_Get_Property(eigen3 SOURCE_DIR)
+  list(INSERT CMAKE_MODULE_PATH 0 "${SOURCE_DIR}/cmake")
+  list(APPEND IRIS_DEPENDENCIES eigen3)
 endif()
-if (IRIS_WITH_CDD)
-	set(CDD_PROJECT_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/cdd_project-prefix/src/cdd_project)
-	ExternalProject_Add(cdd_project
-		URL https://s3.amazonaws.com/drake-provisioning/cddlib-094h.tar.gz
-		PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch
-    CONFIGURE_COMMAND ${CDD_PROJECT_SRC_DIR}/configure --prefix=${CMAKE_INSTALL_PREFIX}
-    BUILD_COMMAND make
-    BUILD_IN_SOURCE 1
-    )
-  ExternalProject_Get_Property(cdd_project SOURCE_DIR)
-  ExternalProject_Add_Step(cdd_project install_setoper_header
-    COMMAND cp ${SOURCE_DIR}/lib-src/setoper.h ${CMAKE_INSTALL_PREFIX}/include
+
+if(IRIS_WITH_CDD)
+  if(NOT CMAKE_VERSION VERSION_LESS 3.1)
+    set(AUTOTOOLS_ENV
+      "${CMAKE_COMMAND}" -E env
+      "CC=${CMAKE_C_COMPILER}"
+      "CFLAGS=${CMAKE_C_FLAGS}"
+      "LDFLAGS=${CMAKE_SHARED_LINKER_FLAGS}")
+  endif()
+
+  find_program(PATCH_EXECUTABLE NAMES patch)
+  mark_as_advanced(PATCH_EXECUTABLE)
+  if(NOT PATCH_EXECUTABLE)
+    message(FATAL_ERROR "Could NOT find patch executable")
+  endif()
+
+  set(MAKE_COMMAND "${CMAKE_MAKE_PROGRAM}")
+  if(CMAKE_VERBOSE_MAKEFILE)
+    set(MAKE_COMMAND "${MAKE_COMMAND}" V=1)
+  endif()
+
+  ExternalProject_Add(cdd
+    DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-download"
+    URL https://d2tbce6hkathzp.cloudfront.net/other/cddlib/cddlib-094h.tar.gz
+    URL_HASH SHA256=fe6d04d494683cd451be5f6fe785e147f24e8ce3ef7387f048e739ceb4565ab5
+    TLS_VERIFY 1
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-src"
+    PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch"
+    CONFIGURE_COMMAND ${AUTOTOOLS_ENV} "<SOURCE_DIR>/configure" "--prefix=${CMAKE_INSTALL_PREFIX}"
+    BUILD_COMMAND ${AUTOTOOLS_ENV} ${MAKE_COMMAND}
+    BUILD_IN_SOURCE 1)
+  ExternalProject_Get_Property(cdd SOURCE_DIR)
+  ExternalProject_Add_Step(cdd install_setoper_header
+    COMMAND "${CMAKE_COMMAND}" -E copy "${SOURCE_DIR}/lib-src/setoper.h" "${CMAKE_INSTALL_PREFIX}/include"
     DEPENDEES install
-    COMMENT "installing setoper.h header manually"
-  )
-	set(iris_dependencies ${iris_dependencies} cdd_project)
+    COMMENT "installing setoper.h header manually")
+  list(APPEND IRIS_DEPENDENCIES cdd)
 endif()
 
-if (IRIS_WITH_MOSEK)
-	ExternalProject_Add(mosek_project
-	    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
-	    GIT_TAG 21b046d424f98ad150c9eeb2e798b0411bf2fbce
-	    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DWITH_MATLAB:BOOL=${IRIS_WITH_MATLAB}
-	    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
-	    )
-	set(iris_dependencies ${iris_dependencies} mosek_project)
+if(IRIS_WITH_MOSEK)
+  ExternalProject_Add(mosek
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/mosek-src"
+    GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
+    GIT_TAG 48dccbeb36cc538a6d3e240836e26d29244165f6
+    CMAKE_ARGS
+      -DBUILD_TESTING=OFF
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      "-DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}"
+      "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+      "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+      -DWITH_MATLAB=${IRIS_WITH_MATLAB}
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/mosek-build")
+  list(APPEND IRIS_DEPENDENCIES mosek)
 endif()
 
-if (IRIS_WITH_PYBIND11)
-  ExternalProject_Add(pybind11_project
+if(IRIS_WITH_PYBIND11)
+  ExternalProject_Add(pybind11
+    SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/pybind11-src"
     GIT_REPOSITORY https://github.com/pybind/pybind11.git
     GIT_TAG 7830e8509f2adc97ce9ee32bf99cd4b82089cc4c
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DPYBIND11_TEST=OFF
-    )
-  set(iris_dependencies ${iris_dependencies} pybind11_project)
+    CMAKE_ARGS
+      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+      "-DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}"
+      "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+      "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
+      "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+      -DPYBIND11_PYTHON_VERSION=${PYBIND11_PYTHON_VERSION}
+      -DPYBIND11_TEST=OFF
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/pybind11-build")
+  list(APPEND IRIS_DEPENDENCIES pybind11)
 endif()
 
 list(INSERT CMAKE_PREFIX_PATH 0 "${CMAKE_INSTALL_PREFIX}")
 
-set(IRIS_CMAKE_ARGS 
-      -DBUILD_TESTING=${BUILD_TESTING}
-      -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-      -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
-      -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}
-      -DWITH_MATLAB=${IRIS_WITH_MATLAB}
-      -DPYBIND11_PYTHON_VERSION=${PYBIND11_PYTHON_VERSION})
+set(IRIS_CMAKE_ARGS
+  -DBUILD_TESTING=${BUILD_TESTING}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  "-DCMAKE_C_COMPILER_LAUNCHER=${CMAKE_C_COMPILER_LAUNCHER}"
+  "-DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}"
+  "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+  "-DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}"
+  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+  "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
+  "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}"
+  "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+  "-DCMAKE_MODULE_LINKER_FLAGS=${CMAKE_MODULE_LINKER_FLAGS}"
+  "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}"
+  "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
+  "-DCMAKE_SHARED_LINKER_FLAGS=${CMAKE_SHARED_LINKER_FLAGS}"
+  -DCMAKE_VERBOSE_MAKEFILE=${CMAKE_VERBOSE_MAKEFILE}
+  -DPYBIND11_PYTHON_VERSION=${PYBIND11_PYTHON_VERSION}
+  -DWITH_MATLAB=${IRIS_WITH_MATLAB})
 
-if (DEFINED PYTHON_EXECUTABLE)
-  set(IRIS_CMAKE_ARGS ${IRIS_CMAKE_ARGS} -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE})
+if(DEFINED EIGEN3_INCLUDE_DIR)
+  list(APPEND IRIS_CMAKE_ARGS "-DEIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}")
 endif()
-if (DEFINED PYTHON_INCLUDE_DIR)
-  set(IRIS_CMAKE_ARGS ${IRIS_CMAKE_ARGS} -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIR})
+if(DEFINED PYTHON_EXECUTABLE)
+  list(APPEND IRIS_CMAKE_ARGS "-DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE}")
 endif()
-if (DEFINED PYTHON_LIBRARY)
-  set(IRIS_CMAKE_ARGS ${IRIS_CMAKE_ARGS} -DPYTHON_LIBRARY=${PYTHON_LIBRARY})
+if(DEFINED PYTHON_INCLUDE_DIR)
+  list(APPEND IRIS_CMAKE_ARGS "-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE_DIR}")
+endif()
+if(DEFINED PYTHON_LIBRARY)
+  list(APPEND IRIS_CMAKE_ARGS "-DPYTHON_LIBRARY=${PYTHON_LIBRARY}")
 endif()
 
-ExternalProject_Add(iris_project
-	SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src
-    CMAKE_ARGS ${IRIS_CMAKE_ARGS}
-    INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
-    DEPENDS ${iris_dependencies}
-    )
-ExternalProject_Add_Step(iris_project forceconfigure
- 		COMMAND ${CMAKE_COMMAND} -E echo "Force configure of iris"
- 		DEPENDEES update
- 		DEPENDERS configure
- 		ALWAYS 1)
+if(CMAKE_VERSION VERSION_LESS 3.2)
+  set(EXTERNAL_PROJECT_ADD_BUILD_ALWAYS)
+else()
+  set(EXTERNAL_PROJECT_ADD_BUILD_ALWAYS BUILD_ALWAYS 1)
+endif()
 
-install(FILES)
+ExternalProject_Add(iris
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src"
+  CMAKE_ARGS ${IRIS_CMAKE_ARGS}
+  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/iris-build"
+  ${EXTERNAL_PROJECT_ADD_BUILD_ALWAYS}
+  DEPENDS ${IRIS_DEPENDENCIES})
+
+if(CMAKE_VERSION VERSION_LESS 3.2)
+  ExternalProject_Add_Step(iris build_always
+    COMMAND "${CMAKE_COMMAND}" -E echo "Force configure of IRIS"
+    DEPENDEES update
+    DEPENDERS configure
+    ALWAYS 1)
+endif()
