@@ -13,6 +13,7 @@ if(APPLE)
   endif()
 endif()
 
+include(CMakePackageConfigHelpers)
 include(CTest)
 include(GNUInstallDirs)
 
@@ -125,6 +126,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAGS_WARNING}")
 
+set(IRIS_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 set(IRIS_INCLUDE_DIR ${CMAKE_INSTALL_INCLUDEDIR})
 set(IRIS_LIBRARY_DIR ${CMAKE_INSTALL_LIBDIR})
 set(IRIS_PYTHON_DIR
