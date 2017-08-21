@@ -4,17 +4,16 @@ set -euo pipefail
 
 case "${1:-}" in
   ("homebrew")
-    brew install cmake gmp matplotlib numpy python scipy
-    pip2 install ipython==5.4.1 jupyter nose
+    brew install cmake gmp numpy python3 scipy
+    pip3 install matplotlib nose
     ;;
   ("macports")
-    port install cmake gmp py27-ipython py27-jupyter py27-matplotlib \
-      py27-nose py27-numpy py27-scipy python27
+    port install cmake gmp py36-matplotlib py36-nose py36-numpy py36-scipy \
+      python36
     ;;
   ("ubuntu")
     apt-get install --no-install-recommends cmake g++ gcc git libgmp-dev make \
-      python python-matplotlib python-nose python-numpy python-pip python-scipy
-    pip install ipython==5.4.1 jupyter
+      python3 python3-matplotlib python3-nose python3-numpy python3-scipy
     ;;
   (*)
     echo "Usage: $0 <package_manager>" 1>&2
