@@ -136,3 +136,5 @@ add_subdirectory(python)
 if(WITH_MATLAB)
   add_subdirectory(matlab)
 endif()
+
+install(FILES license.txt DESTINATION ${CMAKE_INSTALL_DOCDIR})
