@@ -19,10 +19,18 @@ include(GNUInstallDirs)
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/../cmake")
 
-find_package(pybind11 REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Mosek REQUIRED)
-find_package(NumPy REQUIRED)
+find_package(pybind11 CONFIG REQUIRED)
+find_package(Mosek CONFIG REQUIRED)
+find_package(NumPy MODULE REQUIRED)
+
+# Newer versions of Eigen 3 define imported targets in their package
+# configuration files, so try to locate such a file before using the legacy
+# find module.
+find_package(Eigen3 CONFIG)
+
+if(NOT Eigen3_FOUND)
+  find_package(Eigen3 MODULE REQUIRED)
+endif()
 
 find_library(CDD_LIBRARY NAMES cdd)
 

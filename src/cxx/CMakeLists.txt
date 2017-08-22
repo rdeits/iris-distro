@@ -6,7 +6,12 @@ set_target_properties(iris_geometry PROPERTIES
   PUBLIC_HEADER iris/geometry.h
   SOVERSION 0)
 target_include_directories(iris_geometry PRIVATE "${CDD_INCLUDE_DIR}"
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> "${EIGEN3_INCLUDE_DIR}")
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+if(TARGET Eigen3::Eigen)
+  target_link_libraries(iris_geometry Eigen3::Eigen)
+else()
+  target_include_directories(iris_geometry PUBLIC "${EIGEN3_INCLUDE_DIR}")
+endif()
 target_link_libraries(iris_geometry "${CDD_LIBRARY}")
 
 add_library(iris_mosek SHARED iris_mosek.cpp
@@ -23,10 +28,16 @@ set_target_properties(iris PROPERTIES
   PUBLIC_HEADER iris/iris.h
   SOVERSION 0)
 target_include_directories(iris
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> "${EIGEN3_INCLUDE_DIR}")
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+if(TARGET Eigen3::Eigen)
+  target_link_libraries(iris Eigen3::Eigen)
+else()
+  target_include_directories(iris PUBLIC "${EIGEN3_INCLUDE_DIR}")
+endif()
 target_link_libraries(iris iris_cvxgen_ldp_cpp iris_geometry iris_mosek)
 
-export(TARGETS iris iris_geometry iris_mosek APPEND FILE iris-targets.cmake)
+export(TARGETS iris iris_geometry iris_mosek NAMESPACE iris::
+  APPEND FILE iris-targets.cmake)
 
 install(TARGETS iris iris_geometry iris_mosek
   EXPORT iris-targets
@@ -39,6 +50,15 @@ configure_file(iris.pc.in iris.pc @ONLY)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/iris.pc"
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+# If we are using the Eigen3::Eigen imported target, the iris package
+# configuration file needs a find_dependency call so that the imported target
+# is defined in dependent projects.
+if(TARGET Eigen3::Eigen)
+  set(FIND_DEPENDENCY_EIGEN3 "find_dependency(Eigen3)")
+else()
+  set(FIND_DEPENDENCY_EIGEN3)
+endif()
 
 configure_package_config_file(iris-config.cmake.in iris-config.cmake
   INSTALL_DESTINATION ${IRIS_DIR}

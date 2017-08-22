@@ -2,6 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
+@FIND_DEPENDENCY_EIGEN3@
 find_dependency(mosek)
 
 set(IRIS_FOUND TRUE)
