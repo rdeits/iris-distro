@@ -4,6 +4,7 @@
 
 #include "iris/geometry.h"
 #include "iris/iris.h"
+#include "iris/iris_mosek.h"
 
 namespace py = pybind11;
 
@@ -42,6 +43,14 @@ PYBIND11_PLUGIN(iris_wrapper) {
     ;
 
   m.def("inflate_region", &iris::inflate_region, "Solve the given IRIS problem", py::arg("IRISProblem"), py::arg("IRISOptions"), py::arg("debug") = nullptr);
+
+  m.def("inner_ellipsoid", 
+        [](const iris::Polyhedron &polyhedron) {
+              // iris::Ellipsoid* ellipsoid = new iris::Ellipsoid(polyhedron.getDimension());
+              iris::Ellipsoid ellipsoid(polyhedron.getDimension());
+              iris_mosek::inner_ellipsoid(polyhedron, &ellipsoid);
+              return ellipsoid;
+        });
 
   py::class_<iris::IRISOptions>(m, "IRISOptions")
     .def(py::init<>())

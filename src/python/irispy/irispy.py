@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 import numpy as np
 
-from .iris_wrapper import IRISOptions, IRISRegion, IRISProblem
-
-from .iris_wrapper import IRISDebugData, Ellipsoid, Polyhedron
+from .iris_wrapper import (IRISOptions, IRISRegion, IRISProblem,
+                           IRISDebugData, Ellipsoid, Polyhedron,
+                           inner_ellipsoid)
 from .iris_wrapper import inflate_region as c_inflate_region
 from .extensions import ellipsoid
 from .extensions import polyhedron
