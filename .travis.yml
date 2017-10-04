@@ -4,7 +4,7 @@ notifications:
   email: false
 
 branches:
-  only: 
+  only:
     - master
 
 matrix:
@@ -13,7 +13,7 @@ matrix:
       sudo: required
       dist: trusty
       python: "2.7"
-      env: 
+      env:
         - PYBIND11_PYTHON_VERSION=2.7
     - os: linux
       sudo: required
@@ -43,5 +43,5 @@ install:
   - make
 
 script:
-  - cd iris_project-prefix/src/iris_project-build
+  - cd iris-build
   - ctest --output-on-failure
