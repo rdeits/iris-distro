@@ -22,7 +22,6 @@ matrix:
       env:
         - PYBIND11_PYTHON_VERSION=3.5
     - os: osx
-      language: generic
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source travis/linux.sh ; fi
