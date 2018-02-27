@@ -18,8 +18,6 @@ if(BUILD_TESTING)
         COMMAND "${JUPYTER_EXECUTABLE}" nbconvert --to notebook --execute polyhedrons.ipynb --output polyhedrons.ipynb
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/examples")
       set_tests_properties(example_polyhedrons PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_INSTALL_PREFIX}/${IRIS_PYTHON_DIR}")
-    else()
-      message(FATAL_ERROR "Could NOT find jupyter")
     endif()
   endif()
 endif()

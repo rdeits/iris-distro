@@ -22,16 +22,14 @@ matrix:
       env:
         - PYBIND11_PYTHON_VERSION=3.5
     - os: osx
-      language: generic
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source travis/linux.sh ; fi
   - mkdir -p $HOME/.config/matplotlib
   - echo backend\:\ agg >> $HOME/.config/matplotlib/matplotlibrc
   - export MATPLOTLIBRC=$HOME/.config/matplotlib
-  - openssl aes-256-cbc -K $encrypted_b279d3ed6718_key -iv $encrypted_b279d3ed6718_iv -in lic.enc -out lic -d
   - mkdir -p $HOME/mosek
-  - mv lic $HOME/mosek/mosek.lic
+  - openssl aes-256-cbc -K $encrypted_b15e1ad4334d_key -iv $encrypted_b15e1ad4334d_iv -in lic.enc -out $HOME/mosek/mosek.lic -d
   - pip install -r requirements.txt
   - pip install IPython==5.0
   - pip install jupyter
