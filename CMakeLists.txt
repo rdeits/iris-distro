@@ -102,7 +102,7 @@ if(IRIS_WITH_MOSEK)
   ExternalProject_Add(mosek
     SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/mosek-src"
     GIT_REPOSITORY https://github.com/RobotLocomotion/mosek.git
-    GIT_TAG 48dccbeb36cc538a6d3e240836e26d29244165f6
+    GIT_TAG e4bcf2234391c2a16adbce3063090e77e3b1f027
     CMAKE_ARGS
       -DBUILD_TESTING=OFF
       -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
