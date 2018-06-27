@@ -82,8 +82,8 @@ if(IRIS_WITH_CDD)
 
   ExternalProject_Add(cdd
     DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-download"
-    URL https://d2tbce6hkathzp.cloudfront.net/other/cddlib/cddlib-094h.tar.gz
-    URL_HASH SHA256=fe6d04d494683cd451be5f6fe785e147f24e8ce3ef7387f048e739ceb4565ab5
+    URL http://terminator.robots.inf.ed.ac.uk/public/cddlib-094h.tar.gz
+    URL_MD5 1467d270860bbcb26d3ebae424690e7c
     TLS_VERIFY 1
     SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-src"
     PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch"
