@@ -82,8 +82,8 @@ if(IRIS_WITH_CDD)
 
   ExternalProject_Add(cdd
     DOWNLOAD_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-download"
-    URL https://github.com/cddlib/cddlib/releases/download/0.94j/cddlib-0.94j.tar.gz
-    URL_MD5 73e5f7dfa72b5c3339c09564721813d6
+    URL https://github.com/cddlib/cddlib/archive/0.94h.tar.gz
+    URL_MD5 ed36310fef7e9d9669d1c4748ea62fc7
     TLS_VERIFY 1
     SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/cdd-src"
     PATCH_COMMAND "${PATCH_EXECUTABLE}" -p1 < "${CMAKE_CURRENT_SOURCE_DIR}/cdd.patch"
