@@ -18,10 +18,11 @@ matrix:
     - os: linux
       sudo: required
       dist: trusty
-      python: "3.5"
+      python: "3.6"
       env:
-        - PYBIND11_PYTHON_VERSION=3.5
+        - PYBIND11_PYTHON_VERSION=3.6
     - os: osx
+      python: "3.6"
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then source travis/linux.sh ; fi
